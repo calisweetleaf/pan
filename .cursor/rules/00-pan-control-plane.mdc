@@ -1,0 +1,22 @@
+---
+description: PAN SDK project-wide execution control plane.
+alwaysApply: true
+---
+
+# PAN SDK execution contract
+
+- Read root AGENTS.md and STATE.md before modifying source.
+- Treat PLAN.md and docs/research/Building a Sovereign Digital Nation.md as
+  directional canon. Do not invent a replacement architecture.
+- Preserve PAN as a production-grade monolith. Do not introduce microservices,
+  distributed infrastructure, or scaffolding folders to simulate progress.
+- Work at the owning implementation seam. Do not add wrappers, shims, proxies,
+  alternate packages, or duplicate logic to avoid a direct integration.
+- A material architecture decision requires options and evidence before selection:
+  package layout, persistence semantics, protocol/service boundary, deployment,
+  external communications, publication, secrets, or destructive action.
+- A mechanical defect may be repaired directly when the existing contract is
+  clear; run the relevant consumer path afterward.
+- Never claim success from a plan, static check, old log, or unexecuted command.
+  Separate pre-existing baseline failures from introduced failures.
+- Preserve unrelated working-tree changes and historical evidence.

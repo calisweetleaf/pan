@@ -1,0 +1,18 @@
+---
+description: ROE-governed security work for PAN.
+globs:
+  - "security/**"
+alwaysApply: false
+---
+
+# Security lane
+
+Before modifying security/, read security/AGENTS.md and
+security/rules_of_engagement.md.
+
+- Keep defensive intent, authorization boundaries, auditability, and
+  fail-loud evidence intact.
+- Do not convert a defensive analysis surface into uncontrolled external action.
+- Never print, commit, or transmit credentials, tokens, or private keys.
+- Use the PAN Python production lane for source changes, including direct
+  provenance and real verification.

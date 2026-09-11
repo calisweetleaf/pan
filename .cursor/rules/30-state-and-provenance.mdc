@@ -1,0 +1,29 @@
+---
+description: Persistent-state rules for PAN planning, documentation, and handoff.
+globs:
+  - "AGENTS.md"
+  - "STATE.md"
+  - "ANTITHESIS.md"
+  - "BRAINSTORM.md"
+  - "CONTEXT.md"
+  - "MEMORY.md"
+  - "NOTEPAD.md"
+  - "PLAN.md"
+  - "docs/**/*.md"
+alwaysApply: false
+---
+
+# Persistent-state lane
+
+- STATE.md owns verified current runtime truth, not a roadmap.
+- MEMORY.md records durable source-backed findings; append corrections rather
+  than erasing history.
+- CONTEXT.md is a compact retrieval index. Keep exact paths, symbols, evidence,
+  and authority links.
+- NOTEPAD.md is active scratch, never a substitute for evidence or canon.
+- BRAINSTORM.md is non-canonical exploration. Do not promote speculation.
+- ANTITHESIS.md owns rejected directions and recurring anti-drift constraints.
+- Do not hand-edit filetree.md; regenerate it with FileTree Pro after
+  structural changes.
+- Do not claim a behavioral change unless the owning source/configuration and a
+  matching verification surface changed.

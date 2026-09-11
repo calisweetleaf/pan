@@ -1,0 +1,34 @@
+---
+description: Somnus Code Forge production discipline for PAN Python owners.
+globs:
+  - "sdk/**/*.py"
+  - "telecom/**/*.py"
+  - "security/**/*.py"
+  - "tools/**/*.py"
+  - "test/**/*.py"
+alwaysApply: false
+---
+
+# PAN Python production lane
+
+Apply Somnus Code Forge quality semantics to PAN's existing topology.
+
+1. Before a production-source edit, declare EDIT, COMPOSE, or WRAP in root
+   SCOPE.md, naming the exact target, source owner, consumed boundary, and
+   justification.
+2. Existing PAN code is normally **EDIT**. Do not use a wrapper to evade an
+   owned-module repair. **WRAP** is permitted only for a real external source
+   with a stable, narrow adaptation boundary; it may not duplicate domain logic.
+3. Change one coherent consumed unit at a time. Preserve strict typing,
+   provenance docstrings, structured/domain-specific errors, stdlib-first import
+   discipline, and fail-loud behavior.
+4. Do not use unittest.mock, pytest-mock, fabricated success paths, broad
+   exception swallowing, version pins, TODO placeholders, or test weakening.
+5. Prove behavior through a real consumer and real temporary filesystem/SQLite
+   fixture where relevant. Existing pytest consumers may be used; do not migrate
+   the repository merely to satisfy a generic layout.
+6. Run the narrowest relevant check, then widen to the appropriate project gate.
+   Syntax alone is insufficient.
+7. For a production promotion, create the Code Forge run artifacts and update
+   SOTA_RUN.md; record provenance and snapshot information without relocating
+   PAN source into a foreign folder layout.
