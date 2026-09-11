@@ -22,10 +22,22 @@ Justification: I bound MasterDatabase onto DHTNode so the CRDT pool shares
     PANPersistenceStore instead of opening a second sqlite engine.
 Provenance: snapshots/v0.5/manifest.json -> domains.master_db.edits[0]
 Files: PAN_SDK/PAN_SDK.py, PAN_SDK/master_db.py
+
+Modified: 2026-09-11
+Modified by: cursor-grok (daeron)
+Justification: I replaced the canned _run_inference string with an in-process
+    integer linear decoder because wrapping a second engine would duplicate the
+    ModelManifest/packet contract already owned here, and treasury Proof-of-Inference
+    cannot leave hash theater until validators re-execute this same owner.
+Provenance: snapshots/v0.8/manifest.json -> domains.inference.edits[0]
+Files: PAN_SDK/PAN_SDK.py, PAN_SDK/treasury.py
 """
+
+from __future__ import annotations
 
 import hashlib
 import json
+import struct
 import sys
 import time
 import uuid
@@ -621,83 +633,371 @@ class ModelManifest:
 # ---------- Inference Engine ----------#
 # --------------------------- #
 
+PAN_LINEAR_MAGIC = b"PANLIN01"
+PAN_LINEAR_VOCAB = 256
+PAN_LINEAR_SHIFT = 8
+PAN_LINEAR_CLAMP = 32767
+PAN_LINEAR_DEFAULT_HIDDEN = 8
+PAN_INFER_MAX_TOKENS = 4096
+PAN_TEMPERATURE_UNIT = 1000
+
+
+class InferenceError(Exception):
+    """Domain error for local sovereign inference."""
+
+
+class InferenceModelError(InferenceError):
+    """Raised when model bytes cannot be loaded or do not match the manifest."""
+
+
+@dataclass(frozen=True)
+class LinearModelWeights:
+    """Integer weights for the in-process linear decoder."""
+
+    vocab_size: int
+    hidden_size: int
+    shift: int
+    embed: tuple[tuple[int, ...], ...]
+    recur: tuple[tuple[int, ...], ...]
+    unembed: tuple[tuple[int, ...], ...]
+
+
+def _signed_weight(seed: bytes, label: str, index: int) -> int:
+    """Derive one int16-range weight from seed material."""
+    digest = hashlib.sha256(seed + label.encode("ascii") + index.to_bytes(4, "big")).digest()
+    return int.from_bytes(digest[:2], "big") % 255 - 127
+
+
+def _fill_matrix(rows: int, cols: int, seed: bytes, label: str) -> tuple[tuple[int, ...], ...]:
+    """Expand seed material into a deterministic integer matrix."""
+    values: list[tuple[int, ...]] = []
+    index = 0
+    for _row in range(rows):
+        row: list[int] = []
+        for _col in range(cols):
+            row.append(_signed_weight(seed, label, index))
+            index += 1
+        values.append(tuple(row))
+    return tuple(values)
+
+
+def _matvec(matrix: tuple[tuple[int, ...], ...], vec: list[int]) -> list[int]:
+    """Multiply a row-major integer matrix by a vector."""
+    width = len(vec)
+    return [sum(row[i] * vec[i] for i in range(width)) for row in matrix]
+
+
+def _quantize(vec: list[int], shift: int) -> list[int]:
+    """Arithmetic-shift and clamp a hidden state to int16 range."""
+    return [max(-PAN_LINEAR_CLAMP, min(PAN_LINEAR_CLAMP, value >> shift)) for value in vec]
+
+
+def _argmax(logits: list[int]) -> int:
+    """Return the first index of the maximum logit."""
+    best_index = 0
+    best_value = logits[0]
+    for index, value in enumerate(logits):
+        if value > best_value:
+            best_value = value
+            best_index = index
+    return best_index
+
+
+def _temperature_milli(temperature: float) -> int:
+    """Convert a packet temperature into integer milli-units."""
+    if isinstance(temperature, bool) or not isinstance(temperature, (int, float)):
+        raise InferenceError("temperature must be a number")
+    if temperature < 0:
+        raise InferenceError("temperature must be >= 0")
+    return int(round(float(temperature) * PAN_TEMPERATURE_UNIT))
+
+
+def _require_max_tokens(max_tokens: int) -> int:
+    """Reject non-integer or unbounded decode lengths."""
+    if isinstance(max_tokens, bool) or not isinstance(max_tokens, int):
+        raise InferenceError("max_tokens must be an integer")
+    if max_tokens < 1:
+        raise InferenceError("max_tokens must be >= 1")
+    if max_tokens > PAN_INFER_MAX_TOKENS:
+        raise InferenceError("max_tokens exceeds local decoder cap")
+    return max_tokens
+
+
+def _apply_temperature(hidden: list[int], temperature_milli: int) -> list[int]:
+    """Scale hidden state by 1000/temperature_milli. Zero milli leaves state unchanged."""
+    if temperature_milli == 0:
+        return hidden
+    return [value * PAN_TEMPERATURE_UNIT // temperature_milli for value in hidden]
+
+
+def write_linear_model(
+    path: str | Path,
+    *,
+    seed: bytes,
+    hidden_size: int = PAN_LINEAR_DEFAULT_HIDDEN,
+) -> str:
+    """
+    Persist a deterministic integer linear decoder and return its SHA-256.
+
+    Args:
+        path: Destination file. Parent directory must already exist.
+        seed: Non-empty bytes expanded into int16 weights.
+        hidden_size: Recurrent width. Must be >= 1.
+
+    Returns:
+        Hex SHA-256 of the exact file bytes.
+
+    Raises:
+        InferenceModelError: if seed, hidden_size, or the write path is invalid.
+    """
+    if not isinstance(seed, (bytes, bytearray)):
+        raise InferenceModelError("model seed must be bytes")
+    seed_bytes = bytes(seed)
+    if not seed_bytes:
+        raise InferenceModelError("model seed must be non-empty")
+    if isinstance(hidden_size, bool) or not isinstance(hidden_size, int) or hidden_size < 1:
+        raise InferenceModelError("hidden_size must be an integer >= 1")
+    destination = Path(path)
+    embed = _fill_matrix(PAN_LINEAR_VOCAB, hidden_size, seed_bytes, "embed")
+    recur = _fill_matrix(hidden_size, hidden_size, seed_bytes, "recur")
+    unembed = _fill_matrix(hidden_size, PAN_LINEAR_VOCAB, seed_bytes, "unembed")
+    payload = bytearray(PAN_LINEAR_MAGIC)
+    payload.extend(struct.pack(">II", hidden_size, PAN_LINEAR_SHIFT))
+    pack_hidden = struct.Struct(">" + "h" * hidden_size)
+    pack_vocab = struct.Struct(">" + "h" * PAN_LINEAR_VOCAB)
+    for row in embed:
+        payload.extend(pack_hidden.pack(*row))
+    for row in recur:
+        payload.extend(pack_hidden.pack(*row))
+    for row in unembed:
+        payload.extend(pack_vocab.pack(*row))
+    data = bytes(payload)
+    try:
+        destination.write_bytes(data)
+    except OSError as exc:
+        raise InferenceModelError(f"could not write model file: {exc}") from exc
+    return sha256_hex(data)
+
+
+def _load_linear_model(path: Path) -> tuple[LinearModelWeights, str]:
+    """Read PANLIN01 weights and return (weights, file sha256)."""
+    try:
+        data = path.read_bytes()
+    except OSError as exc:
+        raise InferenceModelError(f"could not read model file: {exc}") from exc
+    header_size = 16
+    if len(data) < header_size or data[:8] != PAN_LINEAR_MAGIC:
+        raise InferenceModelError("model file is not pan-sovereign-linear-v1")
+    hidden_size, shift = struct.unpack(">II", data[8:header_size])
+    if hidden_size < 1 or shift > 31:
+        raise InferenceModelError("model header is invalid")
+    expected = header_size + 2 * (
+        PAN_LINEAR_VOCAB * hidden_size
+        + hidden_size * hidden_size
+        + hidden_size * PAN_LINEAR_VOCAB
+    )
+    if len(data) != expected:
+        raise InferenceModelError(
+            f"model byte length {len(data)} does not match hidden_size {hidden_size}"
+        )
+    offset = header_size
+    pack_hidden = struct.Struct(">" + "h" * hidden_size)
+    pack_vocab = struct.Struct(">" + "h" * PAN_LINEAR_VOCAB)
+
+    def take_rows(count: int, spec: struct.Struct) -> tuple[tuple[int, ...], ...]:
+        nonlocal offset
+        rows: list[tuple[int, ...]] = []
+        for _ in range(count):
+            end = offset + spec.size
+            chunk = data[offset:end]
+            if len(chunk) != spec.size:
+                raise InferenceModelError("model weight rows are truncated")
+            rows.append(spec.unpack(chunk))
+            offset = end
+        return tuple(rows)
+
+    embed = take_rows(PAN_LINEAR_VOCAB, pack_hidden)
+    recur = take_rows(hidden_size, pack_hidden)
+    unembed = take_rows(hidden_size, pack_vocab)
+    weights = LinearModelWeights(
+        vocab_size=PAN_LINEAR_VOCAB,
+        hidden_size=hidden_size,
+        shift=shift,
+        embed=embed,
+        recur=recur,
+        unembed=unembed,
+    )
+    return weights, sha256_hex(data)
+
+
 class SovereignInferenceEngine:
     """
-    Local inference engine that processes requests using the sovereign protocol.
-    This represents the "air-gapped AI brain" that runs entirely offline.
+    Local offline inference owner. Validators re-execute `_run_inference`
+    against the same PANLIN01 weights the worker loaded.
     """
-    
+
     def __init__(self, model_path: str, model_manifest: ModelManifest):
+        if not model_path:
+            raise InferenceModelError("SovereignInferenceEngine requires a model_path")
+        if model_manifest is None:
+            raise InferenceModelError("SovereignInferenceEngine requires a ModelManifest")
         self.model_path = model_path
         self.model_manifest = model_manifest
         self.loaded = False
-        logger.info(f"SovereignInferenceEngine initialized for {model_manifest.model_name}")
+        self._weights: LinearModelWeights | None = None
+        self._file_hash = ""
+        logger.info("SovereignInferenceEngine initialized for %s", model_manifest.model_name)
 
-    def load_model(self):
-        """Load the model into memory."""
-        # In a real implementation, this would load your quantized model
-        # For now, we'll just simulate the loading
-        logger.info(f"Loading model from {self.model_path}")
-        # Simulate model loading time
-        time.sleep(0.1)
+    def load_model(self) -> None:
+        """Load quantized weights from disk and demand they match the manifest hash."""
+        model_path = Path(self.model_path)
+        if not model_path.is_file():
+            raise InferenceModelError(f"model file is missing: {model_path}")
+        weights, file_hash = _load_linear_model(model_path)
+        if file_hash != self.model_manifest.model_hash:
+            raise InferenceModelError(
+                "model file hash diverged from ModelManifest.model_hash"
+            )
+        self._weights = weights
+        self._file_hash = file_hash
         self.loaded = True
-        logger.info("Model loaded successfully")
+        logger.info("Loaded sovereign linear model %s hash=%s", model_path, file_hash[:12])
+
+    def infer(
+        self,
+        prompt: str,
+        *,
+        temperature: float = 0.0,
+        max_tokens: int = 32,
+        temperature_milli: int | None = None,
+    ) -> str:
+        """
+        Public re-execution entry. Treasury validators call this.
+
+        Args:
+            prompt: Canonical prompt text.
+            temperature: Packet-scale temperature used when milli is omitted.
+            max_tokens: Number of bytes to emit.
+            temperature_milli: Integer milli-units from a Proof-of-Inference.
+
+        Returns:
+            latin-1 text of the generated byte string.
+
+        Raises:
+            InferenceError: if arguments are illegal or the model cannot run.
+        """
+        if not self.loaded:
+            self.load_model()
+        if temperature_milli is None:
+            milli = _temperature_milli(temperature)
+        else:
+            if isinstance(temperature_milli, bool) or not isinstance(temperature_milli, int):
+                raise InferenceError("temperature_milli must be an integer")
+            if temperature_milli < 0:
+                raise InferenceError("temperature_milli must be >= 0")
+            milli = temperature_milli
+        tokens = _require_max_tokens(max_tokens)
+        return self._decode(prompt, temperature_milli=milli, max_tokens=tokens)
 
     def process_request(self, request_packet: UnifiedDataPacket, 
                        user_public_key_pem: bytes) -> UnifiedDataPacket:
         """Process an inference request and return a signed response."""
         if not self.loaded:
             self.load_model()
-            
-        # Verify the request
-        # In a real implementation, you'd have a communicator to verify
-        # For this example, we'll assume verification is done elsewhere
-        
-        # Extract prompt and parameters
+
         prompt = request_packet.content.get("prompt", "")
-        temperature = request_packet.content.get("temperature", 0.7)
-        max_tokens = request_packet.content.get("max_tokens", 100)
-        
-        logger.info(f"Processing inference request: {prompt[:50]}...")
-        
-        # Simulate model inference with your quantization method
-        # This is where your proprietary quantization would be used
-        response_text = self._run_inference(prompt, temperature, max_tokens)
-        
-        # Create response packet
+        temperature = request_packet.content.get("temperature", 0.0)
+        max_tokens = request_packet.content.get("max_tokens", 32)
+
+        logger.info("Processing inference request: %s...", str(prompt)[:50])
+
+        milli = _temperature_milli(temperature)
+        tokens = _require_max_tokens(max_tokens)
+        started = time.perf_counter()
+        response_text = self._run_inference(prompt, milli / PAN_TEMPERATURE_UNIT, tokens)
+        elapsed_ms = int((time.perf_counter() - started) * 1000)
+
         response_content = {
             "response": response_text,
-            "input_tokens": len(prompt.split()),
+            "input_tokens": len(prompt.split()) if isinstance(prompt, str) else 0,
             "output_tokens": len(response_text.split()),
-            "processing_time_ms": 150,  # Simulated time
-            "model_name": self.model_manifest.model_name
+            "processing_time_ms": elapsed_ms,
+            "model_name": self.model_manifest.model_name,
+            "model_hash": self.model_manifest.model_hash,
+            "temperature_milli": milli,
+            "max_tokens": tokens,
         }
-        
-        # In a real implementation, you'd use a communicator with the model's identity
-        # For this example, we'll create a simplified response
+
         response_packet = UnifiedDataPacket(
             packet_id=None,
             kind="INFERENCE_RESPONSE",
             content=response_content,
-            author_identity_hash=self.model_manifest.creator_identity_hash,  # Simplified
+            author_identity_hash=self.model_manifest.creator_identity_hash,
             timestamp=utc_now_iso(),
             parents=[request_packet.packet_id],
             metadata={"processing_node": "local"},
             content_hash=None,
             signature=None
         )
-        
-        # In a real implementation, this would be signed by the model's identity
-        # response_packet.signature = model_identity.sign(...)
-        
+
         logger.info("Inference request processed successfully")
         return response_packet
 
     def _run_inference(self, prompt: str, temperature: float, max_tokens: int) -> str:
-        """Simulate running inference with your quantization method."""
-        # This is where your proprietary quantization method would be integrated
-        # For demonstration, we'll just return a simulated response
-        return f"Simulated response to: {prompt[:50]}... (processed with proprietary quantization)"
+        """
+        Run the bound integer decoder. This is the PoI re-execution owner.
+
+        Args:
+            prompt: Canonical prompt text.
+            temperature: Non-negative temperature; converted to milli-units.
+            max_tokens: Number of output bytes.
+
+        Returns:
+            latin-1 text of the generated byte string.
+        """
+        if not self.loaded:
+            self.load_model()
+        milli = _temperature_milli(temperature)
+        tokens = _require_max_tokens(max_tokens)
+        return self._decode(prompt, temperature_milli=milli, max_tokens=tokens)
+
+    def _decode(self, prompt: str, *, temperature_milli: int, max_tokens: int) -> str:
+        """Consume prompt bytes and emit max_tokens bytes from loaded weights."""
+        if not isinstance(prompt, str):
+            raise InferenceError("prompt must be a string")
+        if self._weights is None:
+            raise InferenceModelError("model weights are not loaded")
+        weights = self._weights
+        hidden = [0] * weights.hidden_size
+        for token in prompt.encode("utf-8"):
+            hidden = _quantize(
+                [
+                    hidden_value + embed_value
+                    for hidden_value, embed_value in zip(
+                        _matvec(weights.recur, hidden),
+                        weights.embed[token],
+                    )
+                ],
+                weights.shift,
+            )
+            hidden = _apply_temperature(hidden, temperature_milli)
+        generated: list[int] = []
+        for _step in range(max_tokens):
+            logits = _matvec(weights.unembed, hidden)
+            token = _argmax(logits)
+            generated.append(token)
+            hidden = _quantize(
+                [
+                    hidden_value + embed_value
+                    for hidden_value, embed_value in zip(
+                        _matvec(weights.recur, hidden),
+                        weights.embed[token],
+                    )
+                ],
+                weights.shift,
+            )
+            hidden = _apply_temperature(hidden, temperature_milli)
+        return bytes(generated).decode("latin-1")
 
 # --------------------------- #
 # ---------- Distributed Hash Table (DHT) ----------#
@@ -2530,28 +2830,35 @@ if __name__ == "__main__":
     
     print(f"   Created request packet: {request_packet.packet_id[:12]}...\n")
     
-    # 7. Initialize local inference engine
+    # 7. Initialize local inference engine against real PANLIN01 weights
     print("7. Initializing local inference engine...")
-    engine = SovereignInferenceEngine(
-        model_path="/path/to/model.lacka",
-        model_manifest=manifest
-    )
-    
-    # 8. Process inference request
-    print("8. Processing inference request...")
-    response_packet = engine.process_request(
-        request_packet, 
-        user_identity.get_public_key_pem()
-    )
-    
-    print(f"   Received response packet: {response_packet.packet_id[:12]}...")
-    print(f"   Response: {response_packet.content['response']}\n")
-    
-    # 9. Verify response traceability
-    print("9. Verifying response traceability...")
-    if response_packet.parents and response_packet.parents[0] == request_packet.packet_id:
-        print("   Response correctly linked to request")
-    else:
-        print("   WARNING: Response not properly linked to request")
-    
+    import tempfile
+    with tempfile.TemporaryDirectory(prefix="pan_infer_demo_") as demo_dir:
+        model_path = Path(demo_dir) / "demo.panlin"
+        model_hash = write_linear_model(model_path, seed=b"pan-demo-linear")
+        engine_manifest = ModelManifest(
+            model_name="pan-linear-demo",
+            model_hash=model_hash,
+            model_public_key_pem=model_identity.get_public_key_pem(),
+            creator_identity=distributor_identity,
+        )
+        engine = SovereignInferenceEngine(str(model_path), engine_manifest)
+
+        # 8. Process inference request
+        print("8. Processing inference request...")
+        response_packet = engine.process_request(
+            request_packet,
+            user_identity.get_public_key_pem()
+        )
+
+        print(f"   Received response packet: {response_packet.packet_id[:12]}...")
+        print(f"   Response: {response_packet.content['response']}\n")
+
+        # 9. Verify response traceability
+        print("9. Verifying response traceability...")
+        if response_packet.parents and response_packet.parents[0] == request_packet.packet_id:
+            print("   Response correctly linked to request")
+        else:
+            print("   WARNING: Response not properly linked to request")
+
     print("\n=== Demo completed successfully ===")
