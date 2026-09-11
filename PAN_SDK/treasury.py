@@ -7,6 +7,14 @@ Purpose: Deterministic GENESIS/MINT_PHASE/BURN_CYCLE/DISTRIBUTE/AUDIT_HALT/
     CRITICAL_SUSPEND machine. Token allocation requires Proof-of-Inference.
     The Elected Fed Chair proposes; ceil(n/2)+1 validators execute. Turing-complete
     smart contracts are rejected at the proposal boundary.
+
+Modified: 2026-09-11
+Modified by: cursor-grok (daeron)
+Justification: I bound Proof-of-Inference verification onto SovereignInferenceEngine
+    because hashing a claimed prompt/output pair is not re-execution. Wrapping a
+    second verifier would duplicate the Fed FSM already owned here.
+Provenance: snapshots/v0.8/manifest.json -> domains.inference.edits[0]
+Files: PAN_SDK/PAN_SDK.py, PAN_SDK/treasury.py
 """
 
 from __future__ import annotations
@@ -24,10 +32,12 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from PAN_SDK.PAN_SDK import (
+    InferenceError,
     PANEconomicEngine,
     PANPersistenceStore,
     SovereignCommunicator,
     SovereignIdentity,
+    SovereignInferenceEngine,
     canonical,
     sha256_hex,
     utc_now_iso,
@@ -123,6 +133,9 @@ class ProofOfInference:
     prompt: str
     output: str
     verifier_identity_hashes: tuple[str, ...]
+    model_hash: str
+    temperature_milli: int
+    max_tokens: int
 
     def to_mapping(self) -> dict[str, object]:
         """Serialize for persistence and hashing."""
@@ -133,6 +146,9 @@ class ProofOfInference:
             "prompt": self.prompt,
             "output": self.output,
             "verifier_identity_hashes": list(self.verifier_identity_hashes),
+            "model_hash": self.model_hash,
+            "temperature_milli": self.temperature_milli,
+            "max_tokens": self.max_tokens,
         }
 
     @classmethod
@@ -141,6 +157,20 @@ class ProofOfInference:
         verifiers_raw = payload.get("verifier_identity_hashes") or []
         if not isinstance(verifiers_raw, list):
             raise TreasuryProofError("verifier_identity_hashes must be a list")
+        model_hash = str(payload.get("model_hash") or "")
+        if not model_hash:
+            raise TreasuryProofError("PoI requires model_hash")
+        try:
+            temperature_milli = int(payload.get("temperature_milli"))
+            max_tokens = int(payload.get("max_tokens"))
+        except (TypeError, ValueError) as exc:
+            raise TreasuryProofError(
+                "PoI temperature_milli and max_tokens must be integers"
+            ) from exc
+        if temperature_milli < 0:
+            raise TreasuryProofError("PoI temperature_milli must be >= 0")
+        if max_tokens < 1:
+            raise TreasuryProofError("PoI max_tokens must be >= 1")
         return cls(
             request_hash=str(payload.get("request_hash") or ""),
             result_hash=str(payload.get("result_hash") or ""),
@@ -148,6 +178,9 @@ class ProofOfInference:
             prompt=str(payload.get("prompt") or ""),
             output=str(payload.get("output") or ""),
             verifier_identity_hashes=tuple(str(item) for item in verifiers_raw),
+            model_hash=model_hash,
+            temperature_milli=temperature_milli,
+            max_tokens=max_tokens,
         )
 
 
@@ -250,6 +283,7 @@ class SovereignTreasury:
         identity: SovereignIdentity,
         persistence: PANPersistenceStore,
         economic_engine: PANEconomicEngine,
+        inference_engine: SovereignInferenceEngine | None = None,
     ) -> None:
         """
         Bind the treasury FSM to PAN identity, sqlite persistence, and the live ledger.
@@ -258,6 +292,7 @@ class SovereignTreasury:
             identity: Node operator identity. Signs treasury ledger packets.
             persistence: SQLite-backed PAN persistence store.
             economic_engine: Single supply/account truth. Mint and burn land here.
+            inference_engine: Optional local SovereignInferenceEngine for PoI replay.
 
         Returns:
             None
@@ -279,7 +314,10 @@ class SovereignTreasury:
         self.validators: dict[str, int] = {}
         self.proposals: dict[str, TreasuryProposal] = {}
         self.telemetry: NetworkTelemetry | None = None
+        self.inference_engine: SovereignInferenceEngine | None = None
         self.hydrate_from_persistence()
+        if inference_engine is not None:
+            self.bind_inference_engine(inference_engine)
         LOGGER.info(
             "SovereignTreasury online state=%s chair=%s validators=%s",
             self.state.value,
@@ -584,9 +622,33 @@ class SovereignTreasury:
                 details={"packet_id": packet.packet_id},
             )
 
+    def bind_inference_engine(self, engine: SovereignInferenceEngine) -> None:
+        """
+        Bind the local re-executable inference owner used for Proof-of-Inference.
+
+        Args:
+            engine: Loadable SovereignInferenceEngine whose model bytes this node
+                can re-execute.
+
+        Returns:
+            None
+
+        Raises:
+            TreasuryProofError: if the engine cannot load or lacks a model hash.
+        """
+        if engine is None:
+            raise TreasuryProofError("PoI engine bind requires SovereignInferenceEngine")
+        try:
+            engine.load_model()
+        except InferenceError as exc:
+            raise TreasuryProofError(f"PoI engine failed to load: {exc}") from exc
+        if not engine.model_manifest.model_hash:
+            raise TreasuryProofError("PoI engine manifest is missing model_hash")
+        self.inference_engine = engine
+
     def verify_proof_of_inference(self, proof: ProofOfInference) -> str:
         """
-        Re-execute the deterministic inference commitment and demand quorum verifiers.
+        Re-run the bound SovereignInferenceEngine and demand quorum verifiers.
 
         Args:
             proof: Worker output plus independent validator attestations.
@@ -595,17 +657,31 @@ class SovereignTreasury:
             The verified result_hash.
 
         Raises:
-            TreasuryProofError: if hashes diverge or verifiers are insufficient.
+            TreasuryProofError: if the local decode diverges or verifiers are insufficient.
         """
+        if self.inference_engine is None:
+            raise TreasuryProofError("PoI requires a bound SovereignInferenceEngine")
         if proof.worker_identity_hash not in self.validators:
             raise TreasuryProofError("PoI worker is not a treasury validator")
         request_hash = sha256_hex(proof.prompt)
         if request_hash != proof.request_hash:
             raise TreasuryProofError("request_hash does not match the prompt")
+        if proof.model_hash != self.inference_engine.model_manifest.model_hash:
+            raise TreasuryProofError("PoI model_hash does not match bound engine")
+        try:
+            replayed = self.inference_engine.infer(
+                proof.prompt,
+                max_tokens=proof.max_tokens,
+                temperature_milli=proof.temperature_milli,
+            )
+        except InferenceError as exc:
+            raise TreasuryProofError(f"PoI re-execution failed: {exc}") from exc
+        if replayed != proof.output:
+            raise TreasuryProofError("claimed output diverged from local re-execution")
         commitment = inference_commitment(proof.prompt, proof.output)
         if commitment != proof.result_hash:
             raise TreasuryProofError(
-                "result_hash diverged from deterministic re-execution"
+                "result_hash diverged from the verified prompt/output pair"
             )
         unique_verifiers = []
         seen: set[str] = set()
@@ -789,11 +865,11 @@ class SovereignTreasury:
 
 def inference_commitment(prompt: str, output: str) -> str:
     """
-    Compute the deterministic inference commitment verifiers re-execute.
+    Hash a verified prompt/output pair after local decoder re-execution.
 
     Args:
         prompt: Canonical prompt text.
-        output: Canonical output text.
+        output: Canonical output text produced by SovereignInferenceEngine.
 
     Returns:
         SHA-256 hex of the canonical pair.
@@ -805,21 +881,40 @@ def build_proof(
     *,
     worker_identity_hash: str,
     prompt: str,
-    output: str,
     verifier_identity_hashes: tuple[str, ...],
+    engine: SovereignInferenceEngine,
+    temperature_milli: int = 0,
+    max_tokens: int = 32,
+    output: str | None = None,
 ) -> ProofOfInference:
     """
-    Build a well-formed Proof-of-Inference for a deterministic task.
+    Build a Proof-of-Inference by running the local decoder unless output is claimed.
 
     Args:
         worker_identity_hash: Worker validator.
         prompt: Prompt text.
-        output: Claimed output.
-        verifier_identity_hashes: Independent validators who re-executed the commitment.
+        verifier_identity_hashes: Independent validators who re-executed the owner.
+        engine: Local SovereignInferenceEngine.
+        temperature_milli: Integer temperature recorded on the proof.
+        max_tokens: Decode length recorded on the proof.
+        output: Optional claimed output used to test forgery. Omit to run infer.
 
     Returns:
         ProofOfInference ready for a MINT payload.
     """
+    if engine is None:
+        raise TreasuryProofError("build_proof requires a SovereignInferenceEngine")
+    try:
+        if not engine.loaded:
+            engine.load_model()
+        if output is None:
+            output = engine.infer(
+                prompt,
+                max_tokens=max_tokens,
+                temperature_milli=temperature_milli,
+            )
+    except InferenceError as exc:
+        raise TreasuryProofError(f"PoI worker inference failed: {exc}") from exc
     return ProofOfInference(
         request_hash=sha256_hex(prompt),
         result_hash=inference_commitment(prompt, output),
@@ -827,6 +922,9 @@ def build_proof(
         prompt=prompt,
         output=output,
         verifier_identity_hashes=verifier_identity_hashes,
+        model_hash=engine.model_manifest.model_hash,
+        temperature_milli=temperature_milli,
+        max_tokens=max_tokens,
     )
 
 

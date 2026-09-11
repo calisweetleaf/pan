@@ -1,0 +1,28 @@
+{
+  "version": "0.8",
+  "date": "2026-09-11",
+  "author": "daeron",
+  "summary": "Replace SovereignInferenceEngine._run_inference placeholder with an in-process integer linear decoder and bind treasury Proof-of-Inference onto that owner.",
+  "domains": {
+    "inference": {
+      "module": "PAN_SDK/PAN_SDK.py",
+      "wrapper": null,
+      "tool_count": 1,
+      "provenance": "whitepaper section 4.3 Proof-of-Inference + owned SovereignInferenceEngine",
+      "edits": [
+        {
+          "date": "2026-09-11",
+          "author": "daeron",
+          "summary": "Load PANLIN01 weights, run integer decode in _run_inference, and make treasury verify_proof_of_inference re-execute that owner before mint.",
+          "files": [
+            "PAN_SDK/PAN_SDK.py",
+            "PAN_SDK/treasury.py",
+            "test/inference/test_sovereign_inference.py",
+            "test/treasury/test_sovereign_treasury.py"
+          ],
+          "justification_ref": "SCOPE.md"
+        }
+      ]
+    }
+  }
+}
