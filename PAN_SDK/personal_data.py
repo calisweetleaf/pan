@@ -22,10 +22,10 @@ import threading
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field, asdict, fields
 import logging
 
-from PAN_SDK import (
+from .PAN_SDK import (
     SovereignIdentity,
     PANPersistenceStore,
     utc_now_iso,
@@ -288,8 +288,36 @@ class PANPersonalDataStore:
             self.preferences = UserPreferences(user_sovereign_id=self.sovereign_id)
             self.save_preferences(self.preferences)
         
-        conn.close()
         logger.debug(f"Loaded {len(self.contacts)} contacts for {self.sovereign_id[:12]}")
+
+        cursor = conn.execute("SELECT * FROM messages")
+        for row in cursor:
+            msg_data = dict(row)
+            msg_data['media_attachments'] = json.loads(msg_data.get('media_attachments') or '[]')
+            msg_data['metadata'] = json.loads(msg_data.get('metadata') or '{}')
+            msg_data['read'] = bool(msg_data['read'])
+            msg_data['delivered'] = bool(msg_data['delivered'])
+            msg_data['encrypted'] = bool(msg_data['encrypted'])
+            allowed = {item.name for item in fields(PANMessage)}
+            message = PANMessage.from_dict({k: v for k, v in msg_data.items() if k in allowed})
+            self.messages[message.message_id] = message
+
+        cursor = conn.execute("SELECT * FROM call_logs")
+        for row in cursor:
+            call_data = dict(row)
+            call_data['metadata'] = json.loads(call_data.get('metadata') or '{}')
+            allowed = {item.name for item in fields(PANCallLog)}
+            call_log = PANCallLog.from_dict({k: v for k, v in call_data.items() if k in allowed})
+            self.call_logs[call_log.call_id] = call_log
+
+        conn.close()
+        logger.debug(
+            "Loaded %s contacts, %s messages, %s call logs for %s",
+            len(self.contacts),
+            len(self.messages),
+            len(self.call_logs),
+            self.sovereign_id[:12],
+        )
     
     # ==================== Contact Management ====================
     

@@ -6,7 +6,7 @@ compresses sensitive data on-the-fly, and logs to the offline ledger.
 """
 import re
 from typing import Optional, Callable, Dict, Any
-from PAN_SDK import UnifiedDataPacket, sha256_hex
+from .PAN_SDK import UnifiedDataPacket, sha256_hex
 
 
 class SovereignFirewall:
@@ -148,7 +148,7 @@ if __name__ == "__main__":
     fw = SovereignFirewall()
     
     # Test with simulated packet
-    from PAN_SDK import UnifiedDataPacket, SovereignIdentity
+    from .PAN_SDK import UnifiedDataPacket, SovereignIdentity
     
     identity = SovereignIdentity("TestUser")
     

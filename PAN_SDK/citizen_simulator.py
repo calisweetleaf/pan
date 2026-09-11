@@ -9,7 +9,7 @@ import logging
 import json
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, field
-from PAN_SDK import (
+from .PAN_SDK import (
     SovereignIdentity, DHTNode, PANCitizenRegistry as BaseRegistry,
     PANEconomicEngine, PANConsensus, utc_now_iso, derive_uuid, PANPersistenceStore
 )

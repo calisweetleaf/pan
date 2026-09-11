@@ -1,7 +1,7 @@
 ---
 description: Somnus Code Forge production discipline for PAN Python owners.
 globs:
-  - "sdk/**/*.py"
+  - "PAN_SDK/**/*.py"
   - "telecom/**/*.py"
   - "security/**/*.py"
   - "tools/**/*.py"
