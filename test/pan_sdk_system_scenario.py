@@ -27,9 +27,11 @@ from PAN_SDK import (
     PANPersistenceStore,
     SovereignCommunicator,
     SovereignIdentity,
+    SovereignInferenceEngine,
     SovereignPipeline,
     sha256_hex,
 )
+from PAN_SDK.PAN_SDK import write_linear_model
 from PAN_SDK.email_social import (
     MAIL_KIND,
     EmailSocialBlocked,
@@ -42,8 +44,10 @@ from PAN_SDK.master_db import MasterDatabaseError
 from PAN_SDK.personal_data import PANPersonalDataStore, PANPhoneAddressRegistry
 from PAN_SDK.treasury import (
     ProposalKind,
+    SovereignTreasury,
     TreasuryContractRejected,
     TreasuryError,
+    TreasuryProofError,
     TreasuryState,
     build_proof,
 )
@@ -79,6 +83,7 @@ SCENARIO_EXCEPTIONS = (
     KeyError,
     sqlite3.Error,
     TreasuryError,
+    TreasuryProofError,
     TreasuryContractRejected,
     EmailSocialError,
     EmailSocialBlocked,
@@ -137,6 +142,27 @@ def _close_handle(handle: object | None, label: str) -> None:
         closer()
     except (OSError, sqlite3.Error, RuntimeError) as exc:
         LOGGER.exception("Failed to close %s: %s", label, exc)
+
+
+def _bind_poi_engine(
+    treasury: SovereignTreasury,
+    tmpdir: Path,
+    creator: SovereignIdentity,
+) -> SovereignInferenceEngine:
+    """Write PANLIN01 weights and bind them on treasury for civic PoI mint."""
+    model_path = tmpdir / "civic_poi.panlin"
+    model_hash = write_linear_model(model_path, seed=b"pan-civic-walkthrough")
+    model_identity = SovereignIdentity("CivicPoILinearModel")
+    manifest = ModelManifest(
+        model_name="civic-poi-linear-v1",
+        model_hash=model_hash,
+        model_public_key_pem=model_identity.get_public_key_pem(),
+        creator_identity=creator,
+    )
+    engine = SovereignInferenceEngine(str(model_path), manifest)
+    treasury.bind_inference_engine(engine)
+    print(f"bound civic PoI engine hash={model_hash[:12]} path={model_path}")
+    return engine
 
 
 def _require_same_sqlite(
@@ -225,12 +251,14 @@ def _exercise_nation_pillars(
     if treasury.quorum_threshold() != 3:
         raise AssertionError(f"expected quorum 3, got {treasury.quorum_threshold()}")
 
+    engine = _bind_poi_engine(treasury, base_path, node_identity)
     proof = build_proof(
         worker_identity_hash=citizen_identity.identity_hash,
         prompt="infer:civic-walkthrough",
-        output="commitment-civic-1",
         verifier_identity_hashes=(node_identity.identity_hash, developer_identity.identity_hash),
+        engine=engine,
     )
+    print(f"poi output_len={len(proof.output)} model={proof.model_hash[:12]}")
     proposal = treasury.submit_proposal(
         citizen_identity.identity_hash,
         ProposalKind.MINT,
@@ -735,7 +763,8 @@ def _narrative_markdown(report: Mapping[str, Any], timestamp: str, json_path: Pa
         "I required one civic walkthrough to exercise SovereignTreasury, an explicit",
         "EmailSocialNode, and MasterDatabase on the same PANPersistenceStore. I did not",
         "auto-bind mail onto DHTNode. I used a real TemporaryDirectory sqlite fixture.",
-        "I did not mock owners, and I did not call qemu or `_run_inference`.",
+        "I did not mock owners. PoI mint re-executes the bound `_run_inference`",
+        "owner. I did not call qemu.",
         "",
         "## What I found",
         "",
