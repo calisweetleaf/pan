@@ -2,3 +2,7 @@ cryptography
 numpy
 psutil
 filelock
+pydantic
+aiosqlite
+pyyaml
+requests

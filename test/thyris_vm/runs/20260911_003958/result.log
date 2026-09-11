@@ -1,0 +1,21 @@
+thyris vm consumer start 20260911_003958
+
+========================================================================
+THYRIS VM CONSUMER
+========================================================================
+phone_orchestrator=C:\Users\trent\pan\telecom\phone_orchestrator.py
+PASS phone_orchestrator_imports
+image storage=C:\Users\trent\AppData\Local\Temp\thyris_img_tglmon9q\images
+PASS image_manager_constructs
+custom vm storage=C:\Users\trent\AppData\Local\Temp\thyris_sup__xsxtde6\vms
+assigned ip=192.168.122.123
+supervisor vms=0
+memory_db=C:\Users\trent\AppData\Local\Temp\thyris_sup__xsxtde6\vms\memory\metadata.db
+idle profile={'profile_name': 'idle', 'vcpus': 1, 'memory_gb': 4, 'gpu_enabled': False, 'description': 'Low power state.'}
+instance state=creating
+PASS supervisor_constructs
+prompt_bridge ImportError=core.prompt_bridge is not in this repository. VMSupervisor prompt methods cannot run until that Thyris owner is pulled. Do not dummy it.
+PASS prompt_bridge_fail_loud
+initialize_prompt ImportError=core.prompt_bridge is not in this repository. VMSupervisor prompt methods cannot run until that Thyris owner is pulled. Do not dummy it.
+PASS prompt_init_fail_loud
+thyris vm consumer status=pass

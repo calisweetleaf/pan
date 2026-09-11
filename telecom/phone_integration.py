@@ -24,7 +24,7 @@ import sys
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
-from thyris.virtual_machine.phone_orchestrator import (
+from telecom.phone_orchestrator import (
     ThyrisPhoneOrchestrator,
     AndroidPhoneVM,
     AndroidVersion,
@@ -637,9 +637,9 @@ async def example_browser_integration():
     """Example of how Oracle Browser would use this system"""
     
     # 1. Initialize components
-    from thyris.virtual_machine.phone_orchestrator import create_phone_orchestrator
-    
-    orchestrator = await create_phone_orchestrator()
+    from telecom.phone_orchestrator import ThyrisPhoneOrchestrator
+
+    orchestrator = ThyrisPhoneOrchestrator()
     
     phone_manager = OracleBrowserPhoneManager(
         phone_orchestrator=orchestrator,

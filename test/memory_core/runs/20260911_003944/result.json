@@ -1,0 +1,45 @@
+{
+  "name": "thyris_memory",
+  "passed": true,
+  "status": "pass",
+  "pass_count": 3,
+  "fail_count": 0,
+  "skip_count": 0,
+  "elapsed_seconds": 0.6775863170623779,
+  "checks": [
+    {
+      "name": "owners_are_not_usms",
+      "status": "pass",
+      "detail": {
+        "memory_manager": "memory.memory_core",
+        "usms": "memory.unified_memory_system"
+      }
+    },
+    {
+      "name": "memory_store_retrieve",
+      "status": "pass",
+      "detail": {
+        "memory_id": "7516a145-31c5-46ea-87cc-84e6e20eb5f7",
+        "retrieved": 1,
+        "embedding": "LocalHashEmbeddingModel"
+      }
+    },
+    {
+      "name": "cache_set_get",
+      "status": "pass",
+      "detail": {
+        "cache_get": {
+          "vm": "android-13",
+          "ready": true
+        },
+        "metadata_db": "C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_cache_m54xyu2o\\runtime_cache\\cache_metadata.db"
+      }
+    }
+  ],
+  "artifacts": {
+    "json": "C:\\Users\\trent\\pan\\test\\memory_core\\runs\\20260911_003944\\result.json",
+    "md": "C:\\Users\\trent\\pan\\test\\memory_core\\runs\\20260911_003944\\result.md",
+    "log": "C:\\Users\\trent\\pan\\test\\memory_core\\runs\\20260911_003944\\result.log",
+    "run_dir": "C:\\Users\\trent\\pan\\test\\memory_core\\runs\\20260911_003944"
+  }
+}

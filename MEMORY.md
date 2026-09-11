@@ -3,6 +3,50 @@
 Append durable, evidence-backed findings here. Preserve corrections as new dated
 entries instead of erasing historical truth.
 
+## 2026-09-11 — Thyris owners landed in memory/ and telecom/
+
+**Keys:** MemoryManager · MemoryConfiguration · SomnusCache · VMSupervisor ·
+CustomVMManager · VMImageManager · ThyrisPhoneOrchestrator
+
+**Status:** LANDED (import/construct). QEMU boot is NOT landed.
+
+### Durable findings
+
+- Thyris VM memory is `memory.memory_core` / `memory.system_cache`. Immune
+  memory remains `memory.unified_memory_system`. They coexist. A `memory_system`
+  package is forbidden.
+- `telecom.phone_orchestrator` imports `MemoryManager` from `memory.memory_core`
+  and `SomnusCache` from `memory.system_cache`. `CustomVMManager`,
+  `CustomNetworkManager`, `VMState`, and `ResourceProfile` live on
+  `telecom.vm_supervisor`.
+- `core.prompt_bridge` is still absent. Dummy PromptSystemBridge/MemoryManager
+  fallbacks were removed. Prompt methods raise ImportError.
+- `memory.memory_integration` still needs `schemas.session`. Do not dummy it.
+- Offline initialize uses `LocalHashEmbeddingModel` and `SimpleLocalVectorDB`
+  when sentence-transformers / chromadb are absent. That is not transformer
+  semantic search.
+
+### Evidence
+
+- `python test/run_pan_gate.py` exit 0, 12.820s, 2026-09-11
+- `results/pan_gate_20260911_004035.json`
+- `test/memory_core/runs/20260911_004047/result.json` (3/3)
+- `test/thyris_vm/runs/20260911_004047/result.json` (5/5)
+
+### Boundary
+
+- Do not claim Thyris VMs boot.
+- `_run_inference` still a placeholder.
+
+### Retrieval anchors
+
+- SCOPE.md
+- SOTA_RUN.md
+- memory/memory_core.py
+- telecom/vm_supervisor.py
+- telecom/phone_orchestrator.py
+- STATE.md
+
 ## 2026-09-10 — Nation pillars: treasury FSM, email/social relays, CRDT master_db
 
 **Keys:** SovereignTreasury · ProofOfInference · EmailSocialNode · StatelessRelay ·

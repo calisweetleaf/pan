@@ -27,6 +27,8 @@ from immune.test_planetary_immune_system import run as run_immune
 from treasury.test_sovereign_treasury import run as run_treasury
 from email_social.test_email_social import run as run_email_social
 from master_db.test_master_db import run as run_master_db
+from memory_core.test_memory_core import run as run_thyris_memory
+from thyris_vm.test_thyris_vm import run as run_thyris_vm
 from test_pan_persistence import run as run_persistence
 from test_pan_manifest import run as run_manifest
 from probe_name_registry import run as run_name_registry
@@ -45,14 +47,14 @@ COMPILE_TARGETS = (
     ROOT_DIR / "security" / "sovereign_firewall.py",
     ROOT_DIR / "security" / "planetary_immune_system.py",
     ROOT_DIR / "memory" / "unified_memory_system.py",
+    ROOT_DIR / "memory" / "memory_core.py",
+    ROOT_DIR / "memory" / "system_cache.py",
+    ROOT_DIR / "telecom" / "vm_supervisor.py",
+    ROOT_DIR / "telecom" / "vm_image_manager.py",
+    ROOT_DIR / "telecom" / "phone_orchestrator.py",
 )
 
-SKIPPED_COMPILE = (
-    {
-        "path": str(ROOT_DIR / "telecom" / "phone_orchestrator.py"),
-        "reason": "Thyris vm_supervisor / memory_system owners are not in this repository",
-    },
-)
+SKIPPED_COMPILE: tuple[dict[str, str], ...] = ()
 
 
 def _print_banner(title: str) -> None:
@@ -199,6 +201,8 @@ def main() -> int:
         run_treasury,
         run_email_social,
         run_master_db,
+        run_thyris_memory,
+        run_thyris_vm,
     ]
     for runner in runners:
         _print_banner(f"RUNNING {getattr(runner, '__name__', runner)}")

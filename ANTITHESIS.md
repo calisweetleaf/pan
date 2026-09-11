@@ -32,6 +32,11 @@ take unless Daeron explicitly changes the product thesis.
 - **Identity collapse:** do not pretend PAN RSA `SovereignIdentity` and USMS
   Ed25519 `SovereignIdentity` are the same type. Bind them; do not forge a
   single key class without an explicit decision and tests.
+- **Memory-system package:** do not create `memory_system` beside `memory/`.
+  Thyris VM memory is `memory.memory_core` / `memory.system_cache`. USMS stays
+  `memory.unified_memory_system`. Do not wrap one to look like the other.
+- **Dummy Thyris owners:** do not stub `core.prompt_bridge`, `schemas.session`,
+  QEMU, or Android images to make phone orchestration look complete.
 - **Email overlay on every DHTNode:** do not auto-construct `EmailSocialNode`
   (and its firewall sqlite) inside `DHTNode.__init__`. Civic tests use
   TemporaryDirectory; an extra unclosed sqlite handle fails Windows cleanup.

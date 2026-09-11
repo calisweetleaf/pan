@@ -3,7 +3,7 @@
 **Repository:** /home/daeron/LAB/Experiments/projects/pan-sdk
 **Classification:** internal research; offline-first, SQLite-backed
 **Product thesis:** the Planetary Autonomous Network is a sovereign digital-country substrate. It is not a generic web application, microservice estate, or adapter collection.
-**Packet updated:** 2026-09-10
+**Packet updated:** 2026-09-11
 **Current runtime state:** STATE.md
 
 ## Authority and entry
@@ -61,22 +61,27 @@ Do not import a foreign directory layout such as tools/native/ into PAN just to 
 | PAN_SDK/email_social.py | Nostr-inspired sealed mail / social relays over UnifiedDataPacket |
 | PAN_SDK/master_db.py | Offline-first CRDT pool on PANPersistenceStore |
 | PAN_SDK/personal_data.py | local personal-data surface |
-| memory/unified_memory_system.py | signed Ed25519 memory DAG (USMS) |
+| memory/unified_memory_system.py | signed Ed25519 memory DAG (USMS; immune-system memory) |
+| memory/memory_core.py | Thyris VM MemoryManager / MemoryConfiguration |
+| memory/system_cache.py | Thyris SomnusCache |
 | security/sovereign_firewall.py | fail-closed packet border (security-owned) |
 | security/planetary_immune_system.py | USMS EVENT/BELIEF + PAN threat bulletins |
-| telecom/phone_orchestrator.py | Thyris V1 phone orchestration (blocked on missing VM owners) |
+| telecom/vm_supervisor.py | VMSupervisor, CustomVMManager, CustomNetworkManager, VMState, ResourceProfile |
+| telecom/vm_image_manager.py | VMImageManager, OSFamily |
+| telecom/phone_orchestrator.py | Thyris V1 phone orchestration (importable; QEMU boot unproven) |
 | security/ | defensive sovereignty and ROE-governed security work |
-| test/ | direct gate, persistence/name/manifest/personal probes, immune/treasury/email_social/master_db consumers, system scenario |
+| test/ | direct gate, persistence/name/manifest/personal probes, immune/treasury/email_social/master_db/thyris_memory/thyris_vm consumers, system scenario |
 | reference-code/ | historical lineage; not imported runtime code |
 | archives/, results/ | historical evidence; do not rewrite old artifacts |
 
 ## Known baseline and decision boundaries
 
 - Package directory is `PAN_SDK/`. That is the consumed import contract, not an open layout debate.
-- `python3 test/run_pan_gate.py` is the current verified gate; see STATE.md. It includes immune, treasury, email_social, and master_db slices.
+- `python3 test/run_pan_gate.py` is the current verified gate; see STATE.md. It includes immune, treasury, email_social, master_db, thyris_memory, and thyris_vm slices.
 - Security owns `security/sovereign_firewall.py`. PAN RSA identity and USMS Ed25519 identity are bound, not collapsed.
-- `telecom/phone_orchestrator.py` still cannot import: Thyris `vm_supervisor` / `memory_system` are absent.
-- Historical 2025-10-02 Windows results remain historical evidence only. The 2026-09-10 Windows gate is current.
+- Thyris VM memory (`memory.memory_core`) and USMS (`memory.unified_memory_system`) coexist in `memory/` and must not be collapsed. Do not create a `memory_system` package.
+- `telecom/phone_orchestrator.py` imports. QEMU boot, Android images, and `core.prompt_bridge` are still absent.
+- Historical 2025-10-02 Windows results remain historical evidence only. The 2026-09-11 Windows gate is current.
 
 An agent **may** repair a mechanically demonstrated defect that preserves the existing contract, then prove the consumed path. It must stop and present options before choosing among materially different persistence schemas, protocol/service boundaries, publication, deployment, external communications, credential handling, or destructive operations.
 
@@ -97,6 +102,10 @@ Optional focused consumers:
  python3 test/treasury/test_sovereign_treasury.py
  python3 test/email_social/test_email_social.py
  python3 test/master_db/test_master_db.py
+ python3 test/memory_core/test_memory_core.py
+ python3 test/thyris_vm/test_thyris_vm.py
+ python3 test/memory_core/test_memory_core.py
+ python3 test/thyris_vm/test_thyris_vm.py
 
 A green syntax check is structural evidence only. Do not claim a successful PAN integration without the gate artifact. Never mask a known red baseline with skips, changed assertions, or unreported fallback paths.
 

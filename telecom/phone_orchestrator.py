@@ -17,7 +17,19 @@ Architecture:
 
 V1: Infrastructure with "unusable" phone numbers to build hype
 V2: Full communication network activation with hotswap (Android VM ↔ AI agent VM)
+
+Modified: 2026-09-11
+Modified by: cursor-grok (daeron)
+Justification: I rebound memory_system.memory_core / memory_system.system_cache
+    onto this repository's memory.memory_core and memory.system_cache. A
+    memory_system package would duplicate Thyris memory beside USMS. Import-time
+    FileHandler + correlation_id format would write a cwd log and KeyError on
+    the first log record that lacks that field.
+Provenance: snapshots/v0.6/manifest.json -> domains.thyris.edits[0]
+Files: telecom/phone_orchestrator.py
 """
+
+from __future__ import annotations
 
 import logging
 import asyncio
@@ -62,20 +74,9 @@ from PAN_SDK.PAN_SDK import (
     derive_uuid
 )
 
-# Import VM memory system for session persistence
-sys.path.append(str(Path(__file__).parent.parent))
-from memory_system.memory_core import MemoryManager, MemoryConfiguration
-from memory_system.system_cache import SomnusCache
+from memory.memory_core import MemoryManager, MemoryConfiguration
+from memory.system_cache import SomnusCache
 
-# Structured logging with correlation ID
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - [%(correlation_id)s] - %(message)s',
-    handlers=[
-        logging.FileHandler('phone_orchestrator.log'),
-        logging.StreamHandler()
-    ]
-)
 logger = logging.getLogger(__name__)
 
 
@@ -262,10 +263,12 @@ class ThyrisPhoneOrchestrator:
                 "premium": PhoneVMProfile(profile_name="premium", vcpus=6, memory_gb=8, storage_gb=64, display_width=1440, display_height=3200, dpi=560, description="Premium mobile profile")
             }
         
-        # Memory configuration
-        memory_config_name = orch_config.get('memory_configuration', 'default')
+        # Memory configuration lives under VM storage, not cwd data/.
         if memory_config is None:
-            memory_config = MemoryConfiguration()
+            memory_config = MemoryConfiguration(
+                vector_db_path=str(self.vm_storage_path / "memory" / "vectors"),
+                metadata_db_path=str(self.vm_storage_path / "memory" / "metadata.db"),
+            )
         
         # Create directories
         self.vm_storage_path.mkdir(parents=True, exist_ok=True)
@@ -280,7 +283,11 @@ class ThyrisPhoneOrchestrator:
         self.network_manager = CustomNetworkManager()
         
         # Initialize PAN SDK components
-        self.pan_registry = PANPhoneAddressRegistry()
+        self.pan_registry = PANPhoneAddressRegistry(
+            persistence=PANPersistenceStore(
+                base_path=self.vm_storage_path / "pan_phone_registry"
+            )
+        )
         self.personal_data_stores: Dict[str, PANPersonalDataStore] = {}
         
         # Initialize VM memory system for session persistence

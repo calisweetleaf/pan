@@ -1,0 +1,75 @@
+{
+  "name": "thyris_vm",
+  "passed": true,
+  "status": "pass",
+  "pass_count": 5,
+  "fail_count": 0,
+  "skip_count": 0,
+  "elapsed_seconds": 0.06754040718078613,
+  "checks": [
+    {
+      "name": "phone_orchestrator_imports",
+      "status": "pass",
+      "detail": {
+        "module": "C:\\Users\\trent\\pan\\telecom\\phone_orchestrator.py",
+        "thyris_class": "ThyrisPhoneOrchestrator",
+        "vm_state": "creating"
+      }
+    },
+    {
+      "name": "image_manager_constructs",
+      "status": "pass",
+      "detail": {
+        "metadata_file": "C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_img_9nr50zc3\\images\\image_metadata.json",
+        "os_families": [
+          "ubuntu",
+          "debian",
+          "fedora",
+          "centos",
+          "alpine",
+          "arch",
+          "windows",
+          "custom"
+        ]
+      }
+    },
+    {
+      "name": "supervisor_constructs",
+      "status": "pass",
+      "detail": {
+        "ip": "192.168.122.173",
+        "memory_db": "C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_sup_8nyz1ezl\\vms\\memory\\metadata.db",
+        "profiles": [
+          "coding",
+          "idle",
+          "media_creation",
+          "research"
+        ],
+        "orchestrator_aliases": {
+          "vm_manager": true,
+          "network": true
+        }
+      }
+    },
+    {
+      "name": "prompt_bridge_fail_loud",
+      "status": "pass",
+      "detail": {
+        "error": "core.prompt_bridge is not in this repository. VMSupervisor prompt methods cannot run until that Thyris owner is pulled. Do not dummy it."
+      }
+    },
+    {
+      "name": "prompt_init_fail_loud",
+      "status": "pass",
+      "detail": {
+        "error": "core.prompt_bridge is not in this repository. VMSupervisor prompt methods cannot run until that Thyris owner is pulled. Do not dummy it."
+      }
+    }
+  ],
+  "artifacts": {
+    "json": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260911_004047\\result.json",
+    "md": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260911_004047\\result.md",
+    "log": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260911_004047\\result.log",
+    "run_dir": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260911_004047"
+  }
+}

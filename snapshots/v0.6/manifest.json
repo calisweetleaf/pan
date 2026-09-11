@@ -1,0 +1,34 @@
+{
+  "version": "0.6",
+  "date": "2026-09-11",
+  "author": "daeron",
+  "summary": "Bind operator-pulled Thyris VM memory and supervisor owners into memory/ and telecom/ so phone_orchestrator can import.",
+  "domains": {
+    "thyris": {
+      "module": "telecom/phone_orchestrator.py",
+      "wrapper": null,
+      "tool_count": 4,
+      "provenance": "operator-pulled Thyris files into existing memory/ and telecom/ packages",
+      "edits": [
+        {
+          "date": "2026-09-11",
+          "author": "daeron",
+          "summary": "Rebind memory_system/core/backend imports onto memory.memory_core, memory.system_cache, and telecom.vm_image_manager; remove dummy prompt-bridge/memory fallbacks; compile phone_orchestrator in the project gate.",
+          "files": [
+            "memory/memory_core.py",
+            "memory/system_cache.py",
+            "memory/__init__.py",
+            "memory/memory_integration.py",
+            "telecom/__init__.py",
+            "telecom/vm_supervisor.py",
+            "telecom/vm_image_manager.py",
+            "telecom/phone_orchestrator.py",
+            "telecom/phone_integration.py",
+            "test/run_pan_gate.py"
+          ],
+          "justification_ref": "SCOPE.md"
+        }
+      ]
+    }
+  }
+}

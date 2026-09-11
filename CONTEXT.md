@@ -16,6 +16,24 @@ source inspection or STATE.md.
 - NOTEPAD.md — current scratch, non-canonical.
 - security/AGENTS.md + security/rules_of_engagement.md — security lane.
 
+## 2026-09-11 — Thyris VM owners imported (not booted)
+
+**Keys:** MemoryManager · SomnusCache · VMSupervisor · VMImageManager ·
+ThyrisPhoneOrchestrator
+
+- **State:** The four operator-pulled files are consumed in `memory/` and
+  `telecom/`. `phone_orchestrator` imports. Gate includes thyris_memory and
+  thyris_vm slices and is green on Windows. USMS is unchanged.
+- **Authority:** STATE.md; SOTA_RUN.md; results/pan_gate_20260911_004035.json;
+  test/memory_core/runs/20260911_004047/result.json;
+  test/thyris_vm/runs/20260911_004047/result.json.
+- **Boundary:** `core.prompt_bridge` and `schemas.session` are still absent.
+  QEMU boot is unproven. Do not create `memory_system`.
+- **Then inspect:** memory/memory_core.py, memory/system_cache.py,
+  telecom/vm_supervisor.py, telecom/vm_image_manager.py,
+  telecom/phone_orchestrator.py.
+- **Open:** prompt_bridge owner; real inference; QEMU/Android images.
+
 ## 2026-09-10 — Nation pillars landed (treasury, email_social, master_db)
 
 **Keys:** SovereignTreasury · EmailSocialNode · MasterDatabase · Proof-of-Inference · CRDT
@@ -104,18 +122,23 @@ SCOPE.md · SOTA_RUN.md
 | master db | CRDT join over local sqlite | PAN_SDK/master_db.py |
 | immune system | USMS EVENT/BELIEF + firewall + PAN threat bulletins | security/planetary_immune_system.py |
 | packet border | fail-closed dictionary/regex/SQLite inspection | security/sovereign_firewall.py |
-| unified memory | signed Ed25519 memory DAG | memory/unified_memory_system.py |
-| Thyris V1 | phone orchestration lane; import blocked on missing VM owners | telecom/phone_orchestrator.py |
+| unified memory | signed Ed25519 memory DAG (immune) | memory/unified_memory_system.py |
+| Thyris VM memory | MemoryManager / SomnusCache | memory/memory_core.py, memory/system_cache.py |
+| Thyris V1 | phone orchestration; importable; QEMU unproven | telecom/phone_orchestrator.py |
+| VM supervisor | CustomVMManager / VMState / ResourceProfile | telecom/vm_supervisor.py |
 | security | ROE-governed defensive lane | security/ |
 | lineage | non-runtime historical designs | reference-code/, archives/, results/ |
 | gate | direct fail-loud consumer runner | test/run_pan_gate.py |
 
 ## Active hazards
 
-- thyris-owners — `telecom/phone_orchestrator.py` imports modules that are not in
-  this repository. Do not dummy them.
+- prompt-bridge-absent — `core.prompt_bridge` is not in this repository.
+  VMSupervisor prompt methods fail loud. Do not dummy them.
+- schemas-session-absent — `memory/memory_integration.py` cannot import.
+- thyris-qemu-unproven — import/construct are green; VMs do not boot here.
 - inference-placeholder — `_run_inference` is not a working model service.
 - old-results — Windows 2025-10-02 result is historical evidence, not this run.
 - wrapper-drift — do not use adapters or parallel layouts to evade direct
   integration.
-- filetree-stale — generated map still shows `sdk/`; regenerate via FileTree Pro.
+- filetree-generated — `filetree.md` is operator-owned navigation. This turn
+  did not hand-edit it.

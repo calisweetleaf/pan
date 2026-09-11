@@ -1,0 +1,57 @@
+{
+  "name": "email_social",
+  "passed": true,
+  "status": "pass",
+  "pass_count": 5,
+  "fail_count": 0,
+  "skip_count": 0,
+  "elapsed_seconds": 2.4515292644500732,
+  "checks": [
+    {
+      "name": "sealed_mail_across_relays",
+      "status": "pass",
+      "detail": {
+        "packet_id": "504d4604b623458fcace9fa467dc6f5ecbeda1f1225e96c58be604a93e76d667",
+        "relays": 2,
+        "alice_address": "pan:id:f0292fb534f1b0dfa862c32d4dfe7aefd5d8ef375ce94ac90090f7d29702bb01"
+      }
+    },
+    {
+      "name": "legacy_ip_rejected",
+      "status": "pass",
+      "detail": {
+        "rejected": true
+      }
+    },
+    {
+      "name": "relay_blocks_unsigned_and_routing",
+      "status": "pass",
+      "detail": {
+        "forged_rejected": true,
+        "routing_rejected": true
+      }
+    },
+    {
+      "name": "social_and_knock",
+      "status": "pass",
+      "detail": {
+        "social_id": "231b671dd62fb5d3dc65b7931ecce9c1530ccf0d4c386883afaacf7283be88b1",
+        "knocks_dropped": 2
+      }
+    },
+    {
+      "name": "restart_hydrates_relay",
+      "status": "pass",
+      "detail": {
+        "before": 1,
+        "after": 1
+      }
+    }
+  ],
+  "artifacts": {
+    "json": "C:\\Users\\trent\\pan\\test\\email_social\\runs\\20260911_004046\\result.json",
+    "md": "C:\\Users\\trent\\pan\\test\\email_social\\runs\\20260911_004046\\result.md",
+    "log": "C:\\Users\\trent\\pan\\test\\email_social\\runs\\20260911_004046\\result.log",
+    "run_dir": "C:\\Users\\trent\\pan\\test\\email_social\\runs\\20260911_004046"
+  }
+}

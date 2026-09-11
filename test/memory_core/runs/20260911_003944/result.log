@@ -1,0 +1,20 @@
+thyris memory consumer start 20260911_003944
+
+========================================================================
+THYRIS MEMORY CONSUMER
+========================================================================
+thyris owner=memory.memory_core
+usms owner=memory.unified_memory_system
+PASS owners_are_not_usms
+metadata_db=C:\Users\trent\AppData\Local\Temp\thyris_mem_5q6u0lhg\metadata.db
+sentence_transformers is not installed; using LocalHashEmbeddingModel. Semantic similarity is hash-stable, not transformer-grade.
+Failed to import chromadb: No module named 'chromadb'
+ChromaDB not available; using in-process SimpleLocalVectorDB fallback.
+embedding_model=LocalHashEmbeddingModel
+stored memory_id=7516a145-31c5-46ea-87cc-84e6e20eb5f7
+retrieved count=1
+PASS memory_store_retrieve
+cache set ok=True
+cache get={'vm': 'android-13', 'ready': True}
+PASS cache_set_get
+thyris memory consumer status=pass

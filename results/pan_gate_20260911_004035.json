@@ -1,0 +1,541 @@
+{
+  "gate": "run_pan_gate",
+  "timestamp": "20260911_004035",
+  "passed": true,
+  "elapsed_seconds": 12.819835186004639,
+  "python": "3.14.4 (tags/v3.14.4:23116f9, Apr  7 2026, 14:10:54) [MSC v.1944 64 bit (AMD64)]",
+  "slices": [
+    {
+      "name": "compile",
+      "passed": true,
+      "details": {
+        "compiled": [
+          "PAN_SDK\\PAN_SDK.py",
+          "PAN_SDK\\personal_data.py",
+          "PAN_SDK\\citizen_simulator.py",
+          "PAN_SDK\\__init__.py",
+          "PAN_SDK\\treasury.py",
+          "PAN_SDK\\email_social.py",
+          "PAN_SDK\\master_db.py",
+          "security\\sovereign_firewall.py",
+          "security\\planetary_immune_system.py",
+          "memory\\unified_memory_system.py",
+          "memory\\memory_core.py",
+          "memory\\system_cache.py",
+          "telecom\\vm_supervisor.py",
+          "telecom\\vm_image_manager.py",
+          "telecom\\phone_orchestrator.py"
+        ],
+        "skipped": []
+      }
+    },
+    {
+      "name": "import",
+      "passed": true,
+      "details": {
+        "package": "C:\\Users\\trent\\pan\\PAN_SDK\\__init__.py",
+        "has_persist_name": true,
+        "has_store_name": true,
+        "has_get_name": true,
+        "dht_node": "DHTNode",
+        "identity": "SovereignIdentity",
+        "citizen_simulator": "C:\\Users\\trent\\pan\\PAN_SDK\\citizen_simulator.py"
+      }
+    },
+    {
+      "name": "persistence",
+      "passed": true,
+      "details": {
+        "components": [
+          "dht_data",
+          "dht_ledger",
+          "economy_accounts",
+          "governance_proposals",
+          "governance_policies"
+        ],
+        "matches": {
+          "dht_data": true,
+          "dht_ledger": true,
+          "economy_accounts": true,
+          "governance_proposals": true,
+          "governance_policies": true
+        },
+        "account_count": 3,
+        "proposal_count": 1
+      }
+    },
+    {
+      "name": "name_registry",
+      "passed": true,
+      "details": {
+        "registered": true,
+        "invalid_rejected": true,
+        "unauthorized_rejected": true,
+        "persisted_active": true,
+        "hydrated_name": "testname",
+        "hydrated_target": "64830970e852563e1d3e0e6e8c9bc23c36b4587f2a27005ddd5ff5ded3e60487",
+        "missing_is_none": true,
+        "store_name_fail_loud": true
+      }
+    },
+    {
+      "name": "manifest",
+      "passed": true,
+      "details": {
+        "valid": true,
+        "tampered": false,
+        "wrong_key": false
+      }
+    },
+    {
+      "name": "personal_data",
+      "passed": true,
+      "details": {
+        "matches": {
+          "contacts": true,
+          "messages": true,
+          "call_logs": true,
+          "preferences": true,
+          "phone_addresses": true
+        },
+        "phone_address": "pan:netlab:motiflab:voice"
+      }
+    },
+    {
+      "name": "system_scenario",
+      "passed": true,
+      "details": {
+        "comparisons": {
+          "dht_data": "MATCH",
+          "dht_ledger": "MATCH",
+          "economy_accounts": "MATCH",
+          "governance_proposals": "MATCH",
+          "governance_policies": "MATCH",
+          "citizens": "MATCH",
+          "applications": "MATCH",
+          "name_registry": "MATCH",
+          "phone_addresses": "MATCH",
+          "pending_transactions": "MATCH",
+          "usage_metrics": "MATCH",
+          "personal_contacts": "MATCH",
+          "personal_messages": "MATCH",
+          "personal_call_logs": "MATCH",
+          "personal_preferences": "MATCH"
+        },
+        "operations": {
+          "citizen_id": "50705bd5-8c64-5075-8042-cd93913378cc",
+          "developer_id": "ac8e74f5-9ab0-538e-bf6d-78e579c6e781",
+          "app_id": "6d660ba6-50f6-5ed4-99b5-60f5ec722de9",
+          "registered_name": "testname",
+          "proposal_id": "c45078c3-1f70-5c4b-ac4f-5451d55f7d4d",
+          "snapshot_sizes": {
+            "dht_data": 12,
+            "dht_ledger": 18,
+            "economy_accounts": 6,
+            "governance_proposals": 1,
+            "governance_policies": 2,
+            "citizens": 2,
+            "applications": 1,
+            "name_registry": 1,
+            "phone_addresses": 1,
+            "pending_transactions": 1,
+            "usage_metrics": 2,
+            "personal_contacts": 1,
+            "personal_messages": 1,
+            "personal_call_logs": 1,
+            "personal_preferences": 10
+          }
+        },
+        "artifacts": [
+          "C:\\Users\\trent\\pan\\results\\pan_sdk_system_test_20260911_004036.txt",
+          "C:\\Users\\trent\\pan\\results\\pan_sdk_system_test_20260911_004036.json",
+          "C:\\Users\\trent\\pan\\results\\pan_sdk_system_test_20260911_004036.md"
+        ]
+      }
+    },
+    {
+      "name": "planetary_immune_system",
+      "passed": true,
+      "status": "pass",
+      "pass_count": 9,
+      "fail_count": 0,
+      "skip_count": 0,
+      "elapsed_seconds": 5.323473930358887,
+      "checks": [
+        {
+          "name": "firewall_blocks_telemetry",
+          "status": "pass",
+          "detail": {
+            "telemetry_reason": "telemetry_dictionary",
+            "telemetry_ledger_rows": 1
+          }
+        },
+        {
+          "name": "firewall_allows_civic_chat",
+          "status": "pass",
+          "detail": {
+            "civic_chat_allowed": true
+          }
+        },
+        {
+          "name": "inspect_content_compresses_secrets",
+          "status": "pass",
+          "detail": {
+            "compressed_bytes": 65,
+            "original_bytes": 59
+          }
+        },
+        {
+          "name": "signed_secret_packet_is_blocked",
+          "status": "pass",
+          "detail": {
+            "signed_secret_blocked": true
+          }
+        },
+        {
+          "name": "identity_blocklist",
+          "status": "pass",
+          "detail": {
+            "blocked_identity": "7f1043bc427c"
+          }
+        },
+        {
+          "name": "legacy_ip_routing_blocked",
+          "status": "pass",
+          "detail": {
+            "routing_blocked": true
+          }
+        },
+        {
+          "name": "memory_survives_restart",
+          "status": "pass",
+          "detail": {
+            "intel_id": "1bc950516579d598",
+            "event_node_id": "81fd4a93-b4d3-45ed-99cc-fe71e09a79bd",
+            "belief_node_id": "015e7dfc-8716-4e88-b00f-ca656d7baaf4",
+            "bulletin_dht_key": "threat-memory:1e7554fb40e34cf809358684f5f30201140e548ce92e5b2b558f8250c1d2d552",
+            "restart_hits": 4
+          }
+        },
+        {
+          "name": "peer_ingests_bulletin",
+          "status": "pass",
+          "detail": {
+            "peer_ingested_intel_id": "9777ccc17641673f",
+            "peer_hits": 4,
+            "packet_kind": "THREAT_MEMORY_BULLETIN"
+          }
+        },
+        {
+          "name": "contradiction_and_campaign_entangle",
+          "status": "pass",
+          "detail": {
+            "entanglement_id": "911b4ef4-5ab2-4012-b17c-36786a943d31",
+            "contradiction_node_id": "5ec55acd-afd0-48e8-bc0a-c8dc62072c82",
+            "contradictions": 1
+          }
+        }
+      ],
+      "artifacts": {
+        "json": "C:\\Users\\trent\\pan\\test\\immune\\runs\\20260911_004042\\result.json",
+        "md": "C:\\Users\\trent\\pan\\test\\immune\\runs\\20260911_004042\\result.md",
+        "log": "C:\\Users\\trent\\pan\\test\\immune\\runs\\20260911_004042\\result.log",
+        "run_dir": "C:\\Users\\trent\\pan\\test\\immune\\runs\\20260911_004042"
+      }
+    },
+    {
+      "name": "sovereign_treasury",
+      "passed": true,
+      "status": "pass",
+      "pass_count": 5,
+      "fail_count": 0,
+      "skip_count": 0,
+      "elapsed_seconds": 1.5776262283325195,
+      "checks": [
+        {
+          "name": "genesis_rejects_mint",
+          "status": "pass",
+          "detail": {
+            "state": "GENESIS"
+          }
+        },
+        {
+          "name": "seal_genesis_and_contract_reject",
+          "status": "pass",
+          "detail": {
+            "state": "MINT_PHASE",
+            "quorum": 3
+          }
+        },
+        {
+          "name": "poi_mint_requires_quorum",
+          "status": "pass",
+          "detail": {
+            "minted_balance": 40,
+            "packet_id": "65a7a3ebb1d71570e5dd7158c887a55bb11a3b5b5ef1c7c69f1fe529fc61e64d"
+          }
+        },
+        {
+          "name": "distribute_and_burn_and_halts",
+          "status": "pass",
+          "detail": {
+            "final_state": "CRITICAL_SUSPEND",
+            "supply": 90,
+            "citizen_balance": 15
+          }
+        },
+        {
+          "name": "restart_hydrates_fsm",
+          "status": "pass",
+          "detail": {
+            "state_before": "MINT_PHASE",
+            "chair_before": "7c1e2600bd53b8707454a1ff879bf3d973c2284f58d7e2af077a46e40f156856",
+            "state_after": "MINT_PHASE",
+            "validators_after": 3
+          }
+        }
+      ],
+      "artifacts": {
+        "json": "C:\\Users\\trent\\pan\\test\\treasury\\runs\\20260911_004043\\result.json",
+        "md": "C:\\Users\\trent\\pan\\test\\treasury\\runs\\20260911_004043\\result.md",
+        "log": "C:\\Users\\trent\\pan\\test\\treasury\\runs\\20260911_004043\\result.log",
+        "run_dir": "C:\\Users\\trent\\pan\\test\\treasury\\runs\\20260911_004043"
+      }
+    },
+    {
+      "name": "email_social",
+      "passed": true,
+      "status": "pass",
+      "pass_count": 5,
+      "fail_count": 0,
+      "skip_count": 0,
+      "elapsed_seconds": 2.4515292644500732,
+      "checks": [
+        {
+          "name": "sealed_mail_across_relays",
+          "status": "pass",
+          "detail": {
+            "packet_id": "504d4604b623458fcace9fa467dc6f5ecbeda1f1225e96c58be604a93e76d667",
+            "relays": 2,
+            "alice_address": "pan:id:f0292fb534f1b0dfa862c32d4dfe7aefd5d8ef375ce94ac90090f7d29702bb01"
+          }
+        },
+        {
+          "name": "legacy_ip_rejected",
+          "status": "pass",
+          "detail": {
+            "rejected": true
+          }
+        },
+        {
+          "name": "relay_blocks_unsigned_and_routing",
+          "status": "pass",
+          "detail": {
+            "forged_rejected": true,
+            "routing_rejected": true
+          }
+        },
+        {
+          "name": "social_and_knock",
+          "status": "pass",
+          "detail": {
+            "social_id": "231b671dd62fb5d3dc65b7931ecce9c1530ccf0d4c386883afaacf7283be88b1",
+            "knocks_dropped": 2
+          }
+        },
+        {
+          "name": "restart_hydrates_relay",
+          "status": "pass",
+          "detail": {
+            "before": 1,
+            "after": 1
+          }
+        }
+      ],
+      "artifacts": {
+        "json": "C:\\Users\\trent\\pan\\test\\email_social\\runs\\20260911_004046\\result.json",
+        "md": "C:\\Users\\trent\\pan\\test\\email_social\\runs\\20260911_004046\\result.md",
+        "log": "C:\\Users\\trent\\pan\\test\\email_social\\runs\\20260911_004046\\result.log",
+        "run_dir": "C:\\Users\\trent\\pan\\test\\email_social\\runs\\20260911_004046"
+      }
+    },
+    {
+      "name": "master_db",
+      "passed": true,
+      "status": "pass",
+      "pass_count": 4,
+      "fail_count": 0,
+      "skip_count": 0,
+      "elapsed_seconds": 1.4379687309265137,
+      "checks": [
+        {
+          "name": "offline_nodes_converge",
+          "status": "pass",
+          "detail": {
+            "counter": 11,
+            "docs": [
+              "citizen:ann",
+              "citizen:bea"
+            ]
+          }
+        },
+        {
+          "name": "join_algebra",
+          "status": "pass",
+          "detail": {
+            "commutative": true,
+            "associative": true,
+            "idempotent": true
+          }
+        },
+        {
+          "name": "tombstone_and_orset_remove",
+          "status": "pass",
+          "detail": {
+            "tombstone": true
+          }
+        },
+        {
+          "name": "dht_bind_and_restart",
+          "status": "pass",
+          "detail": {
+            "before": {
+              "emission": 1
+            },
+            "after": {
+              "emission": 1
+            },
+            "cycles": 3
+          }
+        }
+      ],
+      "artifacts": {
+        "json": "C:\\Users\\trent\\pan\\test\\master_db\\runs\\20260911_004047\\result.json",
+        "md": "C:\\Users\\trent\\pan\\test\\master_db\\runs\\20260911_004047\\result.md",
+        "log": "C:\\Users\\trent\\pan\\test\\master_db\\runs\\20260911_004047\\result.log",
+        "run_dir": "C:\\Users\\trent\\pan\\test\\master_db\\runs\\20260911_004047"
+      }
+    },
+    {
+      "name": "thyris_memory",
+      "passed": true,
+      "status": "pass",
+      "pass_count": 3,
+      "fail_count": 0,
+      "skip_count": 0,
+      "elapsed_seconds": 0.23695015907287598,
+      "checks": [
+        {
+          "name": "owners_are_not_usms",
+          "status": "pass",
+          "detail": {
+            "memory_manager": "memory.memory_core",
+            "usms": "memory.unified_memory_system"
+          }
+        },
+        {
+          "name": "memory_store_retrieve",
+          "status": "pass",
+          "detail": {
+            "memory_id": "b457168b-89b4-4dbe-bfe6-a57fedfb345f",
+            "retrieved": 1,
+            "embedding": "LocalHashEmbeddingModel"
+          }
+        },
+        {
+          "name": "cache_set_get",
+          "status": "pass",
+          "detail": {
+            "cache_get": {
+              "vm": "android-13",
+              "ready": true
+            },
+            "metadata_db": "C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_cache_sgu1vpii\\runtime_cache\\cache_metadata.db"
+          }
+        }
+      ],
+      "artifacts": {
+        "json": "C:\\Users\\trent\\pan\\test\\memory_core\\runs\\20260911_004047\\result.json",
+        "md": "C:\\Users\\trent\\pan\\test\\memory_core\\runs\\20260911_004047\\result.md",
+        "log": "C:\\Users\\trent\\pan\\test\\memory_core\\runs\\20260911_004047\\result.log",
+        "run_dir": "C:\\Users\\trent\\pan\\test\\memory_core\\runs\\20260911_004047"
+      }
+    },
+    {
+      "name": "thyris_vm",
+      "passed": true,
+      "status": "pass",
+      "pass_count": 5,
+      "fail_count": 0,
+      "skip_count": 0,
+      "elapsed_seconds": 0.06754040718078613,
+      "checks": [
+        {
+          "name": "phone_orchestrator_imports",
+          "status": "pass",
+          "detail": {
+            "module": "C:\\Users\\trent\\pan\\telecom\\phone_orchestrator.py",
+            "thyris_class": "ThyrisPhoneOrchestrator",
+            "vm_state": "creating"
+          }
+        },
+        {
+          "name": "image_manager_constructs",
+          "status": "pass",
+          "detail": {
+            "metadata_file": "C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_img_9nr50zc3\\images\\image_metadata.json",
+            "os_families": [
+              "ubuntu",
+              "debian",
+              "fedora",
+              "centos",
+              "alpine",
+              "arch",
+              "windows",
+              "custom"
+            ]
+          }
+        },
+        {
+          "name": "supervisor_constructs",
+          "status": "pass",
+          "detail": {
+            "ip": "192.168.122.173",
+            "memory_db": "C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_sup_8nyz1ezl\\vms\\memory\\metadata.db",
+            "profiles": [
+              "coding",
+              "idle",
+              "media_creation",
+              "research"
+            ],
+            "orchestrator_aliases": {
+              "vm_manager": true,
+              "network": true
+            }
+          }
+        },
+        {
+          "name": "prompt_bridge_fail_loud",
+          "status": "pass",
+          "detail": {
+            "error": "core.prompt_bridge is not in this repository. VMSupervisor prompt methods cannot run until that Thyris owner is pulled. Do not dummy it."
+          }
+        },
+        {
+          "name": "prompt_init_fail_loud",
+          "status": "pass",
+          "detail": {
+            "error": "core.prompt_bridge is not in this repository. VMSupervisor prompt methods cannot run until that Thyris owner is pulled. Do not dummy it."
+          }
+        }
+      ],
+      "artifacts": {
+        "json": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260911_004047\\result.json",
+        "md": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260911_004047\\result.md",
+        "log": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260911_004047\\result.log",
+        "run_dir": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260911_004047"
+      }
+    }
+  ],
+  "skipped": []
+}
