@@ -10,6 +10,8 @@ invented alternative.
 - Production topology: `PAN_SDK/`, telecom/, security/, memory/, tools/, and test/.
 - `PAN_SDK/PAN_SDK.py` is the central PAN monolith. The package directory is
   named `PAN_SDK` because that is the consumed import contract.
+  `SovereignInferenceEngine._run_inference` loads PANLIN01 integer weights and
+  runs a deterministic in-process decode. Treasury PoI re-executes that owner.
 - `PAN_SDK/treasury.py` is the federal-reserve FSM. Mint/burn/distribute land on
   `PANEconomicEngine`. DHTNode binds `SovereignTreasury`.
 - `PAN_SDK/email_social.py` is the Nostr-inspired overlay. Identity hash is the
@@ -36,37 +38,33 @@ invented alternative.
 
 ## Verified baseline
 
-- **GREEN, 2026-09-11:** `python test/run_pan_gate.py` exited 0 in 8.871s on
-  Windows Python 3.14 with `.venv` after unbinding AIPC prompt from Thyris.
-  Slices: compile (includes `telecom/phone_orchestrator.py`), import,
-  persistence, name_registry, manifest, personal_data, system_scenario,
-  planetary_immune_system, sovereign_treasury, email_social, master_db,
-  thyris_memory, thyris_vm (6/6 including prompt-unbound, USMS-has-no-prompt,
-  qemu/adb host-tool contract). Artifacts:
-  `results/pan_gate_20260911_011502.json`,
-  `results/pan_gate_20260911_011502.md`.
-- **GREEN, 2026-09-11:** thyris_vm 6/6
-  `test/thyris_vm/runs/20260911_011511/` (gate slice) and focused
-  `test/thyris_vm/runs/20260911_011453/`.
-- **GREEN:** `from telecom.phone_orchestrator import ThyrisPhoneOrchestrator`
-  succeeds from repo root. `from memory.memory_core import MemoryManager` and
-  `from memory.system_cache import SomnusCache` succeed. USMS remains
-  `memory.unified_memory_system.UnifiedMemorySystem`.
-- **GREEN, 2026-09-11:** previous Thyris-import gate remains historical evidence
-  (`results/pan_gate_20260911_004035.json`); it is not this run.
+- **GREEN, 2026-09-11:** `python3 test/run_pan_gate.py` exited 0 in 14.016s on
+  Linux Python 3.12.3 after landing the real `_run_inference` owner. Slices:
+  compile, import, persistence, name_registry, manifest, personal_data,
+  system_scenario, planetary_immune_system, sovereign_treasury (7/7 including
+  forged-output reject), email_social, master_db, thyris_memory, thyris_vm.
+  Artifacts: `results/pan_gate_20260911_085638.json`,
+  `results/pan_gate_20260911_085638.md`.
+- **GREEN, 2026-09-11:** inference consumer 7/7
+  `test/inference/runs/20260911_085509/`.
+- **GREEN, 2026-09-11:** treasury consumer 7/7
+  `test/treasury/runs/20260911_085523/` (focused) and
+  `test/treasury/runs/20260911_085647/` (gate slice).
+- **GREEN, 2026-09-11 (historical Windows):** `python test/run_pan_gate.py`
+  exited 0 in 8.871s on Windows Python 3.14 with `.venv` after unbinding AIPC
+  prompt from Thyris. Artifacts: `results/pan_gate_20260911_011502.json`.
+  That run still treated `_run_inference` as a placeholder.
 
 ## Active frontier
 
 1. QEMU/Android image boot is unproven. Host-tool contract names
-   `qemu-system-x86_64`, `qemu-img`, and `adb`. This Windows gate found
-   qemu-system and qemu-img missing. Import and construct are proven;
-   Thyris VMs do not boot in this gate.
+   `qemu-system-x86_64`, `qemu-img`, and `adb`. This Linux gate found all three
+   missing. Import and construct are proven; Thyris VMs do not boot in this gate.
 2. `memory/memory_integration.py` still imports `schemas.session`, which is
    absent. That is leftover AIPC session-memory, not a Thyris telecom
    requirement. Do not scaffold a fake schemas package.
-3. Agnostic model inference service. `SovereignInferenceEngine._run_inference`
-   is still a placeholder. Treasury PoI re-executes a deterministic commitment
-   until that owner exists.
+3. `PAN_SDK/API.server.py` `_run_inference_async` is still an unconsumed
+   sleep-and-string subclass. It is not the inference owner.
 4. Orama dashboard / vector memory spaces named in whitepaper section 6.2.
 
 ## Known decision boundaries
@@ -96,10 +94,10 @@ invented alternative.
 ## Control-plane packet
 
 Root AGENTS.md, security/AGENTS.md, and `.cursor/` rules/commands were
-reconciled to this baseline on 2026-09-11. The stale `somnus_erebus/` QWEN
-tree is no longer the security packet. Next justified action is qemu
-host-tools/images or `_run_inference`, not `prompt_bridge`. This is not a
-new production-code run; SOTA_RUN.md still names the unbind gate.
+reconciled to the Thyris unbind baseline on 2026-09-11. The stale
+`somnus_erebus/` QWEN tree is no longer the security packet. The inference
+owner landed in snapshots/v0.8; next justified action is qemu
+host-tools/images, not `prompt_bridge`.
 
 ## Generated-map status
 
@@ -110,6 +108,6 @@ must not hand-edit it.
 
 Prove the Thyris host-tool path: install or locate `qemu-img` and
 `qemu-system-x86_64`, obtain an Android image, and run a real disk-create
-consumer. Alternate production unit: a real `SovereignInferenceEngine._run_inference`
-owner. Do not claim phones boot until those tools and images are present
-and tested. Do not pull prompt files. Do not dummy `_run_inference`.
+consumer. Do not claim phones boot until those tools and images are present
+and tested. Do not pull prompt files. Do not add a second inference engine
+in `API.server.py`.

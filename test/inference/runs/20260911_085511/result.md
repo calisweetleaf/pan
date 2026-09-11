@@ -1,0 +1,28 @@
+# Sovereign inference run 20260911_085511
+
+I ran `python test/inference/test_sovereign_inference.py` at 20260911_085511.
+I found status `pass` with 7 passed, 0 failed, 0 skipped.
+
+## What I required
+
+I required a real on-disk PANLIN01 weight file, fail-loud load on missing
+or mismatched bytes, bit-identical re-execution by a second engine, prompt
+and temperature divergence, and process_request to call that same owner.
+I rejected the old canned simulation strings.
+
+## Checks
+
+- `missing_model_fails_loud`: pass
+- `hash_mismatch_fails_loud`: pass
+- `corrupt_header_fails_loud`: pass
+- `reexecution_matches`: pass
+- `prompt_and_temperature_diverge`: pass
+- `process_request_uses_owner`: pass
+- `illegal_args_fail_loud`: pass
+
+## Artifacts
+
+- `/workspace/test/inference/runs/20260911_085511/result.json`
+- `/workspace/test/inference/runs/20260911_085511/result.md`
+- `/workspace/test/inference/runs/20260911_085511/result.log`
+

@@ -1,8 +1,14 @@
-# SCOPE — EDIT: real SovereignInferenceEngine._run_inference owner
+# SCOPE — closed: real SovereignInferenceEngine._run_inference owner
 
-**Status:** OPEN 2026-09-11. Active Code Forge unit.
-**Ledger:** SOTA_RUN.md (to be written after the consumer/gate run)
+**Status:** CLOSED 2026-09-11 after gate 20260911_085638.
+**Ledger:** SOTA_RUN.md
 **Snapshot:** snapshots/v0.8/manifest.json
+**Gate:** results/pan_gate_20260911_085638.json
+
+The next production unit is not declared here. Next justified action (STATE.md):
+prove `qemu-img` / `qemu-system-x86_64` plus an Android image on a real
+disk-create consumer. Do not pull `core.prompt_bridge`. Do not treat
+`API.server.py` as a second inference engine.
 
 ## Engagement Mode
 
@@ -12,6 +18,7 @@
 - justification: I am editing the owned inference method in place because wrapping a second engine would duplicate the packet/manifest contract already on SovereignInferenceEngine, and API.server.py is forbidden as a parallel owner. Treasury Proof-of-Inference already calls a commitment helper; that helper cannot stay hash-theater once a local re-executable owner exists. A wrapper around the placeholder would preserve the dummy. Direct edit is the only way for validators to re-run the same decode path the worker ran.
 - author: daeron
 - date: 2026-09-11
+- closed: 2026-09-11 after gate 20260911_085638
 
 ## Runtime options (material choice)
 
@@ -28,7 +35,7 @@ Validators must re-execute the identical deterministic task (whitepaper §4.3). 
 
 Choice: **Option A**. Treasury `verify_proof_of_inference` binds that same owner and re-runs `infer` before accepting a mint.
 
-## Targets
+## Targets (closed)
 
 | Target | Owner | Consumed boundary |
 |---|---|---|
@@ -41,7 +48,7 @@ Choice: **Option A**. Treasury `verify_proof_of_inference` binds that same owner
 
 The placeholder lived inside the owning class. A WRAP adapter would either call the dummy or copy decode logic beside it. API.server.py already subclasses the engine with a sleep-and-string async path; that file is out of this unit and must not become the owner. Treasury already owns PoI verification; it must call the real engine or mint stays theater.
 
-## Out of scope
+## Still out of scope
 
 - qemu / Android images / Thyris boot
 - `prompt_bridge`, `schemas.session`, `memory_system`
