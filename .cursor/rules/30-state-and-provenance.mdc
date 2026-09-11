@@ -18,7 +18,10 @@ alwaysApply: false
 
 # Persistent-state lane
 
-- STATE.md owns verified current runtime truth, not a roadmap.
+- STATE.md owns verified current runtime truth, not a roadmap. Latest
+  verified full gate is results/pan_gate_20260911_011502.json until a new
+  full gate is run. Do not promote the narrower results/pan_gate_20260911_030722.json
+  runner as current.
 - MEMORY.md records durable source-backed findings; append corrections rather
   than erasing history.
 - CONTEXT.md is a compact retrieval index. Keep exact paths, symbols, evidence,
@@ -34,6 +37,10 @@ alwaysApply: false
   structural changes.
 - Do not claim a behavioral change unless the owning source/configuration and a
   matching verification surface changed.
-- Next justified action lives in STATE.md: qemu-img / qemu-system-x86_64 plus
-  an Android image, or a real _run_inference owner. Do not write prompt_bridge
-  back in as next work. Do not treat a missing memory_system package as a gap.
+- Next consumed unit is the real SovereignInferenceEngine._run_inference
+  owner (finish-prior). qemu-img / qemu-system-x86_64 plus an Android image
+  is a later host-tool frontier, not a co-equal next unit. Do not write
+  prompt_bridge back in as next work. Do not expand master_db §6.2. Do not
+  treat a missing memory_system package as a gap. If STATE.md still lists
+  qemu as equal next work, follow this finish-prior order; do not install
+  qemu from that lag.

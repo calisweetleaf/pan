@@ -44,3 +44,8 @@ Apply Somnus Code Forge quality semantics to PAN's existing topology.
 8. Do not create memory_system. Do not dummy core.prompt_bridge or
    schemas.session. memory.memory_integration is unconsumed AIPC leftover, not
    a Thyris boot requirement.
+9. Next consumed production unit is a real SovereignInferenceEngine._run_inference
+   owner in PAN_SDK/PAN_SDK.py (EDIT, new SCOPE.md). Keep API.server.py from
+   becoming a second engine. Do not start a qemu/Android unit. Do not expand
+   master_db §6.2 (vector/Orama/rsync is a persistence-schema decision). Do
+   not treat prompt_bridge as missing work.
