@@ -43,6 +43,8 @@
 
 **These files are not in use, but rather can/do serve as earlier developments that later went into the `/home/daeron/LAB/Experiments/projects/pan-sdk/sdk/PAN_SDK.py`**
 
+> The lacka integration will be removed and instead replaced with a agnostic model inference/service
+
 ---
 
 # PAN SDK Core Directives
