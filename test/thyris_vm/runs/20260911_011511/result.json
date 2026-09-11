@@ -1,0 +1,98 @@
+{
+  "name": "thyris_vm",
+  "passed": true,
+  "status": "pass",
+  "pass_count": 6,
+  "fail_count": 0,
+  "skip_count": 0,
+  "elapsed_seconds": 0.1536574363708496,
+  "checks": [
+    {
+      "name": "phone_orchestrator_imports",
+      "status": "pass",
+      "detail": {
+        "module": "C:\\Users\\trent\\pan\\telecom\\phone_orchestrator.py",
+        "thyris_class": "ThyrisPhoneOrchestrator",
+        "vm_state": "creating"
+      }
+    },
+    {
+      "name": "image_manager_constructs",
+      "status": "pass",
+      "detail": {
+        "metadata_file": "C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_img_fwr78fwc\\images\\image_metadata.json",
+        "os_families": [
+          "ubuntu",
+          "debian",
+          "fedora",
+          "centos",
+          "alpine",
+          "arch",
+          "windows",
+          "custom"
+        ]
+      }
+    },
+    {
+      "name": "supervisor_constructs",
+      "status": "pass",
+      "detail": {
+        "ip": "192.168.122.104",
+        "memory_db": "C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_sup_yq_sdcxa\\vms\\memory\\metadata.db",
+        "profiles": [
+          "coding",
+          "idle",
+          "media_creation",
+          "research"
+        ],
+        "orchestrator_aliases": {
+          "vm_manager": true,
+          "network": true
+        }
+      }
+    },
+    {
+      "name": "aipc_prompt_unbound",
+      "status": "pass",
+      "detail": {
+        "supervisor_file": "C:\\Users\\trent\\pan\\telecom\\vm_supervisor.py",
+        "prompt_imports": [],
+        "leaked_methods": []
+      }
+    },
+    {
+      "name": "usms_erebus_has_no_prompt",
+      "status": "pass",
+      "detail": {
+        "usms_module": "memory.unified_memory_system",
+        "immune_module": "security.planetary_immune_system",
+        "packet": "UnifiedDataPacket",
+        "prompt_bridge_in_usms": false,
+        "prompt_bridge_in_immune": false
+      }
+    },
+    {
+      "name": "telecom_host_tools_contract",
+      "status": "pass",
+      "detail": {
+        "required": [
+          "qemu-system-x86_64",
+          "qemu-img",
+          "adb"
+        ],
+        "ok": false,
+        "missing": [
+          "qemu-system-x86_64",
+          "qemu-img"
+        ],
+        "orchestrator": "ThyrisPhoneOrchestrator"
+      }
+    }
+  ],
+  "artifacts": {
+    "json": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260911_011511\\result.json",
+    "md": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260911_011511\\result.md",
+    "log": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260911_011511\\result.log",
+    "run_dir": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260911_011511"
+  }
+}

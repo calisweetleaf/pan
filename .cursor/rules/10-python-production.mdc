@@ -4,6 +4,7 @@ globs:
   - "PAN_SDK/**/*.py"
   - "telecom/**/*.py"
   - "security/**/*.py"
+  - "memory/**/*.py"
   - "tools/**/*.py"
   - "test/**/*.py"
 alwaysApply: false
@@ -25,10 +26,21 @@ Apply Somnus Code Forge quality semantics to PAN's existing topology.
 4. Do not use unittest.mock, pytest-mock, fabricated success paths, broad
    exception swallowing, version pins, TODO placeholders, or test weakening.
 5. Prove behavior through a real consumer and real temporary filesystem/SQLite
-   fixture where relevant. The project gate is `python3 test/run_pan_gate.py`.
+   fixture where relevant. The project gate is `python test/run_pan_gate.py`
+   (POSIX: `python3 test/run_pan_gate.py`). Focused consumers:
+   test/immune/test_planetary_immune_system.py,
+   test/treasury/test_sovereign_treasury.py,
+   test/email_social/test_email_social.py,
+   test/master_db/test_master_db.py,
+   test/memory_core/test_memory_core.py,
+   test/thyris_vm/test_thyris_vm.py,
+   plus persistence/name/manifest/personal probes and pan_sdk_system_scenario.py.
    Do not reintroduce pytest, mocks, or skipped assertions.
 6. Run the narrowest relevant check, then widen to the appropriate project gate.
    Syntax alone is insufficient.
 7. For a production promotion, create the Code Forge run artifacts and update
    SOTA_RUN.md; record provenance and snapshot information without relocating
    PAN source into a foreign folder layout.
+8. Do not create memory_system. Do not dummy core.prompt_bridge or
+   schemas.session. memory.memory_integration is unconsumed AIPC leftover, not
+   a Thyris boot requirement.

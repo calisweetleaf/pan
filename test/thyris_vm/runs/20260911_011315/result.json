@@ -1,0 +1,100 @@
+{
+  "name": "thyris_vm",
+  "passed": false,
+  "status": "fail",
+  "pass_count": 5,
+  "fail_count": 1,
+  "skip_count": 0,
+  "elapsed_seconds": 0.19107270240783691,
+  "checks": [
+    {
+      "name": "phone_orchestrator_imports",
+      "status": "pass",
+      "detail": {
+        "module": "C:\\Users\\trent\\pan\\telecom\\phone_orchestrator.py",
+        "thyris_class": "ThyrisPhoneOrchestrator",
+        "vm_state": "creating"
+      }
+    },
+    {
+      "name": "image_manager_constructs",
+      "status": "pass",
+      "detail": {
+        "metadata_file": "C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_img_v4s8a79j\\images\\image_metadata.json",
+        "os_families": [
+          "ubuntu",
+          "debian",
+          "fedora",
+          "centos",
+          "alpine",
+          "arch",
+          "windows",
+          "custom"
+        ]
+      }
+    },
+    {
+      "name": "supervisor_constructs",
+      "status": "pass",
+      "detail": {
+        "ip": "192.168.122.124",
+        "memory_db": "C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_sup_okqebwy7\\vms\\memory\\metadata.db",
+        "profiles": [
+          "coding",
+          "idle",
+          "media_creation",
+          "research"
+        ],
+        "orchestrator_aliases": {
+          "vm_manager": true,
+          "network": true
+        }
+      }
+    },
+    {
+      "name": "aipc_prompt_unbound",
+      "status": "pass",
+      "detail": {
+        "supervisor_file": "C:\\Users\\trent\\pan\\telecom\\vm_supervisor.py",
+        "prompt_imports": [],
+        "leaked_methods": []
+      }
+    },
+    {
+      "name": "usms_erebus_has_no_prompt",
+      "status": "pass",
+      "detail": {
+        "usms_module": "memory.unified_memory_system",
+        "immune_module": "security.planetary_immune_system",
+        "packet": "UnifiedDataPacket",
+        "prompt_bridge_in_usms": false,
+        "prompt_bridge_in_immune": false
+      }
+    },
+    {
+      "name": "telecom_host_tools_contract",
+      "status": "fail",
+      "error": "PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\\\Users\\\\trent\\\\AppData\\\\Local\\\\Temp\\\\thyris_tools_criok_04\\\\phones\\\\pan_phone_registry\\\\pan_state.db'",
+      "detail": {
+        "required": [
+          "qemu-system-x86_64",
+          "qemu-img",
+          "adb"
+        ],
+        "ok": false,
+        "missing": [
+          "qemu-system-x86_64",
+          "qemu-img"
+        ],
+        "orchestrator": "ThyrisPhoneOrchestrator"
+      }
+    }
+  ],
+  "error": "1 thyris vm checks failed",
+  "artifacts": {
+    "json": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260911_011315\\result.json",
+    "md": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260911_011315\\result.md",
+    "log": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260911_011315\\result.log",
+    "run_dir": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260911_011315"
+  }
+}

@@ -14,6 +14,10 @@ fully functional code and no placeholders.
 This system is designed to provide a level of control, resilience, and
 transparency that is impossible to achieve with traditional SaaS solutions.
 
+Thyris consumes this module as telecommunications VM ownership (QEMU disks,
+user-net, snapshots, image manager). In-phone AI and PromptSystemBridge are
+AIPC leftovers, not a Thyris requirement.
+
 Modified: 2026-09-11
 Modified by: cursor-grok (daeron)
 Justification: I rebound vm_image_manager, MemoryManager, and SomnusCache onto
@@ -22,6 +26,18 @@ Justification: I rebound vm_image_manager, MemoryManager, and SomnusCache onto
     still absent; prompt methods fail loud instead of returning canned strings.
 Provenance: snapshots/v0.6/manifest.json -> domains.thyris.edits[0]
 Files: telecom/vm_supervisor.py
+
+Modified: 2026-09-11
+Modified by: cursor-grok (daeron)
+Justification: I unbound the AIPC PromptSystemBridge hook because Thyris is
+    telecommunications, not in-phone AI. Keeping _load_prompt_bridge as a
+    fail-loud ImportError still treated a missing core.prompt_bridge as a
+    Thyris blocker and invited pulling three prompt files Daeron rejected.
+    Wrapping or scaffolding core/ would invent the layer. USMS/Erebus already
+    own cognition via Ed25519 memory DAG plus RSA PAN packets.
+Provenance: snapshots/v0.7/manifest.json -> domains.thyris.edits[0]
+Files: telecom/vm_supervisor.py, telecom/phone_orchestrator.py,
+    test/thyris_vm/test_thyris_vm.py
 """
 
 from __future__ import annotations
@@ -49,25 +65,6 @@ from memory.system_cache import SomnusCache
 from .vm_image_manager import OSFamily, VMImageManager
 
 logger = logging.getLogger(__name__)
-
-
-def _load_prompt_bridge() -> tuple[Any, Any]:
-    """Load the foreign prompt-bridge owner. It is not in this repository.
-
-    Returns:
-        PromptSystemBridge class and SubsystemType from core.prompt_bridge.
-
-    Raises:
-        ImportError: when that Thyris owner has not been pulled. Do not dummy it.
-    """
-    try:
-        from core.prompt_bridge import PromptSystemBridge, SubsystemType
-    except ImportError as exc:
-        raise ImportError(
-            "core.prompt_bridge is not in this repository. VMSupervisor prompt "
-            "methods cannot run until that Thyris owner is pulled. Do not dummy it."
-        ) from exc
-    return PromptSystemBridge, SubsystemType
 
 # --- Enhanced Schemas for Advanced VM Management ---
 
@@ -442,7 +439,12 @@ class CustomResourceManager:
 # --- Host-Side Client for In-VM Agent ---
 
 class SomnusVMAgentClient:
-    """A client on the host machine to communicate with the agent inside the VM."""
+    """Host HTTP client for an optional in-guest agent.
+
+    This is leftover AIPC in-VM process control. Thyris phone orchestration
+    does not require it at import or construct time. Fail loud only when a
+    caller actually invokes guest-agent methods and the guest is unreachable.
+    """
     def __init__(self, vm_ip: str, agent_port: int):
         self.base_url = f"http://{vm_ip}:{agent_port}"
 
@@ -476,7 +478,11 @@ class SomnusVMAgentClient:
 # --- The Evolved VM Supervisor ---
 
 class VMSupervisor:
-    """The OS-level supervisor for managing fleets of persistent AI computers."""
+    """OS-level supervisor for Thyris telecommunications VMs.
+
+    Owns QEMU process lifecycle, user-net addressing, snapshots, and
+    VMImageManager. Does not own in-phone AI or a prompt-generation bridge.
+    """
     def __init__(self, vm_storage_path: Path, config: Dict[str, Any]):
         self.vm_storage_path = vm_storage_path
         self.vm_instances_path = self.vm_storage_path / "instances"
@@ -484,9 +490,6 @@ class VMSupervisor:
 
         self.config = config
         self.active_vms: Dict[UUID, AIVMInstance] = {}
-        # PromptSystemBridge instances when core.prompt_bridge is present.
-        # Any: foreign PromptSystemBridge type is not in this repository.
-        self._vm_prompt_systems: Dict[UUID, Any] = {}
 
         memory_root = self.vm_storage_path / "memory"
         self.memory_manager = MemoryManager(
@@ -520,17 +523,10 @@ class VMSupervisor:
         self._monitor_stop_event = threading.Event()
         self._load_vms_from_disk()
 
-    # Added async initialize method to properly set up memory_manager, cache, and prompt bridge
     async def initialize(self):
-        """Initialize async components of the VM supervisor."""
+        """Initialize async Thyris VM memory and cache. No prompt bridge."""
         await self.memory_manager.initialize()
         self.cache.start_background_cleanup()
-        
-        for _vm_id, prompt_bridge in self._vm_prompt_systems.items():
-            initialize = getattr(prompt_bridge, "initialize", None)
-            if initialize is not None:
-                await initialize()
-        
         logger.info("VM Supervisor async components initialized")
 
     def _load_vms_from_disk(self):
@@ -582,32 +578,14 @@ class VMSupervisor:
                     logging.warning(f"Failed to fetch stats for VM {vm_id}: {e}")
             time.sleep(30)
 
-    async def _initialize_prompt_system(self, vm_instance: AIVMInstance) -> Any:
-        """Initialise a PromptSystemBridge for a newly created VM.
-
-        Raises ImportError when core.prompt_bridge is not in this repository.
-        """
-        prompt_bridge_cls, _subsystem_type = _load_prompt_bridge()
-        prompt_config = {
-            "memory_retention_hours": 48,
-            "semantic_graft_threshold": 0.7,
-            "synthesis_scheduler": {
-                "base_interval_seconds": 2400,
-                "min_interval_seconds": 300,
-                "max_interval_seconds": 7200,
-                "active_messages_per_hour": 10
-            }
-        }
-        prompt_bridge = prompt_bridge_cls(
-            cache=self.cache,
-            memory_manager=self.memory_manager,
-            config=prompt_config
-        )
-        await prompt_bridge.initialize()
-        return prompt_bridge
-
     async def create_ai_computer(self, instance_name: str, personality_config: Dict[str, Any]) -> AIVMInstance:
-        """Provisions a new, persistent AI computer."""
+        """Provision a QEMU-backed VM disk and start it.
+
+        Historical AIPC name. Thyris phones go through ThyrisPhoneOrchestrator.
+        This path fails loud for missing qemu-img or base image, not for prompts.
+        personality_config is retained for call-site compatibility and is not
+        an in-VM AI prompt hook.
+        """
         vm_id = uuid4()
         vm_disk_path = self.vm_instances_path / f"somnus-ai-{vm_id.hex}.qcow2"
         base_image_path = self.vm_storage_path / "base_ai_os.qcow2"
@@ -628,13 +606,10 @@ class VMSupervisor:
             vm_id=vm_id,
             instance_name=instance_name,
             vm_disk_path=str(vm_disk_path),
-            personality_config=personality_config,
             specs=initial_profile.model_dump(),
             current_profile=initial_profile.profile_name
         )
-
-        # Initialise the autonomous prompt system for this VM
-        self._vm_prompt_systems[vm_id] = await self._initialize_prompt_system(vm_instance)
+        _ = personality_config
 
         # Create and start the VM using our custom manager
         if not self.vm_manager.create_vm(vm_instance, initial_profile):
@@ -730,7 +705,10 @@ class VMSupervisor:
             return False
 
     def soft_reboot(self, vm_id: UUID) -> bool:
-        """Triggers a soft reboot of the AI processes via the in-VM agent."""
+        """Ask an optional in-guest agent to restart guest processes.
+
+        AIPC leftover. Not a Thyris phone-orchestration requirement.
+        """
         vm_instance = self.active_vms.get(vm_id)
         if not vm_instance or not vm_instance.internal_ip:
             raise ValueError("VM not found or has no IP.")
@@ -940,35 +918,3 @@ class VMSupervisor:
                 logging.error(f"Failed to clean up VM {vm_id} files: {e}")
                 return False
         return False
-
-    def _get_prompt_system(self, vm_id: UUID) -> Any:
-        """Retrieve the prompt system bridge associated with a VM."""
-        if vm_id not in self._vm_prompt_systems:
-            raise ValueError(f"No prompt system registered for VM {vm_id}")
-        return self._vm_prompt_systems[vm_id]
-
-    async def generate_vm_prompt(
-        self,
-        vm_id: UUID,
-        user_input: str,
-        session_id: str,
-        task_context: Optional[Dict[str, Any]] = None
-    ) -> str:
-        """
-        Public API used by external callers to obtain a context‑aware prompt
-        for a specific VM. Delegates to the VM's PromptSystemBridge.
-        
-        For VMs, we use the PROJECTS subsystem type since VMs represent project environments.
-        """
-        prompt_bridge = self._get_prompt_system(vm_id)
-        _prompt_bridge_cls, subsystem_type_cls = _load_prompt_bridge()
-        subsystem_type = subsystem_type_cls.PROJECTS
-        
-        # Route through the bridge to get the appropriate prompt (adaptive or identity-stabilized)
-        return await prompt_bridge.get_prompt_for_subsystem(
-            subsystem=subsystem_type,
-            user_id=str(vm_id),  # Use VM ID as user identifier
-            user_input=user_input,
-            session_id=session_id,
-            context=task_context
-        )

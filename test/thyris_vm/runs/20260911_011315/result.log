@@ -1,0 +1,61 @@
+thyris vm consumer start 20260911_011315
+
+========================================================================
+THYRIS VM CONSUMER
+========================================================================
+phone_orchestrator=C:\Users\trent\pan\telecom\phone_orchestrator.py
+PASS phone_orchestrator_imports
+image storage=C:\Users\trent\AppData\Local\Temp\thyris_img_v4s8a79j\images
+PASS image_manager_constructs
+custom vm storage=C:\Users\trent\AppData\Local\Temp\thyris_sup_okqebwy7\vms
+assigned ip=192.168.122.124
+supervisor vms=0
+memory_db=C:\Users\trent\AppData\Local\Temp\thyris_sup_okqebwy7\vms\memory\metadata.db
+idle profile={'profile_name': 'idle', 'vcpus': 1, 'memory_gb': 4, 'gpu_enabled': False, 'description': 'Low power state.'}
+instance state=creating
+PASS supervisor_constructs
+supervisor_file=C:\Users\trent\pan\telecom\vm_supervisor.py
+active_vms=0
+PASS aipc_prompt_unbound
+usms_module=memory.unified_memory_system
+immune_module=security.planetary_immune_system
+packet_type=UnifiedDataPacket
+PASS usms_erebus_has_no_prompt
+required_host_tools=['qemu-system-x86_64', 'qemu-img', 'adb']
+host_tools_ok=False missing=['qemu-system-x86_64', 'qemu-img']
+FAIL telecom_host_tools_contract: PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_tools_criok_04\\phones\\pan_phone_registry\\pan_state.db'
+Traceback (most recent call last):
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\shutil.py", line 701, in _rmtree_unsafe
+    os.unlink(fullname)
+    ~~~~~~~~~^^^^^^^^^^
+PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_tools_criok_04\\phones\\pan_phone_registry\\pan_state.db'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\trent\pan\test\thyris_vm\test_thyris_vm.py", line 259, in run
+    fn(detail)
+    ~~^^^^^^^^
+  File "C:\Users\trent\pan\test\thyris_vm\test_thyris_vm.py", line 224, in check_telecom_host_tools_contract
+    with tempfile.TemporaryDirectory(prefix="thyris_tools_") as tmpdir:
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\tempfile.py", line 971, in __exit__
+    self.cleanup()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\tempfile.py", line 975, in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\tempfile.py", line 955, in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\shutil.py", line 852, in rmtree
+    _rmtree_impl(path, dir_fd, onexc)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\shutil.py", line 705, in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\tempfile.py", line 930, in onexc
+    _os.unlink(path)
+    ~~~~~~~~~~^^^^^^
+PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_tools_criok_04\\phones\\pan_phone_registry\\pan_state.db'
+thyris vm consumer status=fail

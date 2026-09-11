@@ -1,0 +1,27 @@
+thyris vm consumer start 20260911_011453
+
+========================================================================
+THYRIS VM CONSUMER
+========================================================================
+phone_orchestrator=C:\Users\trent\pan\telecom\phone_orchestrator.py
+PASS phone_orchestrator_imports
+image storage=C:\Users\trent\AppData\Local\Temp\thyris_img_g8rfxxdn\images
+PASS image_manager_constructs
+custom vm storage=C:\Users\trent\AppData\Local\Temp\thyris_sup_vazu9n1x\vms
+assigned ip=192.168.122.169
+supervisor vms=0
+memory_db=C:\Users\trent\AppData\Local\Temp\thyris_sup_vazu9n1x\vms\memory\metadata.db
+idle profile={'profile_name': 'idle', 'vcpus': 1, 'memory_gb': 4, 'gpu_enabled': False, 'description': 'Low power state.'}
+instance state=creating
+PASS supervisor_constructs
+supervisor_file=C:\Users\trent\pan\telecom\vm_supervisor.py
+active_vms=0
+PASS aipc_prompt_unbound
+usms_module=memory.unified_memory_system
+immune_module=security.planetary_immune_system
+packet_type=UnifiedDataPacket
+PASS usms_erebus_has_no_prompt
+required_host_tools=['qemu-system-x86_64', 'qemu-img', 'adb']
+host_tools_ok=False missing=['qemu-system-x86_64', 'qemu-img']
+PASS telecom_host_tools_contract
+thyris vm consumer status=pass

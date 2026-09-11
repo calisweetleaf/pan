@@ -35,8 +35,21 @@ take unless Daeron explicitly changes the product thesis.
 - **Memory-system package:** do not create `memory_system` beside `memory/`.
   Thyris VM memory is `memory.memory_core` / `memory.system_cache`. USMS stays
   `memory.unified_memory_system`. Do not wrap one to look like the other.
-- **Dummy Thyris owners:** do not stub `core.prompt_bridge`, `schemas.session`,
+- **Dummy Thyris owners:** do not stub `schemas.session`,
   QEMU, or Android images to make phone orchestration look complete.
+- **AIPC prompt layer on Thyris:** do not pull or invent `core.prompt_bridge`,
+  `PromptSystemBridge`, or an Erebus prompt module. Thyris is
+  telecommunications. Phones do not contain in-device AI. USMS already owns
+  immune cognition (Ed25519 DAG + RSA PAN packets). Do not list prompt_bridge
+  as next work.
+- **Stale somnus_erebus / QWEN layout:** do not recreate
+  `python_production_doctor.py`, `QWEN.md`, or a `somnus_erebus/` folder as
+  if they were this repository's security tree. Live consumed owners are
+  `security/sovereign_firewall.py` and `security/planetary_immune_system.py`.
+- **Unconsumed security lineage as immune owner:** `defensive_sovereignty.py`,
+  `reactive_offense.py`, and `defensive_offensive_bridge.py` exist on disk.
+  They are not the gate immune path. Do not wrap them to avoid editing
+  `planetary_immune_system.py`.
 - **Email overlay on every DHTNode:** do not auto-construct `EmailSocialNode`
   (and its firewall sqlite) inside `DHTNode.__init__`. Civic tests use
   TemporaryDirectory; an extra unclosed sqlite handle fails Windows cleanup.
@@ -54,3 +67,6 @@ take unless Daeron explicitly changes the product thesis.
   PYTHONPATH shim.
 - Historical reference-code/ and archives/ preserve lineage; they are not
   production runtime authority.
+- Next justified production work is qemu host tools plus an Android image,
+  or a real `_run_inference` owner. AIPC `prompt_bridge` is a rejected
+  layer, not a missing owner to fetch.

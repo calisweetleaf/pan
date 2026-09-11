@@ -6,7 +6,7 @@ Prints a run report and writes JSON/MD/LOG artifacts.
 
 from __future__ import annotations
 
-import asyncio
+import ast
 import importlib
 import io
 import json
@@ -25,7 +25,11 @@ if str(ROOT_DIR) not in sys.path:
 
 from memory.memory_core import MemoryManager
 from memory.system_cache import SomnusCache
+from memory.unified_memory_system import UnifiedMemorySystem
+from PAN_SDK.PAN_SDK import UnifiedDataPacket
+from security.planetary_immune_system import PlanetaryImmuneSystem
 from telecom.phone_orchestrator import (
+    THYRIS_REQUIRED_HOST_TOOLS,
     CustomNetworkManager as OrchestratorNetwork,
     CustomVMManager as OrchestratorVM,
     ThyrisPhoneOrchestrator,
@@ -38,8 +42,8 @@ from telecom.vm_supervisor import (
     ResourceProfile,
     VMState,
     VMSupervisor,
-    _load_prompt_bridge,
 )
+import telecom.vm_supervisor as vm_supervisor_module
 
 
 class CheckFailure(Exception):
@@ -130,41 +134,112 @@ def check_supervisor_constructs(details: dict[str, object]) -> None:
         }
 
 
-def check_prompt_bridge_fail_loud(details: dict[str, object]) -> None:
-    """Missing core.prompt_bridge must raise ImportError, not a dummy prompt."""
-    try:
-        _load_prompt_bridge()
-    except ImportError as exc:
-        message = str(exc)
-        print(f"prompt_bridge ImportError={message}")
-        if "core.prompt_bridge" not in message:
-            raise CheckFailure(f"ImportError did not name core.prompt_bridge: {message}")
-        details["error"] = message
-        return
-    raise CheckFailure("core.prompt_bridge imported; expected it to be absent")
-
-
-def check_prompt_init_fail_loud(details: dict[str, object]) -> None:
-    """VMSupervisor._initialize_prompt_system fails loud without a dummy bridge."""
-
-    async def _run(tmpdir: str) -> None:
+def check_aipc_prompt_unbound(details: dict[str, object]) -> None:
+    """Thyris supervisor must not load or require core.prompt_bridge."""
+    source_path = Path(vm_supervisor_module.__file__)
+    source = source_path.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    prompt_imports: list[str] = []
+    prompt_functions: list[str] = []
+    supervisor_methods: list[str] = []
+    prompt_attrs: list[str] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and (node.module or "") == "core.prompt_bridge":
+            prompt_imports.append(node.module or "")
+        if isinstance(node, ast.FunctionDef) and node.name == "_load_prompt_bridge":
+            prompt_functions.append(node.name)
+    for node in tree.body:
+        if isinstance(node, ast.ClassDef) and node.name == "VMSupervisor":
+            for item in node.body:
+                if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    supervisor_methods.append(item.name)
+            for item in ast.walk(node):
+                if isinstance(item, ast.Attribute) and item.attr == "_vm_prompt_systems":
+                    prompt_attrs.append(item.attr)
+    forbidden_methods = {"_initialize_prompt_system", "generate_vm_prompt", "_get_prompt_system"}
+    leaked_methods = sorted(forbidden_methods.intersection(supervisor_methods))
+    if prompt_imports:
+        raise CheckFailure(f"vm_supervisor still imports prompt_bridge: {prompt_imports}")
+    if prompt_functions:
+        raise CheckFailure(f"AIPC prompt loaders still defined: {prompt_functions}")
+    if leaked_methods:
+        raise CheckFailure(f"AIPC prompt methods still on VMSupervisor: {leaked_methods}")
+    if prompt_attrs:
+        raise CheckFailure(f"AIPC prompt state still on VMSupervisor: {prompt_attrs}")
+    if hasattr(vm_supervisor_module, "_load_prompt_bridge"):
+        raise CheckFailure("_load_prompt_bridge is still exported")
+    if hasattr(VMSupervisor, "_initialize_prompt_system"):
+        raise CheckFailure("_initialize_prompt_system is still a VMSupervisor method")
+    if hasattr(VMSupervisor, "generate_vm_prompt"):
+        raise CheckFailure("generate_vm_prompt is still a VMSupervisor method")
+    with tempfile.TemporaryDirectory(prefix="thyris_unbound_") as tmpdir:
         supervisor = VMSupervisor(Path(tmpdir) / "vms", {"source": "gate"})
-        instance = AIVMInstance(
-            instance_name="gate-prompt",
-            vm_disk_path=str(Path(tmpdir) / "probe.qcow2"),
+        if hasattr(supervisor, "_vm_prompt_systems"):
+            raise CheckFailure("VMSupervisor still holds _vm_prompt_systems")
+        print(f"supervisor_file={source_path}")
+        print(f"active_vms={len(supervisor.active_vms)}")
+        details["supervisor_file"] = str(source_path)
+        details["prompt_imports"] = prompt_imports
+        details["leaked_methods"] = leaked_methods
+
+
+def check_usms_erebus_has_no_prompt(details: dict[str, object]) -> None:
+    """USMS/Erebus cognition is Ed25519+RSA packets, not prompt_bridge."""
+    usms_path = ROOT_DIR / "memory" / "unified_memory_system.py"
+    immune_path = ROOT_DIR / "security" / "planetary_immune_system.py"
+    if not usms_path.is_file():
+        raise CheckFailure(f"USMS owner missing at {usms_path}")
+    if not immune_path.is_file():
+        raise CheckFailure(f"immune owner missing at {immune_path}")
+    usms_text = usms_path.read_text(encoding="utf-8")
+    immune_text = immune_path.read_text(encoding="utf-8")
+    for label, text in (("usms", usms_text), ("immune", immune_text)):
+        if "prompt_bridge" in text or "PromptSystemBridge" in text:
+            raise CheckFailure(f"{label} names prompt_bridge; Erebus does not need it")
+    if "UnifiedMemorySystem" not in immune_text:
+        raise CheckFailure("immune system does not bind UnifiedMemorySystem")
+    if "UnifiedDataPacket" not in immune_text:
+        raise CheckFailure("immune system does not bind UnifiedDataPacket")
+    if "Ed25519" not in immune_text:
+        raise CheckFailure("immune system does not document Ed25519 USMS identity")
+    print(f"usms_module={UnifiedMemorySystem.__module__}")
+    print(f"immune_module={PlanetaryImmuneSystem.__module__}")
+    print(f"packet_type={UnifiedDataPacket.__name__}")
+    details["usms_module"] = UnifiedMemorySystem.__module__
+    details["immune_module"] = PlanetaryImmuneSystem.__module__
+    details["packet"] = UnifiedDataPacket.__name__
+    details["prompt_bridge_in_usms"] = False
+    details["prompt_bridge_in_immune"] = False
+
+
+def check_telecom_host_tools_contract(details: dict[str, object]) -> None:
+    """Thyris fails loud for qemu/adb, not for AIPC prompts."""
+    expected = ("qemu-system-x86_64", "qemu-img", "adb")
+    if THYRIS_REQUIRED_HOST_TOOLS != expected:
+        raise CheckFailure(
+            f"host tools {THYRIS_REQUIRED_HOST_TOOLS!r} != telecom contract {expected!r}"
+        )
+    if any("prompt" in tool.lower() for tool in THYRIS_REQUIRED_HOST_TOOLS):
+        raise CheckFailure("prompt tooling leaked into Thyris host-tool contract")
+    with tempfile.TemporaryDirectory(prefix="thyris_tools_") as tmpdir:
+        orch = ThyrisPhoneOrchestrator(
+            vm_storage_path=str(Path(tmpdir) / "phones"),
+            android_images_path=str(Path(tmpdir) / "images"),
         )
         try:
-            await supervisor._initialize_prompt_system(instance)
-        except ImportError as exc:
-            print(f"initialize_prompt ImportError={exc}")
-            details["error"] = str(exc)
-            return
-        raise CheckFailure("prompt init returned a dummy instead of ImportError")
-
-    with tempfile.TemporaryDirectory(prefix="thyris_prompt_") as tmpdir:
-        asyncio.run(_run(tmpdir))
-    if "error" not in details:
-        raise CheckFailure("prompt init did not record an ImportError")
+            ok, missing = orch._ensure_host_tools()
+            print(f"required_host_tools={list(THYRIS_REQUIRED_HOST_TOOLS)}")
+            print(f"host_tools_ok={ok} missing={missing}")
+            extra = [item for item in missing if item not in THYRIS_REQUIRED_HOST_TOOLS]
+            if extra:
+                raise CheckFailure(f"host-tool check reported non-telecom tools: {extra}")
+            details["required"] = list(THYRIS_REQUIRED_HOST_TOOLS)
+            details["ok"] = ok
+            details["missing"] = list(missing)
+            details["orchestrator"] = type(orch).__name__
+        finally:
+            orch.pan_registry.persistence.close()
+            orch.cache.shutdown()
 
 
 def run() -> dict[str, object]:
@@ -178,8 +253,9 @@ def run() -> dict[str, object]:
         ("phone_orchestrator_imports", check_phone_orchestrator_imports),
         ("image_manager_constructs", check_image_manager_constructs),
         ("supervisor_constructs", check_supervisor_constructs),
-        ("prompt_bridge_fail_loud", check_prompt_bridge_fail_loud),
-        ("prompt_init_fail_loud", check_prompt_init_fail_loud),
+        ("aipc_prompt_unbound", check_aipc_prompt_unbound),
+        ("usms_erebus_has_no_prompt", check_usms_erebus_has_no_prompt),
+        ("telecom_host_tools_contract", check_telecom_host_tools_contract),
     )
     for name, fn in runners:
         detail: dict[str, object] = {}
@@ -249,8 +325,9 @@ def write_artifacts(payload: dict[str, object], timestamp: str, log_text: str) -
         "## What I required",
         "",
         "I required phone_orchestrator to import against live memory/ and telecom/",
-        "owners, VMImageManager and VMSupervisor to construct on tempdirs, and",
-        "core.prompt_bridge to fail loud instead of a dummy prompt class.",
+        "owners, VMImageManager and VMSupervisor to construct on tempdirs, AIPC",
+        "prompt_bridge to be unbound from the Thyris seam, USMS/Erebus to own",
+        "cognition without prompt_bridge, and host-tool fail-loud to name qemu/adb.",
         "",
         "## Checks",
         "",

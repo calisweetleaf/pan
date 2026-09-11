@@ -16,6 +16,38 @@ source inspection or STATE.md.
 - NOTEPAD.md — current scratch, non-canonical.
 - security/AGENTS.md + security/rules_of_engagement.md — security lane.
 
+## 2026-09-11 — Operator packet locked to live owners
+
+**Keys:** AGENTS.md · security/AGENTS.md · .cursor/rules · SCOPE.md
+
+- **State:** Continuity docs and Cursor rules now name live owners: nation
+  pillars, security-owned firewall, USMS+PAN immune bind, Thyris telecom
+  (not AIPC), memory_core beside USMS. SCOPE.md is closed. Next action is
+  qemu+image or `_run_inference`, not `prompt_bridge`.
+- **Authority:** STATE.md; AGENTS.md; security/AGENTS.md;
+  .cursor/rules/00-pan-control-plane.mdc; results/pan_gate_20260911_011502.json.
+- **Boundary:** This is not a new production-code run. Do not hand-edit
+  filetree.md. Do not recreate the somnus_erebus/QWEN tree.
+- **Then inspect:** AGENTS.md, security/AGENTS.md, STATE.md, ANTITHESIS.md.
+- **Open:** qemu-img / qemu-system / Android images; real inference.
+
+## 2026-09-11 — AIPC prompt unbound from Thyris telecom
+
+**Keys:** VMSupervisor · ThyrisPhoneOrchestrator · UnifiedMemorySystem ·
+PlanetaryImmuneSystem
+
+- **State:** `core.prompt_bridge` is rejected for Thyris. Prompt loaders and
+  VM prompt methods were deleted from `telecom/vm_supervisor.py`. Gate is green
+  on Windows. USMS/Erebus were not edited and do not consume prompt_bridge.
+- **Authority:** STATE.md; SOTA_RUN.md; results/pan_gate_20260911_011502.json;
+  test/thyris_vm/runs/20260911_011511/result.json; snapshots/v0.7/manifest.json;
+  ANTITHESIS.md.
+- **Boundary:** Do not create `core/` or an Erebus prompt layer. Do not claim
+  QEMU boot. `schemas.session` remains absent and unconsumed.
+- **Then inspect:** telecom/vm_supervisor.py, telecom/phone_orchestrator.py,
+  security/planetary_immune_system.py, memory/unified_memory_system.py.
+- **Open:** qemu-img / qemu-system / Android images; real inference.
+
 ## 2026-09-11 — Thyris VM owners imported (not booted)
 
 **Keys:** MemoryManager · SomnusCache · VMSupervisor · VMImageManager ·
@@ -27,12 +59,13 @@ ThyrisPhoneOrchestrator
 - **Authority:** STATE.md; SOTA_RUN.md; results/pan_gate_20260911_004035.json;
   test/memory_core/runs/20260911_004047/result.json;
   test/thyris_vm/runs/20260911_004047/result.json.
-- **Boundary:** `core.prompt_bridge` and `schemas.session` are still absent.
-  QEMU boot is unproven. Do not create `memory_system`.
+- **Boundary:** `schemas.session` is still absent. QEMU boot is unproven.
+  Do not create `memory_system`. AIPC prompt_bridge is no longer a Thyris
+  owner (see unbind entry above).
 - **Then inspect:** memory/memory_core.py, memory/system_cache.py,
   telecom/vm_supervisor.py, telecom/vm_image_manager.py,
   telecom/phone_orchestrator.py.
-- **Open:** prompt_bridge owner; real inference; QEMU/Android images.
+- **Open:** real inference; QEMU/Android images.
 
 ## 2026-09-10 — Nation pillars landed (treasury, email_social, master_db)
 
@@ -51,7 +84,7 @@ ThyrisPhoneOrchestrator
   deterministic commitment until `_run_inference` exists.
 - **Then inspect:** PAN_SDK/treasury.py, PAN_SDK/email_social.py,
   PAN_SDK/master_db.py.
-- **Open:** Thyris VM owners; real inference; FileTree Pro regeneration.
+- **Open:** real inference; QEMU/Android images. Thyris owners later imported.
 
 ## 2026-09-10 — Planetary immune system landed
 
@@ -67,7 +100,8 @@ ThyrisPhoneOrchestrator
   Ed25519 identity remain distinct.
 - **Then inspect:** security/planetary_immune_system.py,
   security/sovereign_firewall.py, test/immune/test_planetary_immune_system.py.
-- **Open:** Thyris VM owners; FileTree Pro regeneration.
+- **Open (historical):** Thyris VM owners and FileTree Pro regeneration;
+  Thyris import later landed.
 
 ## 2026-09-11 — PAN package and name persistence unblocked
 
@@ -79,7 +113,8 @@ ThyrisPhoneOrchestrator
 - **Boundary:** Thyris VM owners and agnostic inference remain unproven.
 - **Then inspect:** PAN_SDK/PAN_SDK.py (`store_name`, `PANNameRegistry`),
   test/run_pan_gate.py, SCOPE.md.
-- **Open:** FileTree Pro regeneration; Thyris `vm_supervisor`; inference seam.
+- **Open (historical):** FileTree Pro regeneration; Thyris `vm_supervisor`;
+  inference seam. Thyris import later landed.
 
 ## 2026-09-10 — Cursor control plane established
 
@@ -89,13 +124,15 @@ SCOPE.md · SOTA_RUN.md
 - **State:** Root AGENTS.md is now a PAN-specific execution packet; scoped
   Cursor rules and commands exist under .cursor/.
 - **Authority:** AGENTS.md; .cursor/rules/00-pan-control-plane.mdc.
-- **Boundary:** The control plane does not alter production Python or resolve
-  the known syntax/import-layout blockers.
-- **Evidence:** source-only control-plane review; no production code changed.
+- **Boundary:** The 2026-09-10 control plane did not alter production Python
+  or resolve the then-known syntax/import-layout blockers. Those blockers
+  later landed (PAN_SDK/ rename, nation pillars, Thyris import, prompt unbind).
+  See the 2026-09-11 packet-lock entry above for the current rules text.
+- **Evidence:** source-only control-plane review; no production code changed
+  on this date.
 - **Then inspect:** STATE.md, .cursor/rules/10-python-production.mdc,
   .cursor/commands/implement.md.
-- **Open:** regenerate filetree.md through FileTree Pro after this structural
-  addition; do not hand-edit the generated map.
+- **Open (historical):** filetree regeneration after `.cursor/` addition.
 
 ## 2026-09-09 — Kubuntu baseline blocked before test collection
 
@@ -125,17 +162,21 @@ SCOPE.md · SOTA_RUN.md
 | unified memory | signed Ed25519 memory DAG (immune) | memory/unified_memory_system.py |
 | Thyris VM memory | MemoryManager / SomnusCache | memory/memory_core.py, memory/system_cache.py |
 | Thyris V1 | phone orchestration; importable; QEMU unproven | telecom/phone_orchestrator.py |
-| VM supervisor | CustomVMManager / VMState / ResourceProfile | telecom/vm_supervisor.py |
+| VM supervisor | CustomVMManager / VMState / ResourceProfile; AIPC prompt unbound | telecom/vm_supervisor.py |
+| security packet | live firewall + immune bind; stale QWEN tree rejected | security/AGENTS.md |
 | security | ROE-governed defensive lane | security/ |
 | lineage | non-runtime historical designs | reference-code/, archives/, results/ |
 | gate | direct fail-loud consumer runner | test/run_pan_gate.py |
 
 ## Active hazards
 
-- prompt-bridge-absent — `core.prompt_bridge` is not in this repository.
-  VMSupervisor prompt methods fail loud. Do not dummy them.
+- aipc-prompt-rejected — do not pull or invent `core.prompt_bridge`. Thyris
+  is telecom; USMS already owns immune cognition. prompt_bridge is not next work.
+- stale-erebus-qwen — `security/AGENTS.md` is the live packet. Do not recreate
+  somnus_erebus/ or python_production_doctor.py.
 - schemas-session-absent — `memory/memory_integration.py` cannot import.
 - thyris-qemu-unproven — import/construct are green; VMs do not boot here.
+  qemu-system and qemu-img were missing on the 2026-09-11 Windows gate host.
 - inference-placeholder — `_run_inference` is not a working model service.
 - old-results — Windows 2025-10-02 result is historical evidence, not this run.
 - wrapper-drift — do not use adapters or parallel layouts to evade direct

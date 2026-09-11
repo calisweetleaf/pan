@@ -1,26 +1,23 @@
-# SOTA_RUN — Thyris owners (memory_core, system_cache, vm_supervisor, vm_image_manager)
+# SOTA_RUN — Unbind AIPC prompt from Thyris telecom
 
 **Date:** 2026-09-11
 **Mode:** EDIT (see SCOPE.md)
-**Claim:** Operator-pulled Thyris files are consumed owners in this repository.
-`memory.memory_core` / `memory.system_cache` are Thyris VM memory. USMS remains
-the immune Ed25519 DAG. `telecom.vm_supervisor` and `telecom.vm_image_manager`
-are the owners `phone_orchestrator` already imported. The phone orchestrator
-imports. This is not a claim that QEMU VMs boot, Android images install, or
-`core.prompt_bridge` exists. The pulled modules are not claimed SOTA++
-(pre-existing broad `except Exception`).
+**Claim:** Thyris telecom no longer treats `core.prompt_bridge` as a required
+owner. VMSupervisor constructs without a prompt loader. Phone orchestration
+fails loud for qemu/adb, not for AIPC prompts. USMS/Erebus were not edited and
+do not name prompt_bridge. This is not a claim that QEMU VMs boot. The pulled
+Thyris modules are not claimed SOTA++ (pre-existing broad `except Exception`).
 
 ## Commands
 
 ```bash
-python test/memory_core/test_memory_core.py
 python test/thyris_vm/test_thyris_vm.py
 python test/run_pan_gate.py
 ```
 
-- Thyris memory consumer (gate slice): **PASS**, 3/3 checks
-- Thyris VM consumer (gate slice): **PASS**, 5/5 checks
-- Project gate: **PASS**, exit 0, 12.820s
+- Thyris VM consumer (focused): **PASS**, 6/6 checks
+- Thyris VM consumer (gate slice): **PASS**, 6/6 checks
+- Project gate: **PASS**, exit 0, 8.871s
 - Python: 3.14 (Windows) via `.venv`
 
 ## Slices
@@ -43,35 +40,38 @@ python test/run_pan_gate.py
 
 ## Artifacts
 
-- Latest thyris_memory run: `test/memory_core/runs/20260911_004047/`
+- Latest thyris_vm run: `test/thyris_vm/runs/20260911_011511/`
   - `result.json`
   - `result.md`
   - `result.log`
-- Latest thyris_vm run: `test/thyris_vm/runs/20260911_004047/`
-  - `result.json`
-  - `result.md`
-  - `result.log`
-- Gate: `results/pan_gate_20260911_004035.json`
-- Gate: `results/pan_gate_20260911_004035.md`
-- Snapshot: `snapshots/v0.6/manifest.json`
+- Focused thyris_vm run: `test/thyris_vm/runs/20260911_011453/`
+- Gate: `results/pan_gate_20260911_011502.json`
+- Gate: `results/pan_gate_20260911_011502.md`
+- Snapshot: `snapshots/v0.7/manifest.json`
 
 ## Ledger counts (latest thyris_vm result.json)
 
-The last unit's latest `result.json` is `test/thyris_vm/runs/20260911_004047/result.json`:
+The last unit's latest `result.json` is `test/thyris_vm/runs/20260911_011511/result.json`:
 
 - status: pass
-- pass_count: 5
+- pass_count: 6
 - fail_count: 0
 - skip_count: 0
 
-Thyris memory latest: status pass, pass_count 3, fail_count 0, skip_count 0.
-
 ## Skipped / not proven
 
-- `core.prompt_bridge` is absent; VMSupervisor prompt methods fail loud
+- QEMU / Android ISO conversion / in-VM agent HTTP. qemu-system and qemu-img
+  were missing on this Windows host.
 - `memory/memory_integration.py` needs `schemas.session`
-- QEMU / Android ISO conversion / in-VM agent HTTP
 - `SovereignInferenceEngine._run_inference` is still a placeholder
 - Orama dashboard / 1536-d vector spaces
 - USMS as a whole is not claimed SOTA++ (pre-existing broad `except Exception`)
 - Thyris pulled modules are not claimed SOTA++
+
+## After this run (continuity, not a new unit)
+
+Operator packet, security/AGENTS.md, and `.cursor/` rules/commands were
+updated to match this ledger. SCOPE.md is closed. Next justified action is
+qemu-img / qemu-system-x86_64 plus an Android image, or a real
+`_run_inference` owner, not `prompt_bridge`. This file remains the latest
+production-code run until a new Code Forge unit starts.

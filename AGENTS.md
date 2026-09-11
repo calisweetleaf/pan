@@ -1,10 +1,13 @@
 # PAN SDK — Operator Packet
 
-**Repository:** /home/daeron/LAB/Experiments/projects/pan-sdk
+**Repository:** C:\Users\trent\pan (Windows operator workspace). Same product as
+the historical Linux path /home/daeron/LAB/Experiments/projects/pan-sdk; that
+path is not a second layout.
 **Classification:** internal research; offline-first, SQLite-backed
 **Product thesis:** the Planetary Autonomous Network is a sovereign digital-country substrate. It is not a generic web application, microservice estate, or adapter collection.
 **Packet updated:** 2026-09-11
 **Current runtime state:** STATE.md
+**Latest verified gate:** results/pan_gate_20260911_011502.json (Windows Python 3.14 `.venv`, exit 0, 8.871s)
 
 ## Authority and entry
 
@@ -35,10 +38,13 @@ Do not bulk-read the repository or create a plan that assumes an unlocated compo
 - Never create a wrapper, shim, proxy, compatibility layer, parallel implementation, or alternate package merely to avoid editing the owned module. A wrapper that duplicates domain logic is rejected.
 - When a direct production edit is justified, use it and preserve provenance. Do not call a thin or incomplete artifact production-ready.
 - The control plane may use scoped .cursor/ rules and commands; that is execution infrastructure, not a product-service decomposition.
+- Thyris is telecommunications (phone orchestration, VMs as phones/relays). It is not AIPC. Phones do not contain in-device AI. Do not pull or invent `core.prompt_bridge`.
+- USMS (`memory.unified_memory_system`) is the immune Ed25519 DAG. Thyris VM memory is `memory.memory_core` / `memory.system_cache`. They coexist in `memory/`. Do not create a `memory_system` package.
+- Nation pillars already exist as consumed owners: `PAN_SDK/treasury.py`, `PAN_SDK/email_social.py`, `PAN_SDK/master_db.py`.
 
 ## Production Python contract — Somnus Code Forge
 
-All changes to PAN_SDK/**/*.py, telecom/**/*.py, security/**/*.py, or tools/**/*.py use the Somnus Code Forge loop.
+All changes to PAN_SDK/**/*.py, telecom/**/*.py, security/**/*.py, memory/**/*.py, or tools/**/*.py use the Somnus Code Forge loop.
 
 1. Declare **EDIT**, **COMPOSE**, or **WRAP** before code changes in root SCOPE.md.
    - Default for code already owned by this repository: **EDIT**.
@@ -56,7 +62,7 @@ Do not import a foreign directory layout such as tools/native/ into PAN just to 
 
 | Surface | Owner / role |
 |---|---|
-| PAN_SDK/PAN_SDK.py | PAN monolith: identity, ledger, citizens, economy, governance, policy, persistence |
+| PAN_SDK/PAN_SDK.py | PAN monolith: identity, ledger, citizens, economy, governance, policy, persistence. `SovereignInferenceEngine._run_inference` is still a placeholder |
 | PAN_SDK/treasury.py | Fed FSM: PoI mint, quorum execute, contract rejection |
 | PAN_SDK/email_social.py | Nostr-inspired sealed mail / social relays over UnifiedDataPacket |
 | PAN_SDK/master_db.py | Offline-first CRDT pool on PANPersistenceStore |
@@ -64,12 +70,15 @@ Do not import a foreign directory layout such as tools/native/ into PAN just to 
 | memory/unified_memory_system.py | signed Ed25519 memory DAG (USMS; immune-system memory) |
 | memory/memory_core.py | Thyris VM MemoryManager / MemoryConfiguration |
 | memory/system_cache.py | Thyris SomnusCache |
+| memory/memory_integration.py | unconsumed AIPC session-memory leftover; imports absent `schemas.session`. Not a Thyris blocker |
 | security/sovereign_firewall.py | fail-closed packet border (security-owned) |
-| security/planetary_immune_system.py | USMS EVENT/BELIEF + PAN threat bulletins |
-| telecom/vm_supervisor.py | VMSupervisor, CustomVMManager, CustomNetworkManager, VMState, ResourceProfile |
+| security/planetary_immune_system.py | USMS EVENT/BELIEF + PAN threat bulletins. Erebus cognition. No prompt_bridge |
+| security/defensive_sovereignty.py, reactive_offense.py, defensive_offensive_bridge.py | present lineage; not imported by the gate. Live immune path is planetary_immune_system.py |
+| telecom/vm_supervisor.py | VMSupervisor, CustomVMManager, CustomNetworkManager, VMState, ResourceProfile. AIPC prompt hook unbound |
 | telecom/vm_image_manager.py | VMImageManager, OSFamily |
 | telecom/phone_orchestrator.py | Thyris V1 phone orchestration (importable; QEMU boot unproven) |
-| security/ | defensive sovereignty and ROE-governed security work |
+| telecom/phone_integration.py | browser APK/VNC bridge; not a gate compile target; qemu still unproven |
+| security/ | defensive sovereignty and ROE-governed security work; see security/AGENTS.md |
 | test/ | direct gate, persistence/name/manifest/personal probes, immune/treasury/email_social/master_db/thyris_memory/thyris_vm consumers, system scenario |
 | reference-code/ | historical lineage; not imported runtime code |
 | archives/, results/ | historical evidence; do not rewrite old artifacts |
@@ -77,37 +86,46 @@ Do not import a foreign directory layout such as tools/native/ into PAN just to 
 ## Known baseline and decision boundaries
 
 - Package directory is `PAN_SDK/`. That is the consumed import contract, not an open layout debate.
-- `python3 test/run_pan_gate.py` is the current verified gate; see STATE.md. It includes immune, treasury, email_social, master_db, thyris_memory, and thyris_vm slices.
+- `python test/run_pan_gate.py` is the current verified Windows gate; see STATE.md. It includes immune, treasury, email_social, master_db, thyris_memory, and thyris_vm slices. POSIX spelling is `python3 test/run_pan_gate.py`.
 - Security owns `security/sovereign_firewall.py`. PAN RSA identity and USMS Ed25519 identity are bound, not collapsed.
 - Thyris VM memory (`memory.memory_core`) and USMS (`memory.unified_memory_system`) coexist in `memory/` and must not be collapsed. Do not create a `memory_system` package.
-- `telecom/phone_orchestrator.py` imports. QEMU boot, Android images, and `core.prompt_bridge` are still absent.
-- Historical 2025-10-02 Windows results remain historical evidence only. The 2026-09-11 Windows gate is current.
+- `telecom/phone_orchestrator.py` imports. QEMU boot and Android images are still unproven. AIPC `core.prompt_bridge` is rejected for Thyris telecom (phones have no in-device AI). Do not list prompt_bridge as next work.
+- The stale `somnus_erebus/` / QWEN.md tree described in older security notes is not this repository's layout. Live security owners are in security/AGENTS.md.
+- Historical 2025-10-02 Windows results remain historical evidence only. The 2026-09-11 Windows gate (`results/pan_gate_20260911_011502.json`) is current.
 
 An agent **may** repair a mechanically demonstrated defect that preserves the existing contract, then prove the consumed path. It must stop and present options before choosing among materially different persistence schemas, protocol/service boundaries, publication, deployment, external communications, credential handling, or destructive operations.
 
 ## Verification
 
-The project gate is a direct Python runner (not pytest):
+The project gate is a direct Python runner (not pytest). Latest verified Windows command:
 
-    python3 test/run_pan_gate.py
+    python test/run_pan_gate.py
+
+POSIX equivalent: `python3 test/run_pan_gate.py`.
 
 Optional focused consumers:
 
- python3 test/test_pan_persistence.py
- python3 test/probe_name_registry.py
- python3 test/test_pan_manifest.py
- python3 test/probe_personal_data.py
- python3 test/pan_sdk_system_scenario.py
- python3 test/immune/test_planetary_immune_system.py
- python3 test/treasury/test_sovereign_treasury.py
- python3 test/email_social/test_email_social.py
- python3 test/master_db/test_master_db.py
- python3 test/memory_core/test_memory_core.py
- python3 test/thyris_vm/test_thyris_vm.py
- python3 test/memory_core/test_memory_core.py
- python3 test/thyris_vm/test_thyris_vm.py
+    python test/test_pan_persistence.py
+    python test/probe_name_registry.py
+    python test/test_pan_manifest.py
+    python test/probe_personal_data.py
+    python test/pan_sdk_system_scenario.py
+    python test/immune/test_planetary_immune_system.py
+    python test/treasury/test_sovereign_treasury.py
+    python test/email_social/test_email_social.py
+    python test/master_db/test_master_db.py
+    python test/memory_core/test_memory_core.py
+    python test/thyris_vm/test_thyris_vm.py
 
 A green syntax check is structural evidence only. Do not claim a successful PAN integration without the gate artifact. Never mask a known red baseline with skips, changed assertions, or unreported fallback paths.
+
+## Next justified action
+
+Prove the Thyris host-tool path: locate or install `qemu-img` and `qemu-system-x86_64`, obtain an Android image, and run a real disk-create consumer.
+
+The alternate production unit is a real `SovereignInferenceEngine._run_inference` owner so treasury Proof-of-Inference can leave deterministic commitment re-execution.
+
+Do not pull or invent `core.prompt_bridge`. Do not dummy `_run_inference`. Do not claim phones boot until qemu, qemu-img, and an Android image are present and tested. `schemas.session` / `memory.memory_integration` is leftover AIPC session-memory and is not a Thyris blocker.
 
 ## Security and operational boundaries
 
@@ -138,4 +156,4 @@ Before ending a substantive implementation turn:
 2. State exactly what passed, failed, and was not run.
 3. Update only the persistent surfaces whose semantic truth changed.
 4. Preserve original evidence and unrelated working-tree changes.
-5. Leave one imperative next action if a real blocker remains.
+5. Leave one imperative next action if a real blocker remains. The current next action is qemu+image or `_run_inference`, never `prompt_bridge`.

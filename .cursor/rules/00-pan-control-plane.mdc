@@ -12,6 +12,19 @@ alwaysApply: true
   distributed infrastructure, or scaffolding folders to simulate progress.
 - Work at the owning implementation seam. Do not add wrappers, shims, proxies,
   alternate packages, or duplicate logic to avoid a direct integration.
+- Nation pillars already exist: PAN_SDK/treasury.py, PAN_SDK/email_social.py,
+  PAN_SDK/master_db.py. Edit those owners; do not recreate them beside the
+  monolith.
+- Thyris is telecommunications (phone orchestration, VMs as phones/relays).
+  It is not AIPC. Phones do not contain in-device AI. Do not pull, invent, or
+  dummy core.prompt_bridge / PromptSystemBridge.
+- USMS (memory.unified_memory_system, Ed25519 immune DAG) is not Thyris VM
+  memory (memory.memory_core / memory.system_cache). They coexist in memory/.
+  Do not create a memory_system package and do not wrap one to look like the
+  other.
+- Security owns security/sovereign_firewall.py. Erebus cognition is
+  security/planetary_immune_system.py binding USMS to PAN RSA packets. Do not
+  collapse PAN RSA identity and USMS Ed25519 identity.
 - A material architecture decision requires options and evidence before selection:
   package layout, persistence semantics, protocol/service boundary, deployment,
   external communications, publication, secrets, or destructive action.
@@ -20,3 +33,6 @@ alwaysApply: true
 - Never claim success from a plan, static check, old log, or unexecuted command.
   Separate pre-existing baseline failures from introduced failures.
 - Preserve unrelated working-tree changes and historical evidence.
+- Next justified action is qemu-img / qemu-system-x86_64 plus an Android image,
+  or a real SovereignInferenceEngine._run_inference owner. prompt_bridge is
+  rejected, not next work.

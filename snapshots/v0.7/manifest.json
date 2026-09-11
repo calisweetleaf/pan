@@ -1,0 +1,27 @@
+{
+  "version": "0.7",
+  "date": "2026-09-11",
+  "author": "daeron",
+  "summary": "Unbind leftover AIPC PromptSystemBridge from Thyris telecom so VMSupervisor and phone orchestration do not require core.prompt_bridge.",
+  "domains": {
+    "thyris": {
+      "module": "telecom/vm_supervisor.py",
+      "wrapper": null,
+      "tool_count": 2,
+      "provenance": "AIPC prompt hook removed from owned telecom supervisor; USMS remains immune cognition",
+      "edits": [
+        {
+          "date": "2026-09-11",
+          "author": "daeron",
+          "summary": "Delete _load_prompt_bridge and VM prompt methods; name qemu/adb host-tool contract; prove USMS/Erebus do not consume prompt_bridge.",
+          "files": [
+            "telecom/vm_supervisor.py",
+            "telecom/phone_orchestrator.py",
+            "test/thyris_vm/test_thyris_vm.py"
+          ],
+          "justification_ref": "SCOPE.md"
+        }
+      ]
+    }
+  }
+}

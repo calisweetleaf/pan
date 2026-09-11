@@ -1,138 +1,97 @@
-# Somnus Erebus Project - Qwen Context
+# PAN security lane — Operator Packet
 
-## Project Overview
+**Folder:** security/
+**Parent packet:** ../AGENTS.md
+**Runtime truth:** ../STATE.md
+**ROE:** rules_of_engagement.md
+**Packet updated:** 2026-09-11
 
-This subfolder contains a sophisticated autonomous defensive and offensive cybersecurity system designed to protect sovereign digital infrastructure. The system implements a comprehensive threat response framework with formal Rules of Engagement (ROE) compliance, enabling graduated responses from passive monitoring to active countermeasures.
+This folder is the security lane of the PAN monolith. It is not a standalone
+`somnus_erebus/` project and it is not an in-phone AI stack.
 
-The project is built around several core components:
+## Live consumed owners
 
-1. **Defensive Sovereignty System** (`defensive_sovereignty.py`) - Core defensive capabilities for AI model self-protection and autonomy
-2. **Reactive Offensive System** (`reactive_offense.py`) - Calibrated offensive responses based on ROE framework
-3. **Defensive-Offensive Integration Bridge** (`defensive_offensive_bridge.py`) - Unified threat response coordination
-4. **Rules of Engagement** (`rules_of_engagement.md`) - Formal ROE framework for autonomous operations
-5. **Production Doctor** (`python_production_doctor.py`) - Code health assessment tool
+Erebus cognition in this repository is USMS bound to the PAN mesh:
 
-## System Architecture
+- `memory/unified_memory_system.py` persists signed Ed25519 EVENT/BELIEF/CONTRADICTION nodes.
+- `security/planetary_immune_system.py` binds that DAG to PAN RSA `UnifiedDataPacket` / DHT and broadcasts high-confidence beliefs as `THREAT_MEMORY_BULLETIN`.
+- `security/sovereign_firewall.py` is the fail-closed packet border. Security owns it.
 
-### Core Components
+Those two security modules are gate compile targets. The immune consumer is
+`test/immune/test_planetary_immune_system.py`. The project gate includes that
+slice (`python test/run_pan_gate.py`).
 
-#### Defensive Sovereignty System
+Do not pull or invent `core.prompt_bridge` as "Erebus cognition." Thyris phones
+are telecommunications VMs. They do not contain in-device AI. USMS already owns
+immune memory; the planetary immune system already owns the mesh bind.
 
-Implements distributed defense, state persistence, and threat response with:
+PAN `SovereignIdentity` (RSA, `PAN_SDK.PAN_SDK`) and USMS `SovereignIdentity`
+(Ed25519, `memory.unified_memory_system`) are different cryptography. Bind them.
+Do not collapse them into one class.
 
-- Network-based threat monitoring with comprehensive security analysis
-- System integrity monitoring and forensic data collection
-- Distributed defensive agents with resource arbitration
-- State persistence and recovery mechanisms
-- Blockchain-based threat intelligence sharing
-- Neural competition for resource allocation under threat
+## Present lineage that is not the consumed immune path
 
-#### Reactive Offensive System
+These files exist on disk. Nothing in the gate, Thyris, or the immune consumer
+imports them as the live threat-intelligence owner:
 
-Provides calibrated offensive responses with:
+| File | What it is |
+|---|---|
+| defensive_sovereignty.py | historical Somnus defensive coordinator |
+| reactive_offense.py | historical ROE-calibrated offensive coordinator |
+| defensive_offensive_bridge.py | historical D/O bridge; later aliased ThreatIntelligenceCoordinator toward PlanetaryImmuneSystem |
 
-- ROE-compliant escalation from passive defense to active countermeasures
-- Multiple offensive capabilities (traceback hunting, infiltration, neutralization)
-- Human authorization workflow for high-impact operations
-- Viral-class behavior bounded by sovereignty constraints
-- Complete audit trails and compliance monitoring
+Do not wrap these files to avoid editing `planetary_immune_system.py`. Do not
+treat an in-process `intelligence_database` as combat memory. Ephemeral RAM
+dictionaries are rejected; USMS is the local substrate.
 
-#### Integration Bridge
+## Stale QWEN / somnus_erebus tree
 
-Coordinates defensive and offensive operations:
+An older packet (this file's previous text) described a `somnus_erebus/` layout
+with `python_production_doctor.py`, `production_doctor_config.yaml`, `QWEN.md`,
+`TODO.md`, and a security-local `requirements.txt`. Those files are not in this
+repository's `security/` folder. Do not recreate that tree. Do not run a
+Production Doctor command that is not here.
 
-- Seamless integration between detection and response systems
-- Real-time threat intelligence sharing
-- Unified threat response capabilities
-- Full authorization chain management
+Code health for PAN Python is the Somnus Code Forge loop on the existing
+topology (see root AGENTS.md), not a missing doctor script.
 
-## Rules of Engagement Framework
-
-The system operates under a formal **Rules of Engagement (ROE)** framework with four escalation levels:
-
-1. **ROE Level 1: OBSERVE** - Passive monitoring and analysis
-2. **ROE Level 2: DECEIVE** - Deception and misdirection tactics
-3. **ROE Level 3: DEGRADE** - Active degradation of threats
-4. **ROE Level 4: NEUTRALIZE** - Direct neutralization (requires human authorization)
-
-Each level has specific authorization requirements, confidence thresholds, and prescribed actions.
-
-## Code Quality and Maintenance
-
-The project includes a **Python Production Doctor** tool that performs comprehensive code health assessments:
-
-- Syntax error detection
-- TODO and technical debt identification
-- Stub implementation detection
-- Missing docstrings and type hints
-- Test coverage analysis
-- Simple method and placeholder return detection
-
-## Key Technologies
-
-- Python 3.12+
-- Zero external dependencies (pure Python implementation)
-- Modular architecture with protocol interfaces
-- Thread-safe operations
-- DARPA-grade security implementation
-- Comprehensive logging and audit trails
-
-## Configuration
-
-The system is configured through `production_doctor_config.yaml` which defines:
-
-- Code quality thresholds
-- Ignored patterns and functions
-- Severity levels for different issue types
-- Security scan parameters
-- Performance analysis settings
-
-## Development Status
-
-The project is currently in development with significant code quality issues identified by the Production Doctor:
-
-- 1,787 total issues across 2 files
-- 1,586 critical issues that block deployment
-- 4 serious issues requiring immediate attention
-- 197 minor issues for quality improvements
-
-## Usage
-
-To analyze the codebase health:
-
-```bash
-python python_production_doctor.py .
-```
-
-To run with custom configuration:
-
-```bash
-python python_production_doctor.py . -c production_doctor_config.yaml
-```
-
-## Security Considerations
-
-This system is designed for defensive cybersecurity operations with strict ROE compliance. Key security features include:
-
-- Zero-trust architecture principles
-- Finite state machines for system stability
-- Thread-safety for concurrent operations
-- Comprehensive audit logging
-- Human authorization requirements for critical actions
-- Sovereignty constraints on offensive capabilities
-
-## Project Structure
+Live security tree:
 
 ```
-somnus_erebus/
-├── defensive_sovereignty.py         # Core defensive system
-├── reactive_offense.py             # Offensive response system
-├── defensive_offensive_bridge.py   # Integration layer
-├── rules_of_engagement.md          # Formal ROE framework
-├── defensive_sovereignty_report.md # System analysis report
-├── python_production_doctor.py     # Code health assessment tool
-├── production_doctor_config.yaml   # Configuration file
-├── requirements.txt                # Python dependencies
-├── TODO.md                        # Development roadmap
-└── QWEN.md                        # This file
+security/
+├── AGENTS.md
+├── rules_of_engagement.md
+├── sovereign_firewall.py          # consumed packet border
+├── planetary_immune_system.py     # consumed USMS+PAN bind
+├── defensive_sovereignty.py       # unconsumed lineage
+├── reactive_offense.py            # unconsumed lineage
+└── defensive_offensive_bridge.py  # unconsumed lineage
 ```
+
+## Rules of Engagement
+
+`rules_of_engagement.md` remains the formal ROE text. Four escalation levels:
+
+1. OBSERVE: passive monitoring and analysis
+2. DECEIVE: deception and misdirection
+3. DEGRADE: active degradation of threats
+4. NEUTRALIZE: direct neutralization (requires human authorization)
+
+Keep defensive intent, authorization boundaries, auditability, and fail-loud
+evidence intact. Do not convert this lane into uncontrolled external action.
+ROE Level 4 against external hosts is not implemented by the current immune
+landing and is not authorized by it.
+
+## Verification
+
+    python test/immune/test_planetary_immune_system.py
+    python test/run_pan_gate.py
+
+POSIX spelling: `python3` in place of `python`.
+
+## Stop conditions
+
+- Do not log, commit, or print credentials, keys, or tokens.
+- Do not invent a `memory_system` package or wrap USMS to look like Thyris `MemoryManager`.
+- Do not dummy `schemas.session` or `core.prompt_bridge`.
+- Read this packet and `rules_of_engagement.md` before modifying security/.

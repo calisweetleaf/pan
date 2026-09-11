@@ -22,12 +22,13 @@ invented alternative.
 - Security owns the packet border: `security/sovereign_firewall.py`.
 - `security/planetary_immune_system.py` binds USMS (Ed25519 memory DAG) to PAN
   DHT/`UnifiedDataPacket` (RSA transport). High-confidence beliefs broadcast as
-  `THREAT_MEMORY_BULLETIN` packets.
+  `THREAT_MEMORY_BULLETIN` packets. That is Erebus/USMS cognition. It does not
+  use `core.prompt_bridge`.
 - `memory/memory_core.py` and `memory/system_cache.py` are Thyris VM session
   memory. They coexist with USMS in `memory/` and are not the immune DAG.
 - `telecom/vm_supervisor.py` and `telecom/vm_image_manager.py` are the VM owners
-  `phone_orchestrator` already imported. `core.prompt_bridge` is still absent
-  and fails loud.
+  `phone_orchestrator` already imported. AIPC `PromptSystemBridge` is unbound.
+  Thyris does not import or require `core.prompt_bridge`.
 - Direct project gate: `python test/run_pan_gate.py` (immune, treasury,
   email_social, master_db, thyris_memory, thyris_vm slices).
 - Historical lineage: reference-code/, archives/, and the 2025-10-02 Windows
@@ -35,36 +36,38 @@ invented alternative.
 
 ## Verified baseline
 
-- **GREEN, 2026-09-11:** `python test/run_pan_gate.py` exited 0 in 12.820s on
-  Windows Python 3.14 with `.venv`. Slices: compile (includes
-  `telecom/phone_orchestrator.py`), import, persistence, name_registry,
-  manifest, personal_data, system_scenario, planetary_immune_system,
-  sovereign_treasury, email_social, master_db, thyris_memory, thyris_vm.
-  Artifacts: `results/pan_gate_20260911_004035.json`,
-  `results/pan_gate_20260911_004035.md`.
-- **GREEN, 2026-09-11:** thyris_memory 3/3
-  `test/memory_core/runs/20260911_004047/`.
-- **GREEN, 2026-09-11:** thyris_vm 5/5
-  `test/thyris_vm/runs/20260911_004047/`.
+- **GREEN, 2026-09-11:** `python test/run_pan_gate.py` exited 0 in 8.871s on
+  Windows Python 3.14 with `.venv` after unbinding AIPC prompt from Thyris.
+  Slices: compile (includes `telecom/phone_orchestrator.py`), import,
+  persistence, name_registry, manifest, personal_data, system_scenario,
+  planetary_immune_system, sovereign_treasury, email_social, master_db,
+  thyris_memory, thyris_vm (6/6 including prompt-unbound, USMS-has-no-prompt,
+  qemu/adb host-tool contract). Artifacts:
+  `results/pan_gate_20260911_011502.json`,
+  `results/pan_gate_20260911_011502.md`.
+- **GREEN, 2026-09-11:** thyris_vm 6/6
+  `test/thyris_vm/runs/20260911_011511/` (gate slice) and focused
+  `test/thyris_vm/runs/20260911_011453/`.
 - **GREEN:** `from telecom.phone_orchestrator import ThyrisPhoneOrchestrator`
   succeeds from repo root. `from memory.memory_core import MemoryManager` and
   `from memory.system_cache import SomnusCache` succeed. USMS remains
   `memory.unified_memory_system.UnifiedMemorySystem`.
-- **GREEN, 2026-09-10:** previous nation-pillar gate remains historical evidence
-  (`results/pan_gate_20260910_235116.json`); it is not this run.
+- **GREEN, 2026-09-11:** previous Thyris-import gate remains historical evidence
+  (`results/pan_gate_20260911_004035.json`); it is not this run.
 
 ## Active frontier
 
-1. `core.prompt_bridge` (PromptSystemBridge) is not in this repository.
-   VMSupervisor prompt methods raise ImportError. Do not dummy them.
-2. `memory/memory_integration.py` still imports `schemas.session`, which is
-   absent. Do not scaffold a fake schemas package.
-3. QEMU/Android image boot is unproven. Import and construct are proven;
+1. QEMU/Android image boot is unproven. Host-tool contract names
+   `qemu-system-x86_64`, `qemu-img`, and `adb`. This Windows gate found
+   qemu-system and qemu-img missing. Import and construct are proven;
    Thyris VMs do not boot in this gate.
-4. Agnostic model inference service. `SovereignInferenceEngine._run_inference`
+2. `memory/memory_integration.py` still imports `schemas.session`, which is
+   absent. That is leftover AIPC session-memory, not a Thyris telecom
+   requirement. Do not scaffold a fake schemas package.
+3. Agnostic model inference service. `SovereignInferenceEngine._run_inference`
    is still a placeholder. Treasury PoI re-executes a deterministic commitment
    until that owner exists.
-5. Orama dashboard / vector memory spaces named in whitepaper section 6.2.
+4. Orama dashboard / vector memory spaces named in whitepaper section 6.2.
 
 ## Known decision boundaries
 
@@ -87,16 +90,26 @@ invented alternative.
   a direct integration.
 - Ephemeral in-process threat-intelligence dictionaries are rejected. USMS is
   the local cognitive substrate; PAN packets are the mesh.
+- Do not pull or invent `core.prompt_bridge`. Thyris is telecommunications.
+  Phones do not contain in-device AI. USMS/Erebus already own cognition.
+
+## Control-plane packet
+
+Root AGENTS.md, security/AGENTS.md, and `.cursor/` rules/commands were
+reconciled to this baseline on 2026-09-11. The stale `somnus_erebus/` QWEN
+tree is no longer the security packet. Next justified action is qemu
+host-tools/images or `_run_inference`, not `prompt_bridge`. This is not a
+new production-code run; SOTA_RUN.md still names the unbind gate.
 
 ## Generated-map status
 
-`filetree.md` is operator-owned generated navigation. This turn did not
-hand-edit it.
+`filetree.md` is operator-owned generated navigation. Continuity-doc turns
+must not hand-edit it.
 
 ## Next justified action
 
-Pull `core.prompt_bridge` as a real owner if VM prompt generation is the next
-consumed path, or implement the real `_run_inference` owner so Proof-of-Inference
-can leave deterministic commitment re-execution. Do not dummy either gap. Do not
-claim QEMU phones boot until qemu-img/qemu-system and Android images are present
-and tested.
+Prove the Thyris host-tool path: install or locate `qemu-img` and
+`qemu-system-x86_64`, obtain an Android image, and run a real disk-create
+consumer. Alternate production unit: a real `SovereignInferenceEngine._run_inference`
+owner. Do not claim phones boot until those tools and images are present
+and tested. Do not pull prompt files. Do not dummy `_run_inference`.

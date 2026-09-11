@@ -10,9 +10,20 @@ alwaysApply: false
 Before modifying security/, read security/AGENTS.md and
 security/rules_of_engagement.md.
 
+- Live consumed owners are security/sovereign_firewall.py (packet border) and
+  security/planetary_immune_system.py (USMS Ed25519 DAG bound to PAN RSA
+  packets). That bind is Erebus cognition. It does not use core.prompt_bridge.
+- defensive_sovereignty.py, reactive_offense.py, and
+  defensive_offensive_bridge.py exist as unconsumed lineage. They are not the
+  gate immune path. Do not wrap them to avoid editing the live owners.
+- The old somnus_erebus/ QWEN.md / python_production_doctor.py tree is not
+  present in this repository. Do not recreate it.
+- PAN RSA SovereignIdentity and USMS Ed25519 SovereignIdentity are bound, not
+  collapsed.
 - Keep defensive intent, authorization boundaries, auditability, and
   fail-loud evidence intact.
 - Do not convert a defensive analysis surface into uncontrolled external action.
 - Never print, commit, or transmit credentials, tokens, or private keys.
 - Use the PAN Python production lane for source changes, including direct
-  provenance and real verification.
+  provenance and real verification
+  (`python test/immune/test_planetary_immune_system.py`, then the project gate).

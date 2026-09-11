@@ -3,8 +3,8 @@
 Oracle Browser - Thyris Phone Orchestrator
 ================================================================================
 
-Manages Android phone VMs for Oracle Browser V1. Separate from AI VM orchestration
-to maintain clean separation of concerns and enable V2 hotswap feature.
+Manages Android phone VMs for Oracle Browser V1. Thyris is telecommunications:
+calls, packets, and phone orchestration. Phones do not contain in-device AI.
 
 Architecture:
 - Provisions Android-x86 VMs via QEMU (full async subprocess)
@@ -16,7 +16,7 @@ Architecture:
 - Robust: Retries, orphan detection, metrics, encryption for configs
 
 V1: Infrastructure with "unusable" phone numbers to build hype
-V2: Full communication network activation with hotswap (Android VM ↔ AI agent VM)
+V2: Full communication network activation (phone-to-phone / packet mesh)
 
 Modified: 2026-09-11
 Modified by: cursor-grok (daeron)
@@ -26,6 +26,15 @@ Justification: I rebound memory_system.memory_core / memory_system.system_cache
     FileHandler + correlation_id format would write a cwd log and KeyError on
     the first log record that lacks that field.
 Provenance: snapshots/v0.6/manifest.json -> domains.thyris.edits[0]
+Files: telecom/phone_orchestrator.py
+
+Modified: 2026-09-11
+Modified by: cursor-grok (daeron)
+Justification: I dropped unused AIPC VMSupervisor imports and named the qemu/adb
+    host-tool contract because Thyris phones are telecommunications VMs, not
+    prompt-driven AIPC devices. A core.prompt_bridge import would have reintroduced
+    in-phone AI Daeron rejected.
+Provenance: snapshots/v0.7/manifest.json -> domains.thyris.edits[0]
 Files: telecom/phone_orchestrator.py
 """
 
@@ -49,8 +58,7 @@ import os
 import signal
 from collections import defaultdict
 
-# Import VM infrastructure
-from .vm_supervisor import VMSupervisor, VMState, ResourceProfile
+# Import VM infrastructure (telecom owners; not AIPC prompt/supervisor AI)
 from .vm_supervisor import CustomVMManager, CustomNetworkManager
 
 # Import PAN SDK components
@@ -78,6 +86,12 @@ from memory.memory_core import MemoryManager, MemoryConfiguration
 from memory.system_cache import SomnusCache
 
 logger = logging.getLogger(__name__)
+
+THYRIS_REQUIRED_HOST_TOOLS: tuple[str, ...] = (
+    "qemu-system-x86_64",
+    "qemu-img",
+    "adb",
+)
 
 
 # ==================== Phone VM Models ====================
@@ -337,8 +351,7 @@ class ThyrisPhoneOrchestrator:
 
     def _ensure_host_tools(self) -> Tuple[bool, List[str]]:
         """Ensure required host tools are present. Returns (ok, missing_tools)."""
-        required = ['qemu-system-x86_64', 'qemu-img', 'adb']
-        missing = [t for t in required if not self._check_host_tool(t)]
+        missing = [t for t in THYRIS_REQUIRED_HOST_TOOLS if not self._check_host_tool(t)]
         return (len(missing) == 0, missing)
 
     async def _detect_and_cleanup_orphans(self):
@@ -1080,8 +1093,8 @@ class ThyrisPhoneOrchestrator:
         migration_type: str = "android_to_ai"  # or "ai_to_android"
     ) -> Dict[str, Any]:
         """
-        V2 Hotswap: Migrate VM state between Android phone and AI agent VMs.
-        Uses QEMU savevm/loadvm for state transfer.
+        V2 hotswap: migrate VM state between phone VMs.
+        Uses QEMU savevm/loadvm for state transfer. Not an in-phone AI prompt path.
         
         Args:
             from_vm_id: Source VM to save state from

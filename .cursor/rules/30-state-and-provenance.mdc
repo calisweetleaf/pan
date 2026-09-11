@@ -9,6 +9,9 @@ globs:
   - "MEMORY.md"
   - "NOTEPAD.md"
   - "PLAN.md"
+  - "SCOPE.md"
+  - "SOTA_RUN.md"
+  - "security/AGENTS.md"
   - "docs/**/*.md"
 alwaysApply: false
 ---
@@ -23,7 +26,14 @@ alwaysApply: false
 - NOTEPAD.md is active scratch, never a substitute for evidence or canon.
 - BRAINSTORM.md is non-canonical exploration. Do not promote speculation.
 - ANTITHESIS.md owns rejected directions and recurring anti-drift constraints.
+- SCOPE.md names the active Code Forge unit, or records that the last unit
+  closed. Do not leave an obsolete unit looking current.
+- SOTA_RUN.md is the latest production-code run ledger. A continuity-doc
+  update is not a new SOTA run.
 - Do not hand-edit filetree.md; regenerate it with FileTree Pro after
   structural changes.
 - Do not claim a behavioral change unless the owning source/configuration and a
   matching verification surface changed.
+- Next justified action lives in STATE.md: qemu-img / qemu-system-x86_64 plus
+  an Android image, or a real _run_inference owner. Do not write prompt_bridge
+  back in as next work. Do not treat a missing memory_system package as a gap.

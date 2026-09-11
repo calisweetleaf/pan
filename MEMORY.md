@@ -3,6 +3,92 @@
 Append durable, evidence-backed findings here. Preserve corrections as new dated
 entries instead of erasing historical truth.
 
+## 2026-09-11 — Continuity packet locked to live owners
+
+**Keys:** AGENTS.md · security/AGENTS.md · .cursor/rules · SCOPE.md
+
+**Status:** LANDED (docs/control plane). No new production-code run.
+
+### Durable findings
+
+- Root AGENTS.md now names Windows workspace `C:\Users\trent\pan`, the
+  20260911_011502 gate artifact, nation pillars, Thyris vs USMS split, and
+  next action qemu+image or `_run_inference`. `core.prompt_bridge` is rejected
+  next-work, not a missing owner to pull.
+- `security/AGENTS.md` previously described a `somnus_erebus/` QWEN tree
+  (`python_production_doctor.py`, `QWEN.md`, `production_doctor_config.yaml`)
+  that is not in this repository. Live consumed owners are
+  `security/sovereign_firewall.py` and `security/planetary_immune_system.py`.
+  `defensive_sovereignty.py`, `reactive_offense.py`, and
+  `defensive_offensive_bridge.py` exist on disk and are unconsumed lineage.
+- `.cursor/` rules and commands now route to `python test/run_pan_gate.py`
+  plus the immune/treasury/email_social/master_db/thyris_memory/thyris_vm
+  consumers. memory/**/*.py is in the Code Forge glob. SCOPE.md is closed.
+- Erebus cognition is USMS Ed25519 + PAN RSA packets. It is not in-phone AI.
+
+### Evidence
+
+- Live files: security/*.py listing; test/run_pan_gate.py COMPILE_TARGETS;
+  results/pan_gate_20260911_011502.json; STATE.md next-action section.
+
+### Boundary
+
+- Continuity text is not a qemu boot proof and not an inference proof.
+- Do not hand-edit filetree.md.
+
+### Retrieval anchors
+
+- AGENTS.md
+- security/AGENTS.md
+- .cursor/rules/00-pan-control-plane.mdc
+- STATE.md
+- ANTITHESIS.md
+
+## 2026-09-11 — AIPC prompt_bridge unbound from Thyris telecom
+
+**Keys:** VMSupervisor · ThyrisPhoneOrchestrator · PromptSystemBridge (rejected)
+· UnifiedMemorySystem · PlanetaryImmuneSystem
+
+**Status:** LANDED (unbind). QEMU boot is NOT landed.
+
+### Durable findings
+
+- `core.prompt_bridge` / `PromptSystemBridge` was leftover AIPC in-VM prompt
+  generation. It was imported only from `telecom.vm_supervisor._load_prompt_bridge`
+  and called from `_initialize_prompt_system` / `generate_vm_prompt` /
+  `create_ai_computer`. It was not an import-time dependency of
+  `phone_orchestrator`, `memory_core`, `system_cache`, USMS, or Erebus.
+- Daeron rejected pulling it: Thyris is telecommunications; phones no longer
+  have AI inside them. The old VM supervisor was AIPC, not Thyris.
+- The fail-loud ImportError was itself the wrong contract: it treated a missing
+  AIPC prompt owner as a Thyris blocker. The hook is deleted, not dummy-filled.
+- USMS/Erebus did not need it. `security/planetary_immune_system.py` already
+  binds Ed25519 `memory.unified_memory_system` to RSA `UnifiedDataPacket`.
+  Neither file names prompt_bridge.
+- Thyris host-tool fail-loud is `qemu-system-x86_64`, `qemu-img`, `adb`.
+
+### Evidence
+
+- `python test/run_pan_gate.py` exit 0, 8.871s, 2026-09-11
+- `results/pan_gate_20260911_011502.json`
+- `test/thyris_vm/runs/20260911_011511/result.json` (6/6)
+- `snapshots/v0.7/manifest.json`
+
+### Boundary
+
+- Do not pull or invent `core/` prompt files.
+- Do not claim Thyris VMs boot.
+- Do not collapse USMS into MemoryManager.
+
+### Retrieval anchors
+
+- SCOPE.md
+- SOTA_RUN.md
+- ANTITHESIS.md (AIPC prompt layer rejected)
+- telecom/vm_supervisor.py
+- telecom/phone_orchestrator.py
+- STATE.md
+
 ## 2026-09-11 — Thyris owners landed in memory/ and telecom/
 
 **Keys:** MemoryManager · MemoryConfiguration · SomnusCache · VMSupervisor ·
@@ -19,8 +105,9 @@ CustomVMManager · VMImageManager · ThyrisPhoneOrchestrator
   and `SomnusCache` from `memory.system_cache`. `CustomVMManager`,
   `CustomNetworkManager`, `VMState`, and `ResourceProfile` live on
   `telecom.vm_supervisor`.
-- `core.prompt_bridge` is still absent. Dummy PromptSystemBridge/MemoryManager
-  fallbacks were removed. Prompt methods raise ImportError.
+- `core.prompt_bridge` was still absent at import time; dummy PromptSystemBridge
+  fallbacks had been removed. That fail-loud-as-blocker stance was later
+  rejected (see 2026-09-11 unbind entry above).
 - `memory.memory_integration` still needs `schemas.session`. Do not dummy it.
 - Offline initialize uses `LocalHashEmbeddingModel` and `SimpleLocalVectorDB`
   when sentence-transformers / chromadb are absent. That is not transformer

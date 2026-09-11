@@ -7,9 +7,16 @@ evidence-backed decisions to the appropriate authority surface.
 
 - What packaging contract lets the PAN SDK remain a single, locally operated
   product while exposing deliberate application-facing entry points?
-- Which existing PAN_SDK/PAN_SDK.py boundaries are stable enough to support the
-  whitepaper's future phone, treasury, communications, and persistence lanes
-  without a service decomposition?
+- How should a real `SovereignInferenceEngine._run_inference` owner join the
+  existing treasury Proof-of-Inference FSM without a second ledger?
+- What is the first real Thyris disk-create / QEMU boot consumer once
+  qemu-img, qemu-system-x86_64, and an Android image exist on the host?
+
+## Resolved in exploration (promoted)
+
+- Whitepaper phone / treasury / communications / persistence lanes: treasury,
+  email_social, and master_db landed 2026-09-10; Thyris owners import as of
+  2026-09-11. QEMU boot is still unproven. See STATE.md.
 
 ## Resolved in exploration (promoted)
 
