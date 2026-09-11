@@ -23,6 +23,46 @@
 
 > `/home/daeron/LAB/Experiments/projects/pan-sdk/docs/research/Building a Sovereign Digital Nation.md` is the next leap forward in the Planetary Autonomous Network project. `/home/daeron/LAB/Experiments/projects/pan-sdk/PLAN.md` is a long winded rant explanation that needs expanding. This project likely will be refactored
 
+> File `/home/daeron/LAB/Experiments/projects/pan-sdk/reference-code/unified_dag_blockchain.py` implements the original blockchain idea The implementation creates a Directed Acyclic Graph (DAG) based blockchain that supports:
+
+- Multi-parent blocks (strands)
+- Belief-based anchoring instead of traditional consensus
+- Epistemic linking for knowledge evolution
+- Policy mutation through meta-blocks
+- Auto-repair mechanisms for contradictions
+- Memory management with relevance scoring
+
+> File `/home/daeron/LAB/Experiments/projects/pan-sdk/reference-code/mtl.py` contains the sovereign, fork-aware, auto-reflexive, belief-anchored memory fabric.Philosophy, in one breath:
+
+- Not a chain: a living DAG (multi-parent, fork-happy, repair-seeking).
+- Not global consensus: local epistemic anchoring via belief stability.
+- Not transactions: cognitive residues (events, beliefs, meta-policies, syntheses).
+- Not immutable dogma: policy-mutating meta-blocks and self-repair reflexes.
+
+> The file `/docs/research/Building a Sovereign Digital Nation.md`serves as the definitive seeding document for the final iteration of the Planetary Autonomous Network. 
+
+**These files are not in use, but rather can/do serve as earlier developments that later went into the `/home/daeron/LAB/Experiments/projects/pan-sdk/sdk/PAN_SDK.py`**
+
+---
+
+# PAN SDK Core Directives
+
+## Architecture Paradigm
+
+- DO NOT build microservices or complex folder hierarchies.
+- You must construct highly modular, production-grade ecosystems strictly as single-file Python monoliths.
+- A file is only considered production-grade when its operational logic is entirely finalized and over-engineered for resilience.
+
+## Mission
+
+>
+
+## Security & Firewall
+
+- Assume zero trust. Reject legacy telecommunications and ISPs.
+- Implement ruthless anti-surveillance mechanisms to prevent telemetry leaks.
+- All packets must undergo deterministic inspection pipelines (dictionary inspection, regex matching) before transmission.
+
 ---
 
 ### You Are Allowed Operational Paranoia — In Good Ways
