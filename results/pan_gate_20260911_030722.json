@@ -1,0 +1,158 @@
+{
+  "gate": "run_pan_gate",
+  "timestamp": "20260911_030722",
+  "passed": true,
+  "elapsed_seconds": 2.0370960235595703,
+  "python": "3.12.3 (main, Mar 23 2026, 19:04:32) [GCC 13.3.0]",
+  "slices": [
+    {
+      "name": "compile",
+      "passed": true,
+      "details": {
+        "compiled": [
+          "PAN_SDK/PAN_SDK.py",
+          "PAN_SDK/personal_data.py",
+          "PAN_SDK/citizen_simulator.py",
+          "PAN_SDK/sovereign_firewall.py",
+          "PAN_SDK/__init__.py"
+        ],
+        "skipped": [
+          {
+            "path": "/workspace/telecom/phone_orchestrator.py",
+            "reason": "Thyris vm_supervisor / memory_system owners are not in this repository"
+          }
+        ]
+      }
+    },
+    {
+      "name": "import",
+      "passed": true,
+      "details": {
+        "package": "/workspace/PAN_SDK/__init__.py",
+        "has_persist_name": true,
+        "has_store_name": true,
+        "has_get_name": true,
+        "dht_node": "DHTNode",
+        "identity": "SovereignIdentity",
+        "citizen_simulator": "/workspace/PAN_SDK/citizen_simulator.py"
+      }
+    },
+    {
+      "name": "persistence",
+      "passed": true,
+      "details": {
+        "components": [
+          "dht_data",
+          "dht_ledger",
+          "economy_accounts",
+          "governance_proposals",
+          "governance_policies"
+        ],
+        "matches": {
+          "dht_data": true,
+          "dht_ledger": true,
+          "economy_accounts": true,
+          "governance_proposals": true,
+          "governance_policies": true
+        },
+        "account_count": 3,
+        "proposal_count": 1
+      }
+    },
+    {
+      "name": "name_registry",
+      "passed": true,
+      "details": {
+        "registered": true,
+        "invalid_rejected": true,
+        "unauthorized_rejected": true,
+        "persisted_active": true,
+        "hydrated_name": "testname",
+        "hydrated_target": "53f992164895a8d55e2d8472962945cb0474ae1d7ac171d7f7fbc9015b26f4f4",
+        "missing_is_none": true,
+        "store_name_fail_loud": true
+      }
+    },
+    {
+      "name": "manifest",
+      "passed": true,
+      "details": {
+        "valid": true,
+        "tampered": false,
+        "wrong_key": false
+      }
+    },
+    {
+      "name": "personal_data",
+      "passed": true,
+      "details": {
+        "matches": {
+          "contacts": true,
+          "messages": true,
+          "call_logs": true,
+          "preferences": true,
+          "phone_addresses": true
+        },
+        "phone_address": "pan:netlab:motiflab:voice"
+      }
+    },
+    {
+      "name": "system_scenario",
+      "passed": true,
+      "details": {
+        "comparisons": {
+          "dht_data": "MATCH",
+          "dht_ledger": "MATCH",
+          "economy_accounts": "MATCH",
+          "governance_proposals": "MATCH",
+          "governance_policies": "MATCH",
+          "citizens": "MATCH",
+          "applications": "MATCH",
+          "name_registry": "MATCH",
+          "phone_addresses": "MATCH",
+          "pending_transactions": "MATCH",
+          "usage_metrics": "MATCH",
+          "personal_contacts": "MATCH",
+          "personal_messages": "MATCH",
+          "personal_call_logs": "MATCH",
+          "personal_preferences": "MATCH"
+        },
+        "operations": {
+          "citizen_id": "9e64627d-cb02-5e37-88ef-842ac6baa662",
+          "developer_id": "b9f4f98f-9a71-558b-9390-fa2a291f1333",
+          "app_id": "6d660ba6-50f6-5ed4-99b5-60f5ec722de9",
+          "registered_name": "testname",
+          "proposal_id": "9c006fba-8063-5773-92fb-825be6dfff4f",
+          "snapshot_sizes": {
+            "dht_data": 12,
+            "dht_ledger": 18,
+            "economy_accounts": 6,
+            "governance_proposals": 1,
+            "governance_policies": 2,
+            "citizens": 2,
+            "applications": 1,
+            "name_registry": 1,
+            "phone_addresses": 1,
+            "pending_transactions": 1,
+            "usage_metrics": 2,
+            "personal_contacts": 1,
+            "personal_messages": 1,
+            "personal_call_logs": 1,
+            "personal_preferences": 10
+          }
+        },
+        "artifacts": [
+          "/workspace/results/pan_sdk_system_test_20260911_030723.txt",
+          "/workspace/results/pan_sdk_system_test_20260911_030723.json",
+          "/workspace/results/pan_sdk_system_test_20260911_030723.md"
+        ]
+      }
+    }
+  ],
+  "skipped": [
+    {
+      "path": "/workspace/telecom/phone_orchestrator.py",
+      "reason": "Thyris vm_supervisor / memory_system owners are not in this repository"
+    }
+  ]
+}

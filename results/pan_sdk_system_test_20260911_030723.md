@@ -1,0 +1,50 @@
+# PAN SDK system scenario 20260911_030723
+
+Passed: True
+
+## Operations
+
+```json
+{
+  "citizen_id": "9e64627d-cb02-5e37-88ef-842ac6baa662",
+  "developer_id": "b9f4f98f-9a71-558b-9390-fa2a291f1333",
+  "app_id": "6d660ba6-50f6-5ed4-99b5-60f5ec722de9",
+  "registered_name": "testname",
+  "proposal_id": "9c006fba-8063-5773-92fb-825be6dfff4f",
+  "snapshot_sizes": {
+    "dht_data": 12,
+    "dht_ledger": 18,
+    "economy_accounts": 6,
+    "governance_proposals": 1,
+    "governance_policies": 2,
+    "citizens": 2,
+    "applications": 1,
+    "name_registry": 1,
+    "phone_addresses": 1,
+    "pending_transactions": 1,
+    "usage_metrics": 2,
+    "personal_contacts": 1,
+    "personal_messages": 1,
+    "personal_call_logs": 1,
+    "personal_preferences": 10
+  }
+}
+```
+
+## Comparisons
+
+- `dht_data`: MATCH
+- `dht_ledger`: MATCH
+- `economy_accounts`: MATCH
+- `governance_proposals`: MATCH
+- `governance_policies`: MATCH
+- `citizens`: MATCH
+- `applications`: MATCH
+- `name_registry`: MATCH
+- `phone_addresses`: MATCH
+- `pending_transactions`: MATCH
+- `usage_metrics`: MATCH
+- `personal_contacts`: MATCH
+- `personal_messages`: MATCH
+- `personal_call_logs`: MATCH
+- `personal_preferences`: MATCH

@@ -25,8 +25,8 @@ Apply Somnus Code Forge quality semantics to PAN's existing topology.
 4. Do not use unittest.mock, pytest-mock, fabricated success paths, broad
    exception swallowing, version pins, TODO placeholders, or test weakening.
 5. Prove behavior through a real consumer and real temporary filesystem/SQLite
-   fixture where relevant. Existing pytest consumers may be used; do not migrate
-   the repository merely to satisfy a generic layout.
+   fixture where relevant. The project gate is `python3 test/run_pan_gate.py`.
+   Do not reintroduce pytest, mocks, or skipped assertions.
 6. Run the narrowest relevant check, then widen to the appropriate project gate.
    Syntax alone is insufficient.
 7. For a production promotion, create the Code Forge run artifacts and update

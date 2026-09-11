@@ -30,7 +30,8 @@ take unless Daeron explicitly changes the product thesis.
 
 - PLAN.md and the sovereign-digital-nation whitepaper are directional canon;
   they do not authorize invention of absent modules or replacement architecture.
-- The sdk/ versus top-level PAN_SDK import layout remains a material decision
-  surface until resolved by evidence and operator direction.
+- The package directory is `PAN_SDK/`. That layout was resolved by the consumed
+  import contract (2026-09-11). Do not reintroduce `sdk/`, a proxy package, or a
+  PYTHONPATH shim.
 - Historical reference-code/ and archives/ preserve lineage; they are not
   production runtime authority.
