@@ -3,7 +3,7 @@
 **Repository:** /home/daeron/LAB/Experiments/projects/pan-sdk
 **Classification:** internal research; offline-first, SQLite-backed
 **Product thesis:** the Planetary Autonomous Network is a sovereign digital-country substrate. It is not a generic web application, microservice estate, or adapter collection.
-**Packet updated:** 2026-09-10
+**Packet updated:** 2026-09-11
 **Current runtime state:** STATE.md
 
 ## Authority and entry
@@ -30,7 +30,7 @@ Do not bulk-read the repository or create a plan that assumes an unlocated compo
 ## Architecture: preserve the real seams
 
 - The product follows the production-grade monolith doctrine. Do not split it into microservices, introduce distributed infrastructure, or create folder scaffolding to evade integration.
-- Existing production topology is authoritative: sdk/, telecom/, security/, test/, and tools/. Do not relocate it merely to fit an external template.
+- Existing production topology is authoritative: PAN_SDK/, telecom/, security/, test/, and tools/. Do not relocate it merely to fit an external template.
 - Work directly at the stable owning seam. A wrapper is allowed only when a real external implementation and a narrow, durable adaptation boundary already exist.
 - Never create a wrapper, shim, proxy, compatibility layer, parallel implementation, or alternate package merely to avoid editing the owned module. A wrapper that duplicates domain logic is rejected.
 - When a direct production edit is justified, use it and preserve provenance. Do not call a thin or incomplete artifact production-ready.
@@ -38,7 +38,7 @@ Do not bulk-read the repository or create a plan that assumes an unlocated compo
 
 ## Production Python contract — Somnus Code Forge
 
-All changes to sdk/**/*.py, telecom/**/*.py, security/**/*.py, or tools/**/*.py use the Somnus Code Forge loop.
+All changes to PAN_SDK/**/*.py, telecom/**/*.py, security/**/*.py, or tools/**/*.py use the Somnus Code Forge loop.
 
 1. Declare **EDIT**, **COMPOSE**, or **WRAP** before code changes in root SCOPE.md.
    - Default for code already owned by this repository: **EDIT**.
@@ -56,34 +56,38 @@ Do not import a foreign directory layout such as tools/native/ into PAN just to 
 
 | Surface | Owner / role |
 |---|---|
-| sdk/PAN_SDK.py | PAN monolith: identity, ledger, citizens, economy, governance, policy, persistence |
-| sdk/personal_data.py | local personal-data surface |
-| telecom/phone_orchestrator.py | Thyris V1 phone orchestration |
+| PAN_SDK/PAN_SDK.py | PAN monolith: identity, ledger, citizens, economy, governance, policy, persistence |
+| PAN_SDK/personal_data.py | local personal-data surface |
+| telecom/phone_orchestrator.py | Thyris V1 phone orchestration (blocked on missing VM owners) |
 | security/ | defensive sovereignty and ROE-governed security work |
-| test/ | persistence, manifest, phone, and system-scenario consumers |
+| test/ | direct gate, persistence/name/manifest/personal probes, system scenario |
 | reference-code/ | historical lineage; not imported runtime code |
 | archives/, results/ | historical evidence; do not rewrite old artifacts |
 
 ## Known baseline and decision boundaries
 
-- sdk/PAN_SDK.py currently has a syntax blocker around persist_name / load_name_from_db; see STATE.md for the exact verified failure.
-- Tests currently expect a top-level PAN_SDK import while production code lives under sdk/. This is an architecture decision, not a test-only cosmetic repair.
-- Historical Windows results are not proof of current Kubuntu behavior.
+- Package directory is `PAN_SDK/`. That is the consumed import contract, not an open layout debate.
+- `python3 test/run_pan_gate.py` is the current verified gate; see STATE.md.
+- `telecom/phone_orchestrator.py` still cannot import: Thyris `vm_supervisor` / `memory_system` are absent.
+- Historical Windows results are not proof of current behavior.
 
-An agent **may** repair a mechanically demonstrated defect that preserves the existing contract, then prove the consumed path. It must stop and present options before choosing among materially different package layouts, persistence semantics, protocol/service boundaries, publication, deployment, external communications, credential handling, or destructive operations.
+An agent **may** repair a mechanically demonstrated defect that preserves the existing contract, then prove the consumed path. It must stop and present options before choosing among materially different persistence schemas, protocol/service boundaries, publication, deployment, external communications, credential handling, or destructive operations.
 
 ## Verification
 
-Use the narrowest command that proves the touched consumer, then widen:
+The project gate is a direct Python runner (not pytest):
 
-    python3 -m py_compile sdk/PAN_SDK.py
-    python3 -m pytest test/test_pan_persistence.py -q
-    python3 -m pytest test/test_pan_manifest.py -q
-    python3 -m pytest test/test_phone_orchestrator.py -q
-    python3 -m pytest test/ -x -q
+    python3 test/run_pan_gate.py
+
+Optional focused consumers:
+
+    python3 test/test_pan_persistence.py
+    python3 test/probe_name_registry.py
+    python3 test/test_pan_manifest.py
+    python3 test/probe_personal_data.py
     python3 test/pan_sdk_system_scenario.py
 
-A green syntax check is structural evidence only. Do not claim a successful PAN integration without an import/consumer path and the relevant real-fixture or scenario evidence. Never mask a known red baseline with skips, changed assertions, or unreported fallback paths.
+A green syntax check is structural evidence only. Do not claim a successful PAN integration without the gate artifact. Never mask a known red baseline with skips, changed assertions, or unreported fallback paths.
 
 ## Security and operational boundaries
 

@@ -16,6 +16,18 @@ source inspection or STATE.md.
 - NOTEPAD.md — current scratch, non-canonical.
 - security/AGENTS.md + security/rules_of_engagement.md — security lane.
 
+## 2026-09-11 — PAN package and name persistence unblocked
+
+**Keys:** PAN_SDK/ · persist_name · store_name · name_registry · run_pan_gate.py
+
+- **State:** The live package directory is `PAN_SDK/`. `PANNameRegistry`
+  persists through kv component `name_registry`. Direct gate is green.
+- **Authority:** STATE.md; SOTA_RUN.md; results/pan_gate_20260911_030722.json.
+- **Boundary:** Thyris VM owners and agnostic inference remain unproven.
+- **Then inspect:** PAN_SDK/PAN_SDK.py (`store_name`, `PANNameRegistry`),
+  test/run_pan_gate.py, SCOPE.md.
+- **Open:** FileTree Pro regeneration; Thyris `vm_supervisor`; inference seam.
+
 ## 2026-09-10 — Cursor control plane established
 
 **Keys:** Cursor · .cursor/rules · Somnus Code Forge · AGENTS.md ·
@@ -50,18 +62,19 @@ SCOPE.md · SOTA_RUN.md
 
 | Key | Current meaning | Owner |
 |---|---|---|
-| PAN monolith | identity, ledger, citizen, economy, governance, policy, persistence | sdk/PAN_SDK.py |
-| personal data | local personal records surface | sdk/personal_data.py |
-| Thyris V1 | phone orchestration lane | telecom/phone_orchestrator.py |
+| PAN monolith | identity, ledger, citizen, economy, governance, policy, persistence | PAN_SDK/PAN_SDK.py |
+| personal data | local personal records surface | PAN_SDK/personal_data.py |
+| Thyris V1 | phone orchestration lane; import blocked on missing VM owners | telecom/phone_orchestrator.py |
 | security | ROE-governed defensive lane | security/ |
 | lineage | non-runtime historical designs | reference-code/, archives/, results/ |
+| gate | direct fail-loud consumer runner | test/run_pan_gate.py |
 
 ## Active hazards
 
-- syntax-baseline — no current import/test proof until PAN_SDK.py syntax is
-  repaired.
-- import-layout — do not silently add a package shim, rename sdk/, or mutate
-  PYTHONPATH without a justified decision.
-- old-results — Windows result is historical evidence, not a current run.
+- thyris-owners — `telecom/phone_orchestrator.py` imports modules that are not in
+  this repository. Do not dummy them.
+- inference-placeholder — `_run_inference` is not a working model service.
+- old-results — Windows 2025-10-02 result is historical evidence, not this run.
 - wrapper-drift — do not use adapters or parallel layouts to evade direct
   integration.
+- filetree-stale — generated map still shows `sdk/`; regenerate via FileTree Pro.

@@ -21,7 +21,9 @@ from dataclasses import dataclass
 
 # Import phone orchestrator
 import sys
-sys.path.append(str(Path(__file__).parent.parent))
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 from thyris.virtual_machine.phone_orchestrator import (
     ThyrisPhoneOrchestrator,
     AndroidPhoneVM,

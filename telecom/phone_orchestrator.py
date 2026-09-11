@@ -43,7 +43,9 @@ from .vm_supervisor import CustomVMManager, CustomNetworkManager
 
 # Import PAN SDK components
 import sys
-sys.path.append(str(Path(__file__).parent.parent.parent))
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 from PAN_SDK.personal_data import (
     PANPersonalDataStore,
     PANPhoneAddressRegistry,

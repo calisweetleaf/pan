@@ -3,6 +3,47 @@
 Append durable, evidence-backed findings here. Preserve corrections as new dated
 entries instead of erasing historical truth.
 
+## 2026-09-11 — Package rename, name kv persistence, direct gate
+
+**Keys:** PAN_SDK · persist_name · store_name · name_registry · run_pan_gate.py ·
+sdk_adapter
+
+**Status:** LANDED
+
+### Durable findings
+
+- Every consumer already imported `PAN_SDK`. Renaming `sdk/` to `PAN_SDK/`
+  matched the filesystem to that contract. A shim/PYTHONPATH proxy remains
+  banned.
+- `PANNameRegistry.persist_name` belongs on the class. Name records persist via
+  existing `kv_state` component `name_registry`, not a new table.
+- `DHTNode._hydrate_from_persistence` must call `name_registry.hydrate_from_persistence`
+  the same way it hydrates economy/governance/citizens.
+- `PANPersonalDataStore` wrote messages and call logs to sqlite but did not
+  reload them into memory; hydrate now loads those tables.
+- Unused `sdk_adapter.py` was a forbidden identity wrapper. Deleted.
+- Project verification is `python3 test/run_pan_gate.py`. Pytest is not the
+  gate.
+
+### Evidence
+
+- `python3 test/run_pan_gate.py` exit 0, 2026-09-11, 2.037s.
+- `results/pan_gate_20260911_030722.json`
+- `results/pan_sdk_system_test_20260911_030723.txt`
+
+### Boundary
+
+- Green civic persistence is not Thyris VM proof and not inference proof.
+- filetree.md is generated and now stale.
+
+### Retrieval anchors
+
+- SCOPE.md
+- SOTA_RUN.md
+- PAN_SDK/PAN_SDK.py
+- test/run_pan_gate.py
+- STATE.md
+
 ## 2026-09-10 — Cursor-native PAN execution control plane
 
 **Keys:** Cursor · .cursor/rules · Somnus Code Forge · direct edit ·

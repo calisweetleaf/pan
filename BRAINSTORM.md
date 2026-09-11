@@ -7,12 +7,14 @@ evidence-backed decisions to the appropriate authority surface.
 
 - What packaging contract lets the PAN SDK remain a single, locally operated
   product while exposing deliberate application-facing entry points?
-- Which existing sdk/PAN_SDK.py boundaries are stable enough to support the
+- Which existing PAN_SDK/PAN_SDK.py boundaries are stable enough to support the
   whitepaper's future phone, treasury, communications, and persistence lanes
   without a service decomposition?
-- Does the sdk/ versus PAN_SDK import mismatch reflect historical archive
-  extraction, a rename, or an unfinished packaging decision? Inspect lineage
-  before selecting a repair.
+
+## Resolved in exploration (promoted)
+
+- `sdk/` versus `PAN_SDK` import mismatch: the consumed contract was `PAN_SDK`.
+  Directory renamed 2026-09-11. See ANTITHESIS.md and STATE.md.
 
 ## Constraints for exploration
 

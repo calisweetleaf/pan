@@ -162,6 +162,24 @@ class PANPersistenceStore:
                 for row in cursor
             ]
 
+    def store_name(self, name_data: Dict[str, Any]) -> bool:
+        """Persist a PAN name-registration record into kv_state component name_registry."""
+        if not isinstance(name_data, dict) or "name" not in name_data:
+            raise ValueError("store_name requires a mapping that includes a 'name' key")
+        name = name_data["name"]
+        if not isinstance(name, str) or not name.strip():
+            raise ValueError("store_name requires a non-empty name string")
+        self.write_state("name_registry", name, name_data)
+        self.append_journal("name_registry", "persist", {"name": name})
+        return True
+
+    def get_name(self, name: str) -> Optional[Dict[str, Any]]:
+        """Load one persisted name-registration record, or None if absent."""
+        if not isinstance(name, str) or not name:
+            raise ValueError("get_name requires a non-empty name string")
+        return self.read_state("name_registry", name)
+
+
 
 class SovereignIdentity:
     """
@@ -696,6 +714,8 @@ class DHTNode:
             self.economic_engine.hydrate_from_persistence()
         if self.governance_council and hasattr(self.governance_council, 'hydrate_from_persistence'):
             self.governance_council.hydrate_from_persistence()
+        if self.name_registry and hasattr(self.name_registry, 'hydrate_from_persistence'):
+            self.name_registry.hydrate_from_persistence()
 
     def get_key_hash(self, key: str) -> str:
         """Return the PAN hash-space key for a piece of content."""
@@ -916,8 +936,33 @@ class PANNameRegistry:
         self.persistence = persistence
         self.name_registry = {}  # name -> registration record
         self.reverse_lookup = {}  # identity_hash -> names
-        
+        self.hydrate_from_persistence()
         logger.info("PANNameRegistry initialized")
+
+    def _require_persistence(self) -> PANPersistenceStore:
+        store = self.persistence or getattr(self.dht_node, "persistence", None)
+        if store is None:
+            raise RuntimeError("PANNameRegistry requires a PANPersistenceStore")
+        return store
+
+    def hydrate_from_persistence(self) -> None:
+        """Rebuild in-memory name maps from kv_state component name_registry."""
+        store = self.persistence or getattr(self.dht_node, "persistence", None)
+        if store is None:
+            return
+        stored = store.load_component("name_registry")
+        if not stored:
+            return
+        self.name_registry = {}
+        self.reverse_lookup = {}
+        for name, payload in stored.items():
+            if not isinstance(payload, dict):
+                raise TypeError(f"Persisted name record for {name!r} is not a mapping")
+            self.name_registry[name] = payload
+            target_identity = payload.get("target_identity")
+            if target_identity:
+                self.reverse_lookup.setdefault(target_identity, set()).add(name)
+        logger.debug("Hydrated %s name registrations from persistence", len(self.name_registry))
     
     def register_name(self, name: str, target_identity: str, 
                      service_endpoint: str = None, metadata: Dict[str, Any] = None) -> bool:
@@ -952,7 +997,7 @@ class PANNameRegistry:
             if target_identity not in self.reverse_lookup:
                 self.reverse_lookup[target_identity] = set()
             self.reverse_lookup[target_identity].add(name)
-            
+            self.persist_name(name)
             logger.info(f"Successfully registered name {name} for identity {target_identity[:12]}")
             return True
         else:
@@ -1016,24 +1061,25 @@ class PANNameRegistry:
         success = self.dht_node.store(name_key, registration, require_consensus=True)
         
         if success:
+            self.persist_name(name)
             logger.info(f"Deregistered name {name}")
             return True
         else:
             logger.error(f"Failed to deregister name {name} in DHT")
             return False
 
-def persist_name(self, name: str) -> bool:
+    def persist_name(self, name: str) -> bool:
         """Persist a name registration to the database."""
         if name not in self.name_registry:
             logger.warning(f"Cannot persist unknown name: {name}")
             return False
-        
+
         name_data = self.name_registry[name].copy()
-        return self.dht_node.persistence.store_name(name_data)
-    
+        return self._require_persistence().store_name(name_data)
+
     def load_name_from_db(self, name: str) -> Optional[Dict[str, Any]]:
         """Load a name registration from the database."""
-        name_data = self.dht_node.persistence.get_name(name)
+        name_data = self._require_persistence().get_name(name)
         if name_data:
             # Store in memory
             self.name_registry[name] = name_data
@@ -1041,7 +1087,7 @@ def persist_name(self, name: str) -> bool:
             if target_identity not in self.reverse_lookup:
                 self.reverse_lookup[target_identity] = set()
             self.reverse_lookup[target_identity].add(name)
-            
+
             logger.debug(f"Loaded name {name} from database")
             return name_data
         return None
