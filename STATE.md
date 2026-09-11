@@ -38,6 +38,14 @@ invented alternative.
 
 ## Verified baseline
 
+- **GREEN, 2026-09-11:** finish-prior combined tree
+  (`cursor/finish-prior-wave-d5ba`, PR #5, not merged to main).
+  `python3 test/run_pan_gate.py` exited 0 in 12.707s on Linux Python 3.12.3
+  after merging packet alignment, civic walkthrough, and the inference owner.
+  Civic PoI mint now binds PANLIN01 and re-executes `_run_inference`.
+  Artifacts: `results/pan_gate_20260911_091651.json`,
+  `results/pan_gate_20260911_091651.md`,
+  `results/pan_sdk_system_test_20260911_091638.json`.
 - **GREEN, 2026-09-11:** `python3 test/run_pan_gate.py` exited 0 in 14.016s on
   Linux Python 3.12.3 after landing the real `_run_inference` owner. Slices:
   compile, import, persistence, name_registry, manifest, personal_data,

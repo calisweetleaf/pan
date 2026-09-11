@@ -3,6 +3,29 @@
 Append durable, evidence-backed findings here. Preserve corrections as new dated
 entries instead of erasing historical truth.
 
+## 2026-09-11 — Wave-one branches collapsed off main
+
+**Keys:** PR #5 · `cursor/finish-prior-wave-d5ba` · civic PoI · PANLIN01
+
+**Status:** Combined on an integration branch. Not merged to main.
+
+### Durable findings
+
+- #2 packet alignment, #3 civic walkthrough, and #4 inference owner had no
+  overlapping files. Git merges were clean.
+- Civic mint still called `build_proof(..., output="commitment-civic-1")`.
+  After the inference owner, that canned output fails PoI re-execution.
+  The scenario now writes PANLIN01 weights, binds the engine, and mints
+  against real decode. Mail stays explicitly constructed, not auto-bound.
+- `.cursor/` packets still name `_run_inference` as the next unit even though
+  this combined tree contains that owner. That leftover was not rewritten.
+
+### Evidence
+
+- `python3 test/run_pan_gate.py` exit 0, 12.707s, Linux 3.12.3
+- `results/pan_gate_20260911_091651.json`
+- `results/pan_sdk_system_test_20260911_091638.json`
+
 ## 2026-09-11 — Real _run_inference owner (PANLIN01 integer decoder)
 
 **Keys:** SovereignInferenceEngine · `_run_inference` · ProofOfInference ·
