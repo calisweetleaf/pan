@@ -1,0 +1,40 @@
+email_social consumer start 20260910_234327
+
+========================================================================
+CHECK: sealed_mail_across_relays
+========================================================================
+published mail packet=3797f929539dabdbdcccbd565502b006ad6190845145d35a4f7cfc954b775977 relays=2
+bob opened subject='treasury-cycle' body='mint proof attached off-wire'
+stranger correctly failed: sealed envelope is not addressed to this identity
+receipt packet=09e72d1ae2d1ddd80d75a3f1bb1ae3834ba9266442539a169d27f973353fa8d1
+PASS sealed_mail_across_relays
+
+========================================================================
+CHECK: legacy_ip_rejected
+========================================================================
+routing rejected: legacy routing key forbidden: destination_ip
+address rejected: legacy IP value in address
+PASS legacy_ip_rejected
+
+========================================================================
+CHECK: relay_blocks_unsigned_and_routing
+========================================================================
+forged signature rejected: packet signature is invalid
+next_hop rejected: legacy routing key forbidden: next_hop
+PASS relay_blocks_unsigned_and_routing
+
+========================================================================
+CHECK: social_and_knock
+========================================================================
+social packet=dc1903f33172d993743a059ddbf2bc2c1f66ea96938a1bfb818c3b76ad62cb9b
+bea saw text='citizen assembly at dusk'
+live knocks=1 expires=2026-09-11T04:43:29.099818+00:00
+after ttl knocks=0 dropped=2
+PASS social_and_knock
+
+========================================================================
+CHECK: restart_hydrates_relay
+========================================================================
+reopened inbox=1 body=persist-me
+PASS restart_hydrates_relay
+email_social consumer status=pass

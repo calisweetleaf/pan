@@ -3,6 +3,114 @@
 Append durable, evidence-backed findings here. Preserve corrections as new dated
 entries instead of erasing historical truth.
 
+## 2026-09-10 — Nation pillars: treasury FSM, email/social relays, CRDT master_db
+
+**Keys:** SovereignTreasury · ProofOfInference · EmailSocialNode · StatelessRelay ·
+MasterDatabase · CRDT
+
+**Status:** LANDED
+
+### Durable findings
+
+- Treasury is a rigid FSM, not a contract VM. Forbidden solidity/evm/wasm keys
+  fail at submit. Genesis requires three validators. Quorum is `(n+1)//2 + 1`
+  (ceil(n/2)+1). Mint requires deterministic PoI re-execution until a real
+  `_run_inference` owner exists. `burn_tokens` lives on `PANEconomicEngine`
+  so the Fed cannot own a second supply ledger.
+- Email/social addresses by `pan:id:<identity_hash>`. Relays verify signatures
+  and stay blind. Mail is AES-256-GCM plus RSA-OAEP. `open_sealed` is on
+  `SovereignIdentity` because only that object holds the RSA private key.
+  `SovereignCommunicator.verify_packet` ignores a False return from
+  `verify_signature`; overlay verification uses `verify_overlay_packet` and
+  does not trust that helper.
+- EmailSocialNode is constructed explicitly with a firewall. Binding it onto
+  every DHTNode would open a second sqlite handle and break Windows
+  TemporaryDirectory cleanup.
+- MasterDatabase LWW documents, G-counters, and OR-sets join through
+  PANPersistenceStore. Page hashes skip identical replicas. DHTNode binds it
+  on the same connection.
+
+### Evidence
+
+- `python test/run_pan_gate.py` exit 0, 13.515s, 2026-09-10
+- `results/pan_gate_20260910_235116.json`
+- `test/treasury/runs/20260910_235125/result.json` (5/5)
+- `test/email_social/runs/20260910_235128/result.json` (5/5)
+- `test/master_db/runs/20260910_235129/result.json` (4/4)
+- `verify_sota.py` PASS on treasury.py, email_social.py, master_db.py
+
+### Boundary
+
+- Thyris VM owners still absent.
+- `_run_inference` still a placeholder.
+- Orama / vector spaces not implemented.
+- USMS as a file is not SOTA++ (pre-existing broad Exception handlers).
+
+### Retrieval anchors
+
+- SCOPE.md
+- SOTA_RUN.md
+- PAN_SDK/treasury.py
+- PAN_SDK/email_social.py
+- PAN_SDK/master_db.py
+- STATE.md
+
+## 2026-09-10 — Planetary immune system: USMS + firewall + PAN bulletins
+
+**Keys:** PlanetaryImmuneSystem · SovereignFirewall · USMS · THREAT_MEMORY_BULLETIN ·
+ThreatIntelligenceCoordinator
+
+**Status:** LANDED
+
+### Durable findings
+
+- Gemini's memory keystone is correct in function and wrong in one fact: USMS
+  and PAN do **not** share the same `SovereignIdentity` cryptography. USMS is
+  Ed25519; PAN is RSA-2048. The immune system binds both and signs bulletins
+  twice.
+- `ThreatIntelligenceCoordinator` is now `PlanetaryImmuneSystem`. Ephemeral
+  `intelligence_database` RAM is gone. Restart recovers EVENT/BELIEF nodes.
+- Security owns the firewall at `security/sovereign_firewall.py`. The demo
+  `PAN_SDK/sovereign_firewall.py` (print + mock .lacka size string) was deleted,
+  not wrapped. inspect_content may compress-then-sign; inspect_packet never
+  mutates a signed packet.
+- PAN_MESH lane lets threat bulletins name adversaries. EGRESS_LEGACY still
+  drops tracker dictionary/regex hits, secret plaintext, and ISP routing keys.
+- High-confidence beliefs (>= 0.75) wrap as `THREAT_MEMORY_BULLETIN`, pass the
+  firewall, store on DHTNode, and a second node ingests after both signature
+  checks.
+- Failed countermeasures write a CONTRADICTION-linked EVENT. Three campaign
+  vectors quantum-entangle.
+- USMS `BinaryStorageManager._atomic_write` used POSIX directory fds. That is
+  a mechanical Windows defect (`os.open(dir, O_RDONLY)` -> Permission denied).
+  File fsync + `os.replace` is kept; directory fsync is POSIX-only.
+
+### Evidence
+
+- `python test/immune/test_planetary_immune_system.py` 9/9 PASS
+- `python test/run_pan_gate.py` exit 0, 6.730s, 2026-09-10
+- `test/immune/runs/20260910_225924/result.json`
+- `results/pan_gate_20260910_225918.json`
+- `verify_sota.py` PASS on firewall and immune modules
+
+### Boundary
+
+- treasury.py / email_social.py / master_db.py landed later the same day;
+  see the 2026-09-10 nation-pillars entry.
+- USMS as a file is not SOTA++ (pre-existing broad Exception handlers).
+- Offensive ROE Level 4 against external hosts was not implemented and is not
+  authorized by this landing.
+
+### Retrieval anchors
+
+- SCOPE.md
+- SOTA_RUN.md
+- security/planetary_immune_system.py
+- security/sovereign_firewall.py
+- memory/unified_memory_system.py
+- test/immune/test_planetary_immune_system.py
+- STATE.md
+
 ## 2026-09-11 — Package rename, name kv persistence, direct gate
 
 **Keys:** PAN_SDK · persist_name · store_name · name_registry · run_pan_gate.py ·

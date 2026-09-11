@@ -1,0 +1,26 @@
+{
+  "version": "0.4",
+  "date": "2026-09-10",
+  "author": "daeron",
+  "summary": "Nostr-inspired email/social overlay composed onto UnifiedDataPacket and SovereignFirewall.",
+  "domains": {
+    "email_social": {
+      "module": "PAN_SDK/email_social.py",
+      "wrapper": null,
+      "tool_count": 1,
+      "provenance": "whitepaper section 5 + SovereignIdentity.open_sealed + SovereignFirewall",
+      "edits": [
+        {
+          "date": "2026-09-10",
+          "author": "daeron",
+          "summary": "Add open_sealed so hybrid envelopes unwrap at the identity owning seam.",
+          "files": [
+            "PAN_SDK/PAN_SDK.py",
+            "PAN_SDK/email_social.py"
+          ],
+          "justification_ref": "SCOPE.md"
+        }
+      ]
+    }
+  }
+}

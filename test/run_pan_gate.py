@@ -23,6 +23,10 @@ if str(ROOT_DIR) not in sys.path:
 if str(CURRENT_DIR) not in sys.path:
     sys.path.insert(1, str(CURRENT_DIR))
 
+from immune.test_planetary_immune_system import run as run_immune
+from treasury.test_sovereign_treasury import run as run_treasury
+from email_social.test_email_social import run as run_email_social
+from master_db.test_master_db import run as run_master_db
 from test_pan_persistence import run as run_persistence
 from test_pan_manifest import run as run_manifest
 from probe_name_registry import run as run_name_registry
@@ -34,8 +38,13 @@ COMPILE_TARGETS = (
     ROOT_DIR / "PAN_SDK" / "PAN_SDK.py",
     ROOT_DIR / "PAN_SDK" / "personal_data.py",
     ROOT_DIR / "PAN_SDK" / "citizen_simulator.py",
-    ROOT_DIR / "PAN_SDK" / "sovereign_firewall.py",
     ROOT_DIR / "PAN_SDK" / "__init__.py",
+    ROOT_DIR / "PAN_SDK" / "treasury.py",
+    ROOT_DIR / "PAN_SDK" / "email_social.py",
+    ROOT_DIR / "PAN_SDK" / "master_db.py",
+    ROOT_DIR / "security" / "sovereign_firewall.py",
+    ROOT_DIR / "security" / "planetary_immune_system.py",
+    ROOT_DIR / "memory" / "unified_memory_system.py",
 )
 
 SKIPPED_COMPILE = (
@@ -186,6 +195,10 @@ def main() -> int:
         run_manifest,
         run_personal_data,
         slice_scenario,
+        run_immune,
+        run_treasury,
+        run_email_social,
+        run_master_db,
     ]
     for runner in runners:
         _print_banner(f"RUNNING {getattr(runner, '__name__', runner)}")

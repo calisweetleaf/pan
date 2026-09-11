@@ -1,0 +1,27 @@
+{
+  "version": "0.3",
+  "date": "2026-09-10",
+  "author": "daeron",
+  "summary": "Sovereign Treasury FSM composed onto PAN persistence and the economic ledger.",
+  "domains": {
+    "treasury": {
+      "module": "PAN_SDK/treasury.py",
+      "wrapper": null,
+      "tool_count": 1,
+      "provenance": "whitepaper section 4 + PANEconomicEngine + PANPersistenceStore",
+      "edits": [
+        {
+          "date": "2026-09-10",
+          "author": "daeron",
+          "summary": "Add burn_tokens and bind SovereignTreasury on DHTNode so mint/burn/distribute share one supply ledger.",
+          "files": [
+            "PAN_SDK/treasury.py",
+            "PAN_SDK/PAN_SDK.py",
+            "PAN_SDK/__init__.py"
+          ],
+          "justification_ref": "SCOPE.md"
+        }
+      ]
+    }
+  }
+}

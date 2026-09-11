@@ -1,0 +1,26 @@
+{
+  "version": "0.5",
+  "date": "2026-09-10",
+  "author": "daeron",
+  "summary": "Offline-first CRDT master database composed onto PANPersistenceStore.",
+  "domains": {
+    "master_db": {
+      "module": "PAN_SDK/master_db.py",
+      "wrapper": null,
+      "tool_count": 1,
+      "provenance": "whitepaper section 6 + PANPersistenceStore + DHTNode",
+      "edits": [
+        {
+          "date": "2026-09-10",
+          "author": "daeron",
+          "summary": "Bind MasterDatabase on DHTNode so the CRDT pool shares the civic sqlite connection.",
+          "files": [
+            "PAN_SDK/master_db.py",
+            "PAN_SDK/PAN_SDK.py"
+          ],
+          "justification_ref": "SCOPE.md"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "name": "planetary_immune_system",
+  "passed": false,
+  "status": "fail",
+  "pass_count": 6,
+  "fail_count": 3,
+  "skip_count": 0,
+  "elapsed_seconds": 0.8949122428894043,
+  "checks": [
+    {
+      "name": "firewall_blocks_telemetry",
+      "status": "pass",
+      "detail": {
+        "telemetry_reason": "telemetry_dictionary",
+        "telemetry_ledger_rows": 1
+      }
+    },
+    {
+      "name": "firewall_allows_civic_chat",
+      "status": "pass",
+      "detail": {
+        "civic_chat_allowed": true
+      }
+    },
+    {
+      "name": "inspect_content_compresses_secrets",
+      "status": "pass",
+      "detail": {
+        "compressed_bytes": 65,
+        "original_bytes": 59
+      }
+    },
+    {
+      "name": "signed_secret_packet_is_blocked",
+      "status": "pass",
+      "detail": {
+        "signed_secret_blocked": true
+      }
+    },
+    {
+      "name": "identity_blocklist",
+      "status": "pass",
+      "detail": {
+        "blocked_identity": "7f7da5fbfff6"
+      }
+    },
+    {
+      "name": "legacy_ip_routing_blocked",
+      "status": "pass",
+      "detail": {
+        "routing_blocked": true
+      }
+    },
+    {
+      "name": "memory_survives_restart",
+      "status": "fail",
+      "error": "PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\\\Users\\\\trent\\\\AppData\\\\Local\\\\Temp\\\\immune_restart_cmual6bi\\\\usms\\\\memory_store\\\\logs\\\\unified_sovereign_memory.log'",
+      "detail": {}
+    },
+    {
+      "name": "peer_ingests_bulletin",
+      "status": "fail",
+      "error": "PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\\\Users\\\\trent\\\\AppData\\\\Local\\\\Temp\\\\immune_mesh_lh7u3hi3\\\\alpha\\\\usms\\\\memory_store\\\\logs\\\\unified_sovereign_memory.log'",
+      "detail": {}
+    },
+    {
+      "name": "contradiction_and_campaign_entangle",
+      "status": "fail",
+      "error": "PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\\\Users\\\\trent\\\\AppData\\\\Local\\\\Temp\\\\immune_campaign_00s9qu0h\\\\usms\\\\memory_store\\\\logs\\\\unified_sovereign_memory.log'",
+      "detail": {}
+    }
+  ],
+  "error": "3 immune checks failed",
+  "artifacts": {
+    "json": "C:\\Users\\trent\\pan\\test\\immune\\runs\\20260910_225648\\result.json",
+    "md": "C:\\Users\\trent\\pan\\test\\immune\\runs\\20260910_225648\\result.md",
+    "log": "C:\\Users\\trent\\pan\\test\\immune\\runs\\20260910_225648\\result.log",
+    "run_dir": "C:\\Users\\trent\\pan\\test\\immune\\runs\\20260910_225648"
+  }
+}

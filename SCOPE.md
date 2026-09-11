@@ -1,34 +1,28 @@
-# SCOPE — PAN first-run runtime unblock
+# SCOPE — Master database CRDT pool
 
-**Mode:** EDIT
-**Packet:** make the live PAN SDK import, persist civic state, reload it, and fail loud
-**Date:** 2026-09-11
+## Engagement Mode
+
+- mode: COMPOSE
+- target_module: PAN_SDK/master_db.py
+- target_module_provenance: whitepaper section 6 + PANPersistenceStore
+- justification: I am composing the nation's offline-first CRDT sqlite pool as the canon single-file master_db monolith. Documents, G-counters, and OR-sets join by commutative, associative, idempotent merge on the existing PANPersistenceStore. A wrapper around kv_state would duplicate the join. DHTNode binds MasterDatabase on the same sqlite connection so civic hydrate includes the national store without a second database engine.
+- author: daeron
+- date: 2026-09-10
 
 ## Targets
 
 | Target | Owner | Consumed boundary |
 |---|---|---|
-| `sdk/` → `PAN_SDK/` | package layout already claimed by every consumer | `from PAN_SDK import ...`, `from PAN_SDK.PAN_SDK import ...`, `from PAN_SDK.personal_data import ...` |
-| `PAN_SDK/PAN_SDK.py` | `PANPersistenceStore`, `PANNameRegistry`, `DHTNode` | name register → kv `name_registry` → hydrate after reopen |
-| `PAN_SDK/personal_data.py` | `PANPersonalDataStore` | contacts, messages, call logs, preferences reload from sqlite |
-| `test/run_pan_gate.py` | project gate | real tempdir/SQLite consumers, JSON + Markdown artifacts |
+| `PAN_SDK/master_db.py` | MasterDatabase | LWW docs, G-counter, OR-set, page-hash sync |
+| `PAN_SDK/PAN_SDK.py` | DHTNode.master_db | same persistence connection, no extra sqlite |
+| `test/master_db/test_master_db.py` | direct consumer | two offline nodes converge; three-way associativity |
 
-## Direct-edit justification
+## Direct-edit justification (PAN_SDK.py only)
 
-The consumed import contract is already `PAN_SDK`. The folder name `sdk/` is the defect. Renaming the owned package is a direct edit of the live topology, not a shim, PYTHONPATH hack, or proxy package.
+Binding `MasterDatabase` onto `DHTNode` is the same seam as treasury. The CRDT must not open a second sqlite engine beside `PANPersistenceStore`.
 
-`persist_name` / `load_name_from_db` already call `store_name` / `get_name`. Those methods are missing. Civic engines already persist through `kv_state`. Completing `name_registry` on that store is the same seam, not a new persistence architecture.
+## Out of scope this unit
 
-`PAN_SDK/sdk_adapter.py` is an unreferenced identity wrapper plus fake API keys. It duplicates `SovereignIdentity` and is the wrapper grammar this repository forbids. It is deleted, not repaired.
-
-## WRAP (existing, unchanged)
-
-`PAN_SDK/API.py` remains the importlib loader for `API.server.py` because a module filename containing a dot is a real import-boundary constraint. It must not grow domain logic.
-
-## Out of scope
-
-- Thyris QEMU / `vm_supervisor` / `memory_system`
-- Agnostic model inference service
-- Rewriting `PLAN.md`
-- `security/` lane
-- Rewriting historical `results/pan_sdk_system_test_20251002_005512.txt`
+- Orama dashboard / 1536-d vector spaces (named in the whitepaper, not this consumed path)
+- Thyris VM owners
+- sqlite3_rsync binary; page hashes are implemented in-process

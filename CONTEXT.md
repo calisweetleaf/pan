@@ -16,6 +16,41 @@ source inspection or STATE.md.
 - NOTEPAD.md — current scratch, non-canonical.
 - security/AGENTS.md + security/rules_of_engagement.md — security lane.
 
+## 2026-09-10 — Nation pillars landed (treasury, email_social, master_db)
+
+**Keys:** SovereignTreasury · EmailSocialNode · MasterDatabase · Proof-of-Inference · CRDT
+
+- **State:** The three whitepaper monoliths are consumed: Fed FSM with PoI and
+  quorum, Nostr-inspired sealed relays over UnifiedDataPacket, and an
+  offline-first CRDT join on PANPersistenceStore. Gate includes all three
+  slices plus the immune system and is green on Windows.
+- **Authority:** STATE.md; SOTA_RUN.md; results/pan_gate_20260910_235116.json;
+  test/treasury/runs/20260910_235125/result.json;
+  test/email_social/runs/20260910_235128/result.json;
+  test/master_db/runs/20260910_235129/result.json.
+- **Boundary:** EmailSocialNode is not auto-bound on DHTNode (firewall sqlite).
+  MasterDatabase shares PANPersistenceStore. PoI still re-executes a
+  deterministic commitment until `_run_inference` exists.
+- **Then inspect:** PAN_SDK/treasury.py, PAN_SDK/email_social.py,
+  PAN_SDK/master_db.py.
+- **Open:** Thyris VM owners; real inference; FileTree Pro regeneration.
+
+## 2026-09-10 — Planetary immune system landed
+
+**Keys:** PlanetaryImmuneSystem · SovereignFirewall · USMS · THREAT_MEMORY_BULLETIN
+
+- **State:** Security owns the packet border. Threat intelligence persists in
+  USMS and high-confidence beliefs broadcast on the PAN DHT. Gate includes the
+  immune slice and is green on Windows.
+- **Authority:** STATE.md; SOTA_RUN.md; results/pan_gate_20260910_225918.json;
+  test/immune/runs/20260910_225924/result.json.
+- **Boundary:** treasury/email_social/master_db monoliths were still absent at
+  immune landing; they landed later the same day. PAN RSA identity and USMS
+  Ed25519 identity remain distinct.
+- **Then inspect:** security/planetary_immune_system.py,
+  security/sovereign_firewall.py, test/immune/test_planetary_immune_system.py.
+- **Open:** Thyris VM owners; FileTree Pro regeneration.
+
 ## 2026-09-11 — PAN package and name persistence unblocked
 
 **Keys:** PAN_SDK/ · persist_name · store_name · name_registry · run_pan_gate.py
@@ -64,6 +99,12 @@ SCOPE.md · SOTA_RUN.md
 |---|---|---|
 | PAN monolith | identity, ledger, citizen, economy, governance, policy, persistence | PAN_SDK/PAN_SDK.py |
 | personal data | local personal records surface | PAN_SDK/personal_data.py |
+| treasury | Fed FSM, PoI mint, quorum execute | PAN_SDK/treasury.py |
+| email/social | identity-addressed sealed relays | PAN_SDK/email_social.py |
+| master db | CRDT join over local sqlite | PAN_SDK/master_db.py |
+| immune system | USMS EVENT/BELIEF + firewall + PAN threat bulletins | security/planetary_immune_system.py |
+| packet border | fail-closed dictionary/regex/SQLite inspection | security/sovereign_firewall.py |
+| unified memory | signed Ed25519 memory DAG | memory/unified_memory_system.py |
 | Thyris V1 | phone orchestration lane; import blocked on missing VM owners | telecom/phone_orchestrator.py |
 | security | ROE-governed defensive lane | security/ |
 | lineage | non-runtime historical designs | reference-code/, archives/, results/ |

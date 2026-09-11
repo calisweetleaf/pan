@@ -1,0 +1,33 @@
+master_db consumer start 20260910_235058
+
+========================================================================
+CHECK: offline_nodes_converge
+========================================================================
+before A docs=['citizen:ann'] ctr={'inference_cycles': 4}
+before B docs=['citizen:bea'] ctr={'inference_cycles': 7}
+sync pages left<-right=3 right<-left=3
+after A={'documents': {'citizen:ann': {'role': 'chair', 'tokens': 1}, 'citizen:bea': {'role': 'verifier', 'tokens': 2}}, 'counters': {'inference_cycles': 11}, 'sets': {'validators': ['ann', 'bea']}}
+after B={'documents': {'citizen:ann': {'role': 'chair', 'tokens': 1}, 'citizen:bea': {'role': 'verifier', 'tokens': 2}}, 'counters': {'inference_cycles': 11}, 'sets': {'validators': ['ann', 'bea']}}
+PASS offline_nodes_converge
+
+========================================================================
+CHECK: join_algebra
+========================================================================
+commutative snapshot docs={'from_a': 1, 'from_b': 2}
+associative left={'from_a': 1, 'from_b': 2, 'from_c': 3} right={'from_a': 1, 'from_b': 2, 'from_c': 3}
+PASS join_algebra
+
+========================================================================
+CHECK: tombstone_and_orset_remove
+========================================================================
+sync pages left<-right=0 right<-left=2
+sync pages left<-right=2 right<-left=2
+after tombstone A.get=None members=set()
+PASS tombstone_and_orset_remove
+
+========================================================================
+CHECK: dht_bind_and_restart
+========================================================================
+reopened policy={'emission': 1} cycles=3
+PASS dht_bind_and_restart
+master_db consumer status=pass

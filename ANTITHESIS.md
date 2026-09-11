@@ -25,6 +25,20 @@ take unless Daeron explicitly changes the product thesis.
   import-only test does not prove a working PAN integration.
 - **Security theater:** do not log secrets, claim air-gap status without
   evidence, or turn security code into uncontrolled external action.
+- **Ephemeral threat intelligence:** do not store combat memory in process
+  dictionaries or queues that die on restart. USMS is the local substrate;
+  PAN `UnifiedDataPacket` + DHT is the mesh. A wrapper that copies USMS
+  persistence into a second store is rejected.
+- **Identity collapse:** do not pretend PAN RSA `SovereignIdentity` and USMS
+  Ed25519 `SovereignIdentity` are the same type. Bind them; do not forge a
+  single key class without an explicit decision and tests.
+- **Email overlay on every DHTNode:** do not auto-construct `EmailSocialNode`
+  (and its firewall sqlite) inside `DHTNode.__init__`. Civic tests use
+  TemporaryDirectory; an extra unclosed sqlite handle fails Windows cleanup.
+  Relays stay blind; they are not content moderators.
+- **Second sqlite engine for CRDTs:** `MasterDatabase` joins through
+  `PANPersistenceStore`. A parallel sqlite connection for the national store
+  is a split-brain waiting to happen.
 
 ## Current explicit boundaries
 

@@ -1,0 +1,57 @@
+{
+  "name": "master_db",
+  "passed": true,
+  "status": "pass",
+  "pass_count": 4,
+  "fail_count": 0,
+  "skip_count": 0,
+  "elapsed_seconds": 1.2299854755401611,
+  "checks": [
+    {
+      "name": "offline_nodes_converge",
+      "status": "pass",
+      "detail": {
+        "counter": 11,
+        "docs": [
+          "citizen:ann",
+          "citizen:bea"
+        ]
+      }
+    },
+    {
+      "name": "join_algebra",
+      "status": "pass",
+      "detail": {
+        "commutative": true,
+        "associative": true,
+        "idempotent": true
+      }
+    },
+    {
+      "name": "tombstone_and_orset_remove",
+      "status": "pass",
+      "detail": {
+        "tombstone": true
+      }
+    },
+    {
+      "name": "dht_bind_and_restart",
+      "status": "pass",
+      "detail": {
+        "before": {
+          "emission": 1
+        },
+        "after": {
+          "emission": 1
+        },
+        "cycles": 3
+      }
+    }
+  ],
+  "artifacts": {
+    "json": "C:\\Users\\trent\\pan\\test\\master_db\\runs\\20260910_235058\\result.json",
+    "md": "C:\\Users\\trent\\pan\\test\\master_db\\runs\\20260910_235058\\result.md",
+    "log": "C:\\Users\\trent\\pan\\test\\master_db\\runs\\20260910_235058\\result.log",
+    "run_dir": "C:\\Users\\trent\\pan\\test\\master_db\\runs\\20260910_235058"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "name": "sovereign_treasury",
+  "passed": true,
+  "status": "pass",
+  "pass_count": 5,
+  "fail_count": 0,
+  "skip_count": 0,
+  "elapsed_seconds": 1.0812382698059082,
+  "checks": [
+    {
+      "name": "genesis_rejects_mint",
+      "status": "pass",
+      "detail": {
+        "state": "GENESIS"
+      }
+    },
+    {
+      "name": "seal_genesis_and_contract_reject",
+      "status": "pass",
+      "detail": {
+        "state": "MINT_PHASE",
+        "quorum": 3
+      }
+    },
+    {
+      "name": "poi_mint_requires_quorum",
+      "status": "pass",
+      "detail": {
+        "minted_balance": 40,
+        "packet_id": "8e36617b4b0489fffb686948627e6c360819e273cf0198011bb7e7b0b4fcedcd"
+      }
+    },
+    {
+      "name": "distribute_and_burn_and_halts",
+      "status": "pass",
+      "detail": {
+        "final_state": "CRITICAL_SUSPEND",
+        "supply": 90,
+        "citizen_balance": 15
+      }
+    },
+    {
+      "name": "restart_hydrates_fsm",
+      "status": "pass",
+      "detail": {
+        "state_before": "MINT_PHASE",
+        "chair_before": "8a912176b2041c3eed86537fd295d2f826684deb549d313d34aea44ebea69396",
+        "state_after": "MINT_PHASE",
+        "validators_after": 3
+      }
+    }
+  ],
+  "artifacts": {
+    "json": "C:\\Users\\trent\\pan\\test\\treasury\\runs\\20260910_233006\\result.json",
+    "md": "C:\\Users\\trent\\pan\\test\\treasury\\runs\\20260910_233006\\result.md",
+    "log": "C:\\Users\\trent\\pan\\test\\treasury\\runs\\20260910_233006\\result.log",
+    "run_dir": "C:\\Users\\trent\\pan\\test\\treasury\\runs\\20260910_233006"
+  }
+}

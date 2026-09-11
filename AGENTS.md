@@ -3,7 +3,7 @@
 **Repository:** /home/daeron/LAB/Experiments/projects/pan-sdk
 **Classification:** internal research; offline-first, SQLite-backed
 **Product thesis:** the Planetary Autonomous Network is a sovereign digital-country substrate. It is not a generic web application, microservice estate, or adapter collection.
-**Packet updated:** 2026-09-11
+**Packet updated:** 2026-09-10
 **Current runtime state:** STATE.md
 
 ## Authority and entry
@@ -30,7 +30,7 @@ Do not bulk-read the repository or create a plan that assumes an unlocated compo
 ## Architecture: preserve the real seams
 
 - The product follows the production-grade monolith doctrine. Do not split it into microservices, introduce distributed infrastructure, or create folder scaffolding to evade integration.
-- Existing production topology is authoritative: PAN_SDK/, telecom/, security/, test/, and tools/. Do not relocate it merely to fit an external template.
+- Existing production topology is authoritative: PAN_SDK/, telecom/, security/, memory/, test/, and tools/. Do not relocate it merely to fit an external template.
 - Work directly at the stable owning seam. A wrapper is allowed only when a real external implementation and a narrow, durable adaptation boundary already exist.
 - Never create a wrapper, shim, proxy, compatibility layer, parallel implementation, or alternate package merely to avoid editing the owned module. A wrapper that duplicates domain logic is rejected.
 - When a direct production edit is justified, use it and preserve provenance. Do not call a thin or incomplete artifact production-ready.
@@ -57,19 +57,26 @@ Do not import a foreign directory layout such as tools/native/ into PAN just to 
 | Surface | Owner / role |
 |---|---|
 | PAN_SDK/PAN_SDK.py | PAN monolith: identity, ledger, citizens, economy, governance, policy, persistence |
+| PAN_SDK/treasury.py | Fed FSM: PoI mint, quorum execute, contract rejection |
+| PAN_SDK/email_social.py | Nostr-inspired sealed mail / social relays over UnifiedDataPacket |
+| PAN_SDK/master_db.py | Offline-first CRDT pool on PANPersistenceStore |
 | PAN_SDK/personal_data.py | local personal-data surface |
+| memory/unified_memory_system.py | signed Ed25519 memory DAG (USMS) |
+| security/sovereign_firewall.py | fail-closed packet border (security-owned) |
+| security/planetary_immune_system.py | USMS EVENT/BELIEF + PAN threat bulletins |
 | telecom/phone_orchestrator.py | Thyris V1 phone orchestration (blocked on missing VM owners) |
 | security/ | defensive sovereignty and ROE-governed security work |
-| test/ | direct gate, persistence/name/manifest/personal probes, system scenario |
+| test/ | direct gate, persistence/name/manifest/personal probes, immune/treasury/email_social/master_db consumers, system scenario |
 | reference-code/ | historical lineage; not imported runtime code |
 | archives/, results/ | historical evidence; do not rewrite old artifacts |
 
 ## Known baseline and decision boundaries
 
 - Package directory is `PAN_SDK/`. That is the consumed import contract, not an open layout debate.
-- `python3 test/run_pan_gate.py` is the current verified gate; see STATE.md.
+- `python3 test/run_pan_gate.py` is the current verified gate; see STATE.md. It includes immune, treasury, email_social, and master_db slices.
+- Security owns `security/sovereign_firewall.py`. PAN RSA identity and USMS Ed25519 identity are bound, not collapsed.
 - `telecom/phone_orchestrator.py` still cannot import: Thyris `vm_supervisor` / `memory_system` are absent.
-- Historical Windows results are not proof of current behavior.
+- Historical 2025-10-02 Windows results remain historical evidence only. The 2026-09-10 Windows gate is current.
 
 An agent **may** repair a mechanically demonstrated defect that preserves the existing contract, then prove the consumed path. It must stop and present options before choosing among materially different persistence schemas, protocol/service boundaries, publication, deployment, external communications, credential handling, or destructive operations.
 
@@ -81,11 +88,15 @@ The project gate is a direct Python runner (not pytest):
 
 Optional focused consumers:
 
-    python3 test/test_pan_persistence.py
-    python3 test/probe_name_registry.py
-    python3 test/test_pan_manifest.py
-    python3 test/probe_personal_data.py
-    python3 test/pan_sdk_system_scenario.py
+ python3 test/test_pan_persistence.py
+ python3 test/probe_name_registry.py
+ python3 test/test_pan_manifest.py
+ python3 test/probe_personal_data.py
+ python3 test/pan_sdk_system_scenario.py
+ python3 test/immune/test_planetary_immune_system.py
+ python3 test/treasury/test_sovereign_treasury.py
+ python3 test/email_social/test_email_social.py
+ python3 test/master_db/test_master_db.py
 
 A green syntax check is structural evidence only. Do not claim a successful PAN integration without the gate artifact. Never mask a known red baseline with skips, changed assertions, or unreported fallback paths.
 

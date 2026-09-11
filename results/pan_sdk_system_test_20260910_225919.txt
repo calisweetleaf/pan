@@ -1,0 +1,44 @@
+{
+  "operations": {
+    "citizen_id": "16d9a6db-ca3e-5085-958a-54c6e204faa5",
+    "developer_id": "3d72b12d-a80e-5b91-ae36-c2b18d98418a",
+    "app_id": "6d660ba6-50f6-5ed4-99b5-60f5ec722de9",
+    "registered_name": "testname",
+    "proposal_id": "00c89a69-1e68-5f85-8204-4078573eaa0e",
+    "snapshot_sizes": {
+      "dht_data": 12,
+      "dht_ledger": 18,
+      "economy_accounts": 6,
+      "governance_proposals": 1,
+      "governance_policies": 2,
+      "citizens": 2,
+      "applications": 1,
+      "name_registry": 1,
+      "phone_addresses": 1,
+      "pending_transactions": 1,
+      "usage_metrics": 2,
+      "personal_contacts": 1,
+      "personal_messages": 1,
+      "personal_call_logs": 1,
+      "personal_preferences": 10
+    }
+  },
+  "comparisons": {
+    "dht_data": "MATCH",
+    "dht_ledger": "MATCH",
+    "economy_accounts": "MATCH",
+    "governance_proposals": "MATCH",
+    "governance_policies": "MATCH",
+    "citizens": "MATCH",
+    "applications": "MATCH",
+    "name_registry": "MATCH",
+    "phone_addresses": "MATCH",
+    "pending_transactions": "MATCH",
+    "usage_metrics": "MATCH",
+    "personal_contacts": "MATCH",
+    "personal_messages": "MATCH",
+    "personal_call_logs": "MATCH",
+    "personal_preferences": "MATCH"
+  },
+  "passed": true
+}

@@ -1,0 +1,250 @@
+{
+  "gate": "run_pan_gate",
+  "timestamp": "20260910_225918",
+  "passed": true,
+  "elapsed_seconds": 6.729958534240723,
+  "python": "3.14.4 (tags/v3.14.4:23116f9, Apr  7 2026, 14:10:54) [MSC v.1944 64 bit (AMD64)]",
+  "slices": [
+    {
+      "name": "compile",
+      "passed": true,
+      "details": {
+        "compiled": [
+          "PAN_SDK\\PAN_SDK.py",
+          "PAN_SDK\\personal_data.py",
+          "PAN_SDK\\citizen_simulator.py",
+          "PAN_SDK\\__init__.py",
+          "security\\sovereign_firewall.py",
+          "security\\planetary_immune_system.py",
+          "memory\\unified_memory_system.py"
+        ],
+        "skipped": [
+          {
+            "path": "C:\\Users\\trent\\pan\\telecom\\phone_orchestrator.py",
+            "reason": "Thyris vm_supervisor / memory_system owners are not in this repository"
+          }
+        ]
+      }
+    },
+    {
+      "name": "import",
+      "passed": true,
+      "details": {
+        "package": "C:\\Users\\trent\\pan\\PAN_SDK\\__init__.py",
+        "has_persist_name": true,
+        "has_store_name": true,
+        "has_get_name": true,
+        "dht_node": "DHTNode",
+        "identity": "SovereignIdentity",
+        "citizen_simulator": "C:\\Users\\trent\\pan\\PAN_SDK\\citizen_simulator.py"
+      }
+    },
+    {
+      "name": "persistence",
+      "passed": true,
+      "details": {
+        "components": [
+          "dht_data",
+          "dht_ledger",
+          "economy_accounts",
+          "governance_proposals",
+          "governance_policies"
+        ],
+        "matches": {
+          "dht_data": true,
+          "dht_ledger": true,
+          "economy_accounts": true,
+          "governance_proposals": true,
+          "governance_policies": true
+        },
+        "account_count": 3,
+        "proposal_count": 1
+      }
+    },
+    {
+      "name": "name_registry",
+      "passed": true,
+      "details": {
+        "registered": true,
+        "invalid_rejected": true,
+        "unauthorized_rejected": true,
+        "persisted_active": true,
+        "hydrated_name": "testname",
+        "hydrated_target": "512205df47a1c7b1c14f7fa6b3a2e2b97becd0af7fb5b61aa771e5a17b87e2a1",
+        "missing_is_none": true,
+        "store_name_fail_loud": true
+      }
+    },
+    {
+      "name": "manifest",
+      "passed": true,
+      "details": {
+        "valid": true,
+        "tampered": false,
+        "wrong_key": false
+      }
+    },
+    {
+      "name": "personal_data",
+      "passed": true,
+      "details": {
+        "matches": {
+          "contacts": true,
+          "messages": true,
+          "call_logs": true,
+          "preferences": true,
+          "phone_addresses": true
+        },
+        "phone_address": "pan:netlab:motiflab:voice"
+      }
+    },
+    {
+      "name": "system_scenario",
+      "passed": true,
+      "details": {
+        "comparisons": {
+          "dht_data": "MATCH",
+          "dht_ledger": "MATCH",
+          "economy_accounts": "MATCH",
+          "governance_proposals": "MATCH",
+          "governance_policies": "MATCH",
+          "citizens": "MATCH",
+          "applications": "MATCH",
+          "name_registry": "MATCH",
+          "phone_addresses": "MATCH",
+          "pending_transactions": "MATCH",
+          "usage_metrics": "MATCH",
+          "personal_contacts": "MATCH",
+          "personal_messages": "MATCH",
+          "personal_call_logs": "MATCH",
+          "personal_preferences": "MATCH"
+        },
+        "operations": {
+          "citizen_id": "16d9a6db-ca3e-5085-958a-54c6e204faa5",
+          "developer_id": "3d72b12d-a80e-5b91-ae36-c2b18d98418a",
+          "app_id": "6d660ba6-50f6-5ed4-99b5-60f5ec722de9",
+          "registered_name": "testname",
+          "proposal_id": "00c89a69-1e68-5f85-8204-4078573eaa0e",
+          "snapshot_sizes": {
+            "dht_data": 12,
+            "dht_ledger": 18,
+            "economy_accounts": 6,
+            "governance_proposals": 1,
+            "governance_policies": 2,
+            "citizens": 2,
+            "applications": 1,
+            "name_registry": 1,
+            "phone_addresses": 1,
+            "pending_transactions": 1,
+            "usage_metrics": 2,
+            "personal_contacts": 1,
+            "personal_messages": 1,
+            "personal_call_logs": 1,
+            "personal_preferences": 10
+          }
+        },
+        "artifacts": [
+          "C:\\Users\\trent\\pan\\results\\pan_sdk_system_test_20260910_225919.txt",
+          "C:\\Users\\trent\\pan\\results\\pan_sdk_system_test_20260910_225919.json",
+          "C:\\Users\\trent\\pan\\results\\pan_sdk_system_test_20260910_225919.md"
+        ]
+      }
+    },
+    {
+      "name": "planetary_immune_system",
+      "passed": true,
+      "status": "pass",
+      "pass_count": 9,
+      "fail_count": 0,
+      "skip_count": 0,
+      "elapsed_seconds": 5.451821804046631,
+      "checks": [
+        {
+          "name": "firewall_blocks_telemetry",
+          "status": "pass",
+          "detail": {
+            "telemetry_reason": "telemetry_dictionary",
+            "telemetry_ledger_rows": 1
+          }
+        },
+        {
+          "name": "firewall_allows_civic_chat",
+          "status": "pass",
+          "detail": {
+            "civic_chat_allowed": true
+          }
+        },
+        {
+          "name": "inspect_content_compresses_secrets",
+          "status": "pass",
+          "detail": {
+            "compressed_bytes": 65,
+            "original_bytes": 59
+          }
+        },
+        {
+          "name": "signed_secret_packet_is_blocked",
+          "status": "pass",
+          "detail": {
+            "signed_secret_blocked": true
+          }
+        },
+        {
+          "name": "identity_blocklist",
+          "status": "pass",
+          "detail": {
+            "blocked_identity": "0b92512f9333"
+          }
+        },
+        {
+          "name": "legacy_ip_routing_blocked",
+          "status": "pass",
+          "detail": {
+            "routing_blocked": true
+          }
+        },
+        {
+          "name": "memory_survives_restart",
+          "status": "pass",
+          "detail": {
+            "intel_id": "1bc950516579d598",
+            "event_node_id": "1f5d78c3-482a-46b5-92ce-88b6fc7e875b",
+            "belief_node_id": "7cd1774f-c194-4f6f-88b9-3cb7e2d414ee",
+            "bulletin_dht_key": "threat-memory:8773b63fc001df9832aaf009ff8fbcb313f1dfaaf2060c2d5d54174a291fa83f",
+            "restart_hits": 4
+          }
+        },
+        {
+          "name": "peer_ingests_bulletin",
+          "status": "pass",
+          "detail": {
+            "peer_ingested_intel_id": "9777ccc17641673f",
+            "peer_hits": 4,
+            "packet_kind": "THREAT_MEMORY_BULLETIN"
+          }
+        },
+        {
+          "name": "contradiction_and_campaign_entangle",
+          "status": "pass",
+          "detail": {
+            "entanglement_id": "c5cbbeaf-97c6-40fd-816e-5eca16f4311d",
+            "contradiction_node_id": "c189199d-5665-4bff-a5b4-bbdb09c4eadc",
+            "contradictions": 1
+          }
+        }
+      ],
+      "artifacts": {
+        "json": "C:\\Users\\trent\\pan\\test\\immune\\runs\\20260910_225924\\result.json",
+        "md": "C:\\Users\\trent\\pan\\test\\immune\\runs\\20260910_225924\\result.md",
+        "log": "C:\\Users\\trent\\pan\\test\\immune\\runs\\20260910_225924\\result.log",
+        "run_dir": "C:\\Users\\trent\\pan\\test\\immune\\runs\\20260910_225924"
+      }
+    }
+  ],
+  "skipped": [
+    {
+      "path": "C:\\Users\\trent\\pan\\telecom\\phone_orchestrator.py",
+      "reason": "Thyris vm_supervisor / memory_system owners are not in this repository"
+    }
+  ]
+}

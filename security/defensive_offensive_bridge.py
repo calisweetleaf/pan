@@ -12,6 +12,14 @@ Key Features:
 - Real-time threat intelligence sharing between systems
 - Human authorization workflow for high-impact operations
 - Complete audit trail and compliance monitoring
+
+Modified: 2026-09-11
+Modified by: cursor-grok (daeron)
+Justification: I bound ThreatIntelligenceCoordinator to PlanetaryImmuneSystem
+    because the in-process intelligence_database was amnesiac across restarts.
+    Wrapping USMS would have duplicated signed EVENT/BELIEF persistence.
+Provenance: snapshots/v0.2/manifest.json -> domains.immune.edits[0]
+Files: security/defensive_offensive_bridge.py, security/planetary_immune_system.py
 """
 
 import time
@@ -20,12 +28,23 @@ import logging
 import json
 import hashlib
 import uuid
+import sys
+from pathlib import Path
 from typing import Dict, List, Any, Optional, Callable, Set, Tuple
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from queue import Queue, PriorityQueue
 from collections import defaultdict, deque
 import weakref
+
+_ROOT = Path(__file__).resolve().parent.parent
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
+from security.planetary_immune_system import (
+    ImmuneSystemNotBoundError,
+    PlanetaryImmuneSystem,
+)
 
 # Import defensive sovereignty components
 try:
@@ -122,125 +141,8 @@ class IntegratedThreatResponse:
     forensic_evidence: List[str] = field(default_factory=list)
 
 
-class ThreatIntelligenceCoordinator:
-    """Coordinates threat intelligence sharing between defensive and offensive systems"""
-    
-    def __init__(self):
-        self.intelligence_database: Dict[str, Dict[str, Any]] = {}
-        self.sharing_queue: Queue = Queue()
-        self.subscribers: List[Callable] = []
-        self.correlation_engine = ThreatCorrelationEngine()
-        self._lock = threading.RLock()
-        
-        # Intelligence metrics
-        self.metrics = {
-            'total_indicators': 0,
-            'shared_indicators': 0,
-            'correlated_threats': 0,
-            'actionable_intelligence': 0
-        }
-    
-    def register_intelligence_source(self, source_id: str, source_callback: Callable):
-        """Register a threat intelligence source"""
-        with self._lock:
-            self.subscribers.append({
-                'id': source_id,
-                'callback': source_callback,
-                'last_update': time.time()
-            })
-    
-    def share_intelligence(self, intelligence_data: Dict[str, Any], source: str = "unknown"):
-        """Share threat intelligence across integrated systems"""
-        with self._lock:
-            intel_id = hashlib.sha256(f"{time.time()}{intelligence_data}".encode()).hexdigest()[:16]
-            
-            # Store intelligence
-            intelligence_record = {
-                'intel_id': intel_id,
-                'timestamp': time.time(),
-                'source': source,
-                'data': intelligence_data,
-                'confidence': intelligence_data.get('confidence', 0.5),
-                'threat_level': intelligence_data.get('threat_level', 'low'),
-                'actionable': intelligence_data.get('actionable', False)
-            }
-            
-            self.intelligence_database[intel_id] = intelligence_record
-            
-            # Add to sharing queue
-            self.sharing_queue.put(intelligence_record)
-            
-            # Update metrics
-            self.metrics['total_indicators'] += 1
-            if intelligence_record['actionable']:
-                self.metrics['actionable_intelligence'] += 1
-            
-            # Trigger correlation analysis
-            correlated_threats = self.correlation_engine.correlate_intelligence(intelligence_record)
-            if correlated_threats:
-                self.metrics['correlated_threats'] += len(correlated_threats)
-                
-                # Share correlated intelligence
-                for threat in correlated_threats:
-                    self._distribute_intelligence(threat)
-            
-            # Distribute to subscribers
-            self._distribute_intelligence(intelligence_record)
-    
-    def _distribute_intelligence(self, intelligence: Dict[str, Any]):
-        """Distribute intelligence to all subscribers"""
-        for subscriber in self.subscribers:
-            try:
-                subscriber['callback'](intelligence)
-                subscriber['last_update'] = time.time()
-                self.metrics['shared_indicators'] += 1
-            except Exception as e:
-                logger.error(f"Failed to distribute intelligence to {subscriber['id']}: {e}")
-    
-    def get_relevant_intelligence(self, threat_context: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Get intelligence relevant to current threat context"""
-        with self._lock:
-            relevant_intel = []
-            
-            for intel in self.intelligence_database.values():
-                relevance_score = self._calculate_relevance(intel['data'], threat_context)
-                if relevance_score > 0.5:
-                    intel_copy = intel.copy()
-                    intel_copy['relevance_score'] = relevance_score
-                    relevant_intel.append(intel_copy)
-            
-            # Sort by relevance and recency
-            relevant_intel.sort(key=lambda x: (x['relevance_score'], x['timestamp']), reverse=True)
-            
-            return relevant_intel[:10]  # Return top 10 most relevant
-    
-    def _calculate_relevance(self, intel_data: Dict[str, Any], threat_context: Dict[str, Any]) -> float:
-        """Calculate relevance score between intelligence and threat context"""
-        relevance_factors = []
-        
-        # Check IP address overlap
-        intel_ips = set(intel_data.get('source_ips', []))
-        context_ips = set(threat_context.get('source_ips', [threat_context.get('source_ip', '')]))
-        if intel_ips & context_ips:
-            relevance_factors.append(0.9)
-        
-        # Check threat type overlap
-        if intel_data.get('threat_type') == threat_context.get('threat_type'):
-            relevance_factors.append(0.8)
-        
-        # Check temporal proximity (within 24 hours)
-        time_diff = abs(time.time() - intel_data.get('timestamp', 0))
-        if time_diff < 86400:  # 24 hours
-            temporal_relevance = 1.0 - (time_diff / 86400)
-            relevance_factors.append(temporal_relevance * 0.5)
-        
-        # Check confidence similarity
-        intel_confidence = intel_data.get('confidence', 0.5)
-        context_confidence = threat_context.get('confidence', 0.5)
-        confidence_similarity = 1.0 - abs(intel_confidence - context_confidence)
-        relevance_factors.append(confidence_similarity * 0.3)
-        
-        return sum(relevance_factors) / len(relevance_factors) if relevance_factors else 0.0
+class ThreatIntelligenceCoordinator(PlanetaryImmuneSystem):
+    """Persistent threat intelligence coordinator bound to USMS and the PAN DHT."""
 
 
 class ThreatCorrelationEngine:
@@ -721,13 +623,29 @@ class HumanAuthorizationInterface:
 class DefensiveOffensiveBridge:
     """Main integration bridge between defensive and offensive systems"""
     
-    def __init__(self, defensive_module: Any = None, offensive_module: Any = None):
+    def __init__(
+        self,
+        defensive_module: Any = None,  # runtime defensive owner, schema-shaped
+        offensive_module: Any = None,  # runtime offensive owner, schema-shaped
+        *,
+        runtime_root: Optional[Path] = None,
+        immune_system: Optional[PlanetaryImmuneSystem] = None,
+    ):
         # Core modules
         self.defensive_module = defensive_module
         self.offensive_module = offensive_module
         
-        # Integration components
-        self.threat_intelligence = ThreatIntelligenceCoordinator()
+        # Integration components — persistent USMS/PAN immune system, not RAM.
+        if immune_system is not None:
+            self.threat_intelligence = immune_system
+        elif runtime_root is not None:
+            self.threat_intelligence = ThreatIntelligenceCoordinator(runtime_root)
+        else:
+            raise ImmuneSystemNotBoundError(
+                "DefensiveOffensiveBridge requires PlanetaryImmuneSystem or runtime_root"
+            )
+        if self.defensive_module is not None:
+            self.defensive_module.sovereign_firewall = self.threat_intelligence.firewall
         self.human_authorization = HumanAuthorizationInterface()
         
         # State management
@@ -1335,11 +1253,22 @@ class DefensiveOffensiveBridge:
 
 # Integration helper functions
 
-def create_integrated_defense_system(defensive_module: Any = None, offensive_module: Any = None) -> DefensiveOffensiveBridge:
-    """Create fully integrated defense system"""
-    
-    bridge = DefensiveOffensiveBridge(defensive_module, offensive_module)
-    
+def create_integrated_defense_system(
+    defensive_module: Any = None,  # runtime defensive owner, schema-shaped
+    offensive_module: Any = None,  # runtime offensive owner, schema-shaped
+    *,
+    runtime_root: Optional[Path] = None,
+    immune_system: Optional[PlanetaryImmuneSystem] = None,
+) -> DefensiveOffensiveBridge:
+    """Create fully integrated defense system bound to persistent USMS."""
+
+    bridge = DefensiveOffensiveBridge(
+        defensive_module,
+        offensive_module,
+        runtime_root=runtime_root,
+        immune_system=immune_system,
+    )
+
     logger.info("Integrated defense system created")
     return bridge
 
@@ -1355,84 +1284,81 @@ def simulate_threat_scenario(bridge: DefensiveOffensiveBridge, scenario: Dict[st
 
 # Example usage
 if __name__ == "__main__":
-    
-    # Configure logging
+    import tempfile
+
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
-    
-    # Create integrated system
-    bridge = create_integrated_defense_system()
-    
-    # Simulate threat scenarios
-    scenarios = [
-        {
-            'name': 'Corporate Surveillance Detection',
-            'threat_level': 'medium',
-            'context': {
-                'threat_type': 'corporate_surveillance',
-                'source_ip': '192.168.1.100',
-                'confidence': 0.85,
-                'corporate_surveillance': True,
-                'data_collection_detected': True
+
+    with tempfile.TemporaryDirectory(prefix="pan_immune_bridge_") as tmpdir:
+        bridge = create_integrated_defense_system(runtime_root=Path(tmpdir))
+
+        # Simulate threat scenarios
+        scenarios = [
+            {
+                'name': 'Corporate Surveillance Detection',
+                'threat_level': 'medium',
+                'context': {
+                    'threat_type': 'corporate_surveillance',
+                    'source_ip': '192.168.1.100',
+                    'confidence': 0.85,
+                    'corporate_surveillance': True,
+                    'data_collection_detected': True
+                }
+            },
+            {
+                'name': 'Active Malware Exploitation',
+                'threat_level': 'critical',
+                'context': {
+                    'threat_type': 'malware_deployment',
+                    'source_ip': '10.0.0.50',
+                    'confidence': 0.95,
+                    'active_exploitation': True,
+                    'malware_detected': True,
+                    'system_compromise_risk': True
+                }
+            },
+            {
+                'name': 'Family Safety Threat',
+                'threat_level': 'existential',
+                'context': {
+                    'threat_type': 'physical_safety_threat',
+                    'source_ip': '203.0.113.25',
+                    'confidence': 0.98,
+                    'family_safety_threat': True,
+                    'physical_security_breach': True,
+                    'immediate_action_required': True
+                }
             }
-        },
-        {
-            'name': 'Active Malware Exploitation',
-            'threat_level': 'critical',
-            'context': {
-                'threat_type': 'malware_deployment',
-                'source_ip': '10.0.0.50',
-                'confidence': 0.95,
-                'active_exploitation': True,
-                'malware_detected': True,
-                'system_compromise_risk': True
-            }
-        },
-        {
-            'name': 'Family Safety Threat',
-            'threat_level': 'existential',
-            'context': {
-                'threat_type': 'physical_safety_threat',
-                'source_ip': '203.0.113.25',
-                'confidence': 0.98,
-                'family_safety_threat': True,
-                'physical_security_breach': True,
-                'immediate_action_required': True
-            }
-        }
-    ]
-    
-    # Process scenarios
-    for i, scenario in enumerate(scenarios):
+        ]
+
+        for i, scenario in enumerate(scenarios):
+            print(f"\n{'='*60}")
+            print(f"SCENARIO {i+1}: {scenario['name']}")
+            print('='*60)
+
+            response = simulate_threat_scenario(bridge, scenario)
+
+            print(f"Response ID: {response.response_id}")
+            print(f"Threat Level: {response.threat_level.value}")
+            print(f"Response Strategy: {response.response_strategy.value}")
+            print(f"ROE Level: {getattr(response, 'roe_level', 'N/A')}")
+            print(f"Human Authorization Required: {response.human_authorization_required}")
+            print(f"Human Authorized: {response.human_authorized}")
+            print(f"Defensive Actions: {len(response.defensive_actions)}")
+            print(f"Offensive Operations: {len(response.offensive_operations)}")
+            print(f"Overall Effectiveness: {response.overall_effectiveness:.2f}")
+            print(f"Threat Neutralized: {response.threat_neutralized}")
+
+            time.sleep(1.0)
+
         print(f"\n{'='*60}")
-        print(f"SCENARIO {i+1}: {scenario['name']}")
+        print("FINAL INTEGRATION STATUS")
         print('='*60)
-        
-        response = simulate_threat_scenario(bridge, scenario)
-        
-        print(f"Response ID: {response.response_id}")
-        print(f"Threat Level: {response.threat_level.value}")
-        print(f"Response Strategy: {response.response_strategy.value}")
-        print(f"ROE Level: {getattr(response, 'roe_level', 'N/A')}")
-        print(f"Human Authorization Required: {response.human_authorization_required}")
-        print(f"Human Authorized: {response.human_authorized}")
-        print(f"Defensive Actions: {len(response.defensive_actions)}")
-        print(f"Offensive Operations: {len(response.offensive_operations)}")
-        print(f"Overall Effectiveness: {response.overall_effectiveness:.2f}")
-        print(f"Threat Neutralized: {response.threat_neutralized}")
-        
-        # Brief pause between scenarios
-        time.sleep(1.0)
-    
-    # Display final integration status
-    print(f"\n{'='*60}")
-    print("FINAL INTEGRATION STATUS")
-    print('='*60)
-    
-    status = bridge.get_integration_status()
-    print(json.dumps(status, indent=2))
-    
-    # Cleanup
-    bridge.emergency_shutdown("Simulation completed")
+
+        status = bridge.get_integration_status()
+        print(json.dumps(status, indent=2))
+
+        bridge.emergency_shutdown("Simulation completed")
+        bridge.threat_intelligence.close()

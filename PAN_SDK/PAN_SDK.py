@@ -1,5 +1,27 @@
 """
 Planetary Autonomous Network - PAN Global SDK
+
+Modified: 2026-09-10
+Modified by: cursor-grok (daeron)
+Justification: I added burn_tokens on PANEconomicEngine and bound
+    SovereignTreasury onto DHTNode because the Fed FSM cannot own a second
+    supply ledger, and wrapping mint/burn would duplicate account math.
+Provenance: snapshots/v0.3/manifest.json -> domains.treasury.edits[0]
+Files: PAN_SDK/PAN_SDK.py, PAN_SDK/treasury.py
+
+Modified: 2026-09-10
+Modified by: cursor-grok (daeron)
+Justification: I added open_sealed on SovereignIdentity so email_social can
+    unwrap AES-256-GCM envelopes without reading _private_key from another module.
+Provenance: snapshots/v0.4/manifest.json -> domains.email_social.edits[0]
+Files: PAN_SDK/PAN_SDK.py, PAN_SDK/email_social.py
+
+Modified: 2026-09-10
+Modified by: cursor-grok (daeron)
+Justification: I bound MasterDatabase onto DHTNode so the CRDT pool shares
+    PANPersistenceStore instead of opening a second sqlite engine.
+Provenance: snapshots/v0.5/manifest.json -> domains.master_db.edits[0]
+Files: PAN_SDK/PAN_SDK.py, PAN_SDK/master_db.py
 """
 
 import hashlib
@@ -16,9 +38,11 @@ import math
 import sqlite3
 import threading
 from pathlib import Path
+import base64
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
-from cryptography.exceptions import InvalidSignature
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from cryptography.exceptions import InvalidSignature, InvalidTag
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -268,6 +292,50 @@ class SovereignIdentity:
             format=serialization.PrivateFormat.PKCS8,
             encryption_algorithm=serialization.NoEncryption()
         )
+
+    @property
+    def mesh_address(self) -> str:
+        """Return the PAN mesh address derived from this identity's public key."""
+        return f"pan:id:{self.identity_hash}"
+
+    def open_sealed(self, sealed: Dict[str, Any]) -> bytes:
+        """
+        Unwrap a hybrid RSA-OAEP + AES-256-GCM envelope addressed to this identity.
+
+        Args:
+            sealed: Mapping with wrapped_key, nonce, and ciphertext (base64).
+
+        Returns:
+            The plaintext bytes.
+
+        Raises:
+            ValueError: if the envelope is malformed or not for this key.
+        """
+        if not isinstance(sealed, dict):
+            raise ValueError("sealed envelope must be a mapping")
+        try:
+            wrapped = base64.b64decode(str(sealed.get("wrapped_key") or ""), validate=True)
+            nonce = base64.b64decode(str(sealed.get("nonce") or ""), validate=True)
+            ciphertext = base64.b64decode(str(sealed.get("ciphertext") or ""), validate=True)
+        except (ValueError, TypeError) as exc:
+            raise ValueError("sealed envelope is not valid base64") from exc
+        if not wrapped or not nonce or not ciphertext:
+            raise ValueError("sealed envelope is missing required fields")
+        try:
+            aes_key = self._private_key.decrypt(
+                wrapped,
+                padding.OAEP(
+                    mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                    algorithm=hashes.SHA256(),
+                    label=None,
+                ),
+            )
+        except ValueError as exc:
+            raise ValueError("sealed envelope is not addressed to this identity") from exc
+        try:
+            return AESGCM(aes_key).decrypt(nonce, ciphertext, None)
+        except InvalidTag as exc:
+            raise ValueError("sealed envelope failed authenticated decryption") from exc
 
     def create_hashchain_entry(self, data: Dict[str, Any]) -> str:
         """
@@ -663,6 +731,8 @@ class DHTNode:
         self.economic_engine: Optional[Any] = None
         self.name_registry: Optional[Any] = None
         self.governance_council: Optional[Any] = None
+        self.treasury = None
+        self.master_db = None
 
         if enable_registries:
             self._initialize_registries()
@@ -695,6 +765,22 @@ class DHTNode:
                 continue
             kwargs = kwargs or {}
             setattr(self, attr_name, cls(*args, **kwargs))
+        if self.economic_engine is not None and getattr(self, "treasury", None) is None:
+            treasury_cls = globals().get("SovereignTreasury")
+            if treasury_cls is None:
+                logger.debug("SovereignTreasury not bound yet")
+            else:
+                self.treasury = treasury_cls(
+                    identity=self.identity,
+                    persistence=self.persistence,
+                    economic_engine=self.economic_engine,
+                )
+        if getattr(self, "master_db", None) is None:
+            master_cls = global_namespace.get("MasterDatabase")
+            if master_cls is None:
+                logger.debug("MasterDatabase not bound yet")
+            else:
+                self.master_db = master_cls(self.identity.identity_hash, self.persistence)
 
     def _hydrate_from_persistence(self) -> None:
         if not self.persistence:
@@ -716,6 +802,10 @@ class DHTNode:
             self.governance_council.hydrate_from_persistence()
         if self.name_registry and hasattr(self.name_registry, 'hydrate_from_persistence'):
             self.name_registry.hydrate_from_persistence()
+        if self.treasury is not None:
+            self.treasury.hydrate_from_persistence()
+        if self.master_db is not None:
+            self.master_db.hydrate_from_persistence()
 
     def get_key_hash(self, key: str) -> str:
         """Return the PAN hash-space key for a piece of content."""
@@ -1229,6 +1319,56 @@ class PANEconomicEngine:
             "Minted %s tokens to %s for %s. Total supply: %s",
             amount,
             recipient_id[:12],
+            reason,
+            self.token_supply,
+        )
+        return True
+
+    def burn_tokens(self, account_id: str, amount: int, reason: str = "burn") -> bool:
+        """Destroy tokens from an account and reduce total supply."""
+        if amount <= 0:
+            logger.warning("Attempted to burn non-positive token amount")
+            return False
+
+        account = self.ensure_account(account_id)
+        if account["balance"] < amount:
+            logger.warning(
+                "Insufficient tokens for %s to burn %s (has %s)",
+                account_id[:12],
+                amount,
+                account["balance"],
+            )
+            return False
+        if self.token_supply < amount:
+            logger.warning("Token supply %s is below burn amount %s", self.token_supply, amount)
+            return False
+
+        account["balance"] -= amount
+        account["lifetime_spent"] += amount
+        self.token_supply -= amount
+
+        record = {
+            "transaction_type": "burn",
+            "account": account_id,
+            "amount": amount,
+            "reason": reason,
+            "timestamp": utc_now_iso(),
+        }
+        transaction_id = (
+            self.dht_node.execute_transaction(record)
+            if self.dht_node
+            else derive_uuid(f"burn:{account_id}:{utc_now_iso()}")
+        )
+        record["transaction_id"] = transaction_id
+        self.transaction_history.append(record)
+        if self.persistence:
+            self.persistence.append_journal("economy", "transaction", record)
+
+        self._persist_account(account_id)
+        logger.info(
+            "Burned %s tokens from %s for %s. Total supply: %s",
+            amount,
+            account_id[:12],
             reason,
             self.token_supply,
         )
@@ -2332,6 +2472,10 @@ class SovereignPipeline:
         
         logger.info(f"Created download package for {model_name}")
         return package
+
+# Bound after PANEconomicEngine exists so SovereignTreasury can import this module.
+from PAN_SDK.treasury import SovereignTreasury
+from PAN_SDK.master_db import MasterDatabase
 
 # --------------------------- #
 # ---------- Demo ----------#

@@ -1,0 +1,29 @@
+{
+  "version": "0.2",
+  "date": "2026-09-11",
+  "author": "daeron",
+  "summary": "Planetary immune system: USMS-backed threat memory, security-owned firewall, PAN bulletin mesh.",
+  "domains": {
+    "immune": {
+      "module": "security/planetary_immune_system.py",
+      "wrapper": null,
+      "tool_count": 1,
+      "provenance": "memory/unified_memory_system.py + PAN_SDK DHT/UnifiedDataPacket + security ROE lane",
+      "edits": [
+        {
+          "date": "2026-09-11",
+          "author": "daeron",
+          "summary": "Replace ephemeral threat-intelligence RAM with signed USMS nodes, rewrite the firewall as a fail-closed SQLite border, and broadcast high-confidence beliefs as UnifiedDataPackets on the PAN DHT.",
+          "files": [
+            "security/planetary_immune_system.py",
+            "security/sovereign_firewall.py",
+            "security/defensive_offensive_bridge.py",
+            "memory/unified_memory_system.py",
+            "PAN_SDK/sovereign_firewall.py"
+          ],
+          "justification_ref": "SCOPE.md"
+        }
+      ]
+    }
+  }
+}

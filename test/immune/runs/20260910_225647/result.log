@@ -1,0 +1,332 @@
+immune consumer start 20260910_225647
+
+========================================================================
+CHECK: firewall_blocks_telemetry
+========================================================================
+telemetry action=block reason=telemetry_dictionary
+PASS firewall_blocks_telemetry
+
+========================================================================
+CHECK: firewall_allows_civic_chat
+========================================================================
+civic chat action=allow
+PASS firewall_allows_civic_chat
+
+========================================================================
+CHECK: inspect_content_compresses_secrets
+========================================================================
+secret preflight action=compress
+PASS inspect_content_compresses_secrets
+
+========================================================================
+CHECK: signed_secret_packet_is_blocked
+========================================================================
+signed secret action=block reason=sensitive_plaintext_on_signed_packet
+PASS signed_secret_packet_is_blocked
+
+========================================================================
+CHECK: identity_blocklist
+========================================================================
+blocklist action=block
+PASS identity_blocklist
+
+========================================================================
+CHECK: legacy_ip_routing_blocked
+========================================================================
+routing action=block reason=legacy_routing_artifact
+PASS legacy_ip_routing_blocked
+
+========================================================================
+CHECK: memory_survives_restart
+========================================================================
+FAIL memory_survives_restart: PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\trent\\AppData\\Local\\Temp\\immune_restart_cmual6bi\\usms\\memory_store\\logs\\unified_sovereign_memory.log'
+Traceback (most recent call last):
+  File "C:\Users\trent\pan\memory\unified_memory_system.py", line 459, in store_semantic_vector
+    self._atomic_write(storage_path, compressed_data)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\pan\memory\unified_memory_system.py", line 337, in _atomic_write
+    directory_fd = os.open(self.storage_dir, os.O_RDONLY)
+PermissionError: [Errno 13] Permission denied: 'C:\\Users\\trent\\AppData\\Local\\Temp\\immune_restart_cmual6bi\\usms\\memory_store\\binary_data'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\trent\pan\memory\unified_memory_system.py", line 3001, in _store_node
+    semantic_vector_ref = self.binary_storage.store_semantic_vector(node.node_id, node.semantic_vector)
+  File "C:\Users\trent\pan\memory\unified_memory_system.py", line 466, in store_semantic_vector
+    raise BinaryStorageError(f"Semantic vector storage failed: {e}") from e
+memory.unified_memory_system.BinaryStorageError: Semantic vector storage failed: [Errno 13] Permission denied: 'C:\\Users\\trent\\AppData\\Local\\Temp\\immune_restart_cmual6bi\\usms\\memory_store\\binary_data'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\trent\pan\memory\unified_memory_system.py", line 1590, in _install_genesis_if_needed
+    self._store_node(genesis_node)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\trent\pan\memory\unified_memory_system.py", line 3035, in _store_node
+    raise MemoryIntegrityError(f"Node storage failed: {e}")
+memory.unified_memory_system.MemoryIntegrityError: Node storage failed: Semantic vector storage failed: [Errno 13] Permission denied: 'C:\\Users\\trent\\AppData\\Local\\Temp\\immune_restart_cmual6bi\\usms\\memory_store\\binary_data'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\trent\pan\memory\unified_memory_system.py", line 1309, in __init__
+    self._install_genesis_if_needed()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\trent\pan\memory\unified_memory_system.py", line 1597, in _install_genesis_if_needed
+    raise UnifiedMemoryError(f"Genesis installation failed: {e}")
+memory.unified_memory_system.UnifiedMemoryError: Genesis installation failed: Node storage failed: Semantic vector storage failed: [Errno 13] Permission denied: 'C:\\Users\\trent\\AppData\\Local\\Temp\\immune_restart_cmual6bi\\usms\\memory_store\\binary_data'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\trent\pan\test\immune\test_planetary_immune_system.py", line 182, in check_memory_survives_restart
+    first = PlanetaryImmuneSystem(root, node_name="immune-alpha")
+  File "C:\Users\trent\pan\security\planetary_immune_system.py", line 174, in __init__
+    self.memory = UnifiedMemorySystem(
+                  ~~~~~~~~~~~~~~~~~~~^
+        db_path=str(db_path),
+        ^^^^^^^^^^^^^^^^^^^^^
+        config={"runtime_root": str(usms_root), "console_logging": False},
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        enable_quantum_features=True,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\trent\pan\memory\unified_memory_system.py", line 1328, in __init__
+    raise UnifiedMemoryError(f"System initialization failed: {e}")
+memory.unified_memory_system.UnifiedMemoryError: System initialization failed: Genesis installation failed: Node storage failed: Semantic vector storage failed: [Errno 13] Permission denied: 'C:\\Users\\trent\\AppData\\Local\\Temp\\immune_restart_cmual6bi\\usms\\memory_store\\binary_data'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\shutil.py", line 701, in _rmtree_unsafe
+    os.unlink(fullname)
+    ~~~~~~~~~^^^^^^^^^^
+PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\trent\\AppData\\Local\\Temp\\immune_restart_cmual6bi\\usms\\memory_store\\logs\\unified_sovereign_memory.log'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\trent\pan\test\immune\test_planetary_immune_system.py", line 360, in run
+    fn(detail)
+    ~~^^^^^^^^
+  File "C:\Users\trent\pan\test\immune\test_planetary_immune_system.py", line 180, in check_memory_survives_restart
+    with tempfile.TemporaryDirectory(prefix="immune_restart_") as tmpdir:
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\tempfile.py", line 971, in __exit__
+    self.cleanup()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\tempfile.py", line 975, in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\tempfile.py", line 955, in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\shutil.py", line 852, in rmtree
+    _rmtree_impl(path, dir_fd, onexc)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\shutil.py", line 705, in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\tempfile.py", line 930, in onexc
+    _os.unlink(path)
+    ~~~~~~~~~~^^^^^^
+PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\trent\\AppData\\Local\\Temp\\immune_restart_cmual6bi\\usms\\memory_store\\logs\\unified_sovereign_memory.log'
+
+========================================================================
+CHECK: peer_ingests_bulletin
+========================================================================
+FAIL peer_ingests_bulletin: PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\trent\\AppData\\Local\\Temp\\immune_mesh_lh7u3hi3\\alpha\\usms\\memory_store\\logs\\unified_sovereign_memory.log'
+Traceback (most recent call last):
+  File "C:\Users\trent\pan\memory\unified_memory_system.py", line 459, in store_semantic_vector
+    self._atomic_write(storage_path, compressed_data)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\pan\memory\unified_memory_system.py", line 337, in _atomic_write
+    directory_fd = os.open(self.storage_dir, os.O_RDONLY)
+PermissionError: [Errno 13] Permission denied: 'C:\\Users\\trent\\AppData\\Local\\Temp\\immune_mesh_lh7u3hi3\\alpha\\usms\\memory_store\\binary_data'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\trent\pan\memory\unified_memory_system.py", line 3001, in _store_node
+    semantic_vector_ref = self.binary_storage.store_semantic_vector(node.node_id, node.semantic_vector)
+  File "C:\Users\trent\pan\memory\unified_memory_system.py", line 466, in store_semantic_vector
+    raise BinaryStorageError(f"Semantic vector storage failed: {e}") from e
+memory.unified_memory_system.BinaryStorageError: Semantic vector storage failed: [Errno 13] Permission denied: 'C:\\Users\\trent\\AppData\\Local\\Temp\\immune_mesh_lh7u3hi3\\alpha\\usms\\memory_store\\binary_data'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\trent\pan\memory\unified_memory_system.py", line 1590, in _install_genesis_if_needed
+    self._store_node(genesis_node)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\trent\pan\memory\unified_memory_system.py", line 3035, in _store_node
+    raise MemoryIntegrityError(f"Node storage failed: {e}")
+memory.unified_memory_system.MemoryIntegrityError: Node storage failed: Semantic vector storage failed: [Errno 13] Permission denied: 'C:\\Users\\trent\\AppData\\Local\\Temp\\immune_mesh_lh7u3hi3\\alpha\\usms\\memory_store\\binary_data'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\trent\pan\memory\unified_memory_system.py", line 1309, in __init__
+    self._install_genesis_if_needed()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\trent\pan\memory\unified_memory_system.py", line 1597, in _install_genesis_if_needed
+    raise UnifiedMemoryError(f"Genesis installation failed: {e}")
+memory.unified_memory_system.UnifiedMemoryError: Genesis installation failed: Node storage failed: Semantic vector storage failed: [Errno 13] Permission denied: 'C:\\Users\\trent\\AppData\\Local\\Temp\\immune_mesh_lh7u3hi3\\alpha\\usms\\memory_store\\binary_data'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\trent\pan\test\immune\test_planetary_immune_system.py", line 237, in check_peer_ingests_bulletin
+    alpha = PlanetaryImmuneSystem(alpha_root, node_name="immune-alpha")
+  File "C:\Users\trent\pan\security\planetary_immune_system.py", line 174, in __init__
+    self.memory = UnifiedMemorySystem(
+                  ~~~~~~~~~~~~~~~~~~~^
+        db_path=str(db_path),
+        ^^^^^^^^^^^^^^^^^^^^^
+        config={"runtime_root": str(usms_root), "console_logging": False},
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        enable_quantum_features=True,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\trent\pan\memory\unified_memory_system.py", line 1328, in __init__
+    raise UnifiedMemoryError(f"System initialization failed: {e}")
+memory.unified_memory_system.UnifiedMemoryError: System initialization failed: Genesis installation failed: Node storage failed: Semantic vector storage failed: [Errno 13] Permission denied: 'C:\\Users\\trent\\AppData\\Local\\Temp\\immune_mesh_lh7u3hi3\\alpha\\usms\\memory_store\\binary_data'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\shutil.py", line 701, in _rmtree_unsafe
+    os.unlink(fullname)
+    ~~~~~~~~~^^^^^^^^^^
+PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\trent\\AppData\\Local\\Temp\\immune_mesh_lh7u3hi3\\alpha\\usms\\memory_store\\logs\\unified_sovereign_memory.log'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\trent\pan\test\immune\test_planetary_immune_system.py", line 360, in run
+    fn(detail)
+    ~~^^^^^^^^
+  File "C:\Users\trent\pan\test\immune\test_planetary_immune_system.py", line 234, in check_peer_ingests_bulletin
+    with tempfile.TemporaryDirectory(prefix="immune_mesh_") as tmpdir:
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\tempfile.py", line 971, in __exit__
+    self.cleanup()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\tempfile.py", line 975, in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\tempfile.py", line 955, in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\shutil.py", line 852, in rmtree
+    _rmtree_impl(path, dir_fd, onexc)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\shutil.py", line 705, in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\tempfile.py", line 930, in onexc
+    _os.unlink(path)
+    ~~~~~~~~~~^^^^^^
+PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\trent\\AppData\\Local\\Temp\\immune_mesh_lh7u3hi3\\alpha\\usms\\memory_store\\logs\\unified_sovereign_memory.log'
+
+========================================================================
+CHECK: contradiction_and_campaign_entangle
+========================================================================
+FAIL contradiction_and_campaign_entangle: PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\trent\\AppData\\Local\\Temp\\immune_campaign_00s9qu0h\\usms\\memory_store\\logs\\unified_sovereign_memory.log'
+Traceback (most recent call last):
+  File "C:\Users\trent\pan\memory\unified_memory_system.py", line 459, in store_semantic_vector
+    self._atomic_write(storage_path, compressed_data)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\pan\memory\unified_memory_system.py", line 337, in _atomic_write
+    directory_fd = os.open(self.storage_dir, os.O_RDONLY)
+PermissionError: [Errno 13] Permission denied: 'C:\\Users\\trent\\AppData\\Local\\Temp\\immune_campaign_00s9qu0h\\usms\\memory_store\\binary_data'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\trent\pan\memory\unified_memory_system.py", line 3001, in _store_node
+    semantic_vector_ref = self.binary_storage.store_semantic_vector(node.node_id, node.semantic_vector)
+  File "C:\Users\trent\pan\memory\unified_memory_system.py", line 466, in store_semantic_vector
+    raise BinaryStorageError(f"Semantic vector storage failed: {e}") from e
+memory.unified_memory_system.BinaryStorageError: Semantic vector storage failed: [Errno 13] Permission denied: 'C:\\Users\\trent\\AppData\\Local\\Temp\\immune_campaign_00s9qu0h\\usms\\memory_store\\binary_data'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\trent\pan\memory\unified_memory_system.py", line 1590, in _install_genesis_if_needed
+    self._store_node(genesis_node)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\trent\pan\memory\unified_memory_system.py", line 3035, in _store_node
+    raise MemoryIntegrityError(f"Node storage failed: {e}")
+memory.unified_memory_system.MemoryIntegrityError: Node storage failed: Semantic vector storage failed: [Errno 13] Permission denied: 'C:\\Users\\trent\\AppData\\Local\\Temp\\immune_campaign_00s9qu0h\\usms\\memory_store\\binary_data'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\trent\pan\memory\unified_memory_system.py", line 1309, in __init__
+    self._install_genesis_if_needed()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\trent\pan\memory\unified_memory_system.py", line 1597, in _install_genesis_if_needed
+    raise UnifiedMemoryError(f"Genesis installation failed: {e}")
+memory.unified_memory_system.UnifiedMemoryError: Genesis installation failed: Node storage failed: Semantic vector storage failed: [Errno 13] Permission denied: 'C:\\Users\\trent\\AppData\\Local\\Temp\\immune_campaign_00s9qu0h\\usms\\memory_store\\binary_data'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\trent\pan\test\immune\test_planetary_immune_system.py", line 275, in check_contradiction_and_campaign_entangle
+    immune = PlanetaryImmuneSystem(Path(tmpdir), node_name="immune-campaign")
+  File "C:\Users\trent\pan\security\planetary_immune_system.py", line 174, in __init__
+    self.memory = UnifiedMemorySystem(
+                  ~~~~~~~~~~~~~~~~~~~^
+        db_path=str(db_path),
+        ^^^^^^^^^^^^^^^^^^^^^
+        config={"runtime_root": str(usms_root), "console_logging": False},
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        enable_quantum_features=True,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\trent\pan\memory\unified_memory_system.py", line 1328, in __init__
+    raise UnifiedMemoryError(f"System initialization failed: {e}")
+memory.unified_memory_system.UnifiedMemoryError: System initialization failed: Genesis installation failed: Node storage failed: Semantic vector storage failed: [Errno 13] Permission denied: 'C:\\Users\\trent\\AppData\\Local\\Temp\\immune_campaign_00s9qu0h\\usms\\memory_store\\binary_data'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\shutil.py", line 701, in _rmtree_unsafe
+    os.unlink(fullname)
+    ~~~~~~~~~^^^^^^^^^^
+PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\trent\\AppData\\Local\\Temp\\immune_campaign_00s9qu0h\\usms\\memory_store\\logs\\unified_sovereign_memory.log'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\trent\pan\test\immune\test_planetary_immune_system.py", line 360, in run
+    fn(detail)
+    ~~^^^^^^^^
+  File "C:\Users\trent\pan\test\immune\test_planetary_immune_system.py", line 274, in check_contradiction_and_campaign_entangle
+    with tempfile.TemporaryDirectory(prefix="immune_campaign_") as tmpdir:
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\tempfile.py", line 971, in __exit__
+    self.cleanup()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\tempfile.py", line 975, in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\tempfile.py", line 955, in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\shutil.py", line 852, in rmtree
+    _rmtree_impl(path, dir_fd, onexc)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\shutil.py", line 705, in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\tempfile.py", line 930, in onexc
+    _os.unlink(path)
+    ~~~~~~~~~~^^^^^^
+PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\trent\\AppData\\Local\\Temp\\immune_campaign_00s9qu0h\\usms\\memory_store\\logs\\unified_sovereign_memory.log'
+immune consumer status=fail

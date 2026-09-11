@@ -1,0 +1,38 @@
+treasury consumer start 20260910_232941
+
+========================================================================
+CHECK: genesis_rejects_mint
+========================================================================
+genesis blocked mint: proposals are illegal before genesis is sealed
+PASS genesis_rejects_mint
+
+========================================================================
+CHECK: seal_genesis_and_contract_reject
+========================================================================
+seal_genesis status=ok state=MINT_PHASE
+contract rejected: contract key forbidden: bytecode
+PASS seal_genesis_and_contract_reject
+
+========================================================================
+CHECK: poi_mint_requires_quorum
+========================================================================
+unilateral execute=rejected reason=quorum_not_met
+quorum mint status=ok supply=40
+PASS poi_mint_requires_quorum
+
+========================================================================
+CHECK: distribute_and_burn_and_halts
+========================================================================
+distribute blocked without telemetry: DISTRIBUTE requires sealed network telemetry
+to DISTRIBUTE status=ok state=DISTRIBUTE
+citizen after distribute=25
+citizen after burn=15 supply=90
+audit halt blocked mint: AUDIT_HALT accepts only TRANSITION or ELECT_CHAIR
+PASS distribute_and_burn_and_halts
+
+========================================================================
+CHECK: restart_hydrates_fsm
+========================================================================
+reopened state=MINT_PHASE validators=3 chair=6ac89bc55590
+PASS restart_hydrates_fsm
+treasury consumer status=pass
