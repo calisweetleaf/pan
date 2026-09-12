@@ -48,7 +48,7 @@ from security.planetary_immune_system import (
 
 # Import defensive sovereignty components
 try:
-    from defensive_sovereignty import (
+    from security.defensive_sovereignty import (
         ThreatLevel, DefenseMode, SovereigntyState, ThreatDetectionModule,
         NetworkThreatMonitor, SystemIntegrityMonitor, ForensicDataCollector,
         ThreatSignature
@@ -66,7 +66,7 @@ except ImportError as e:
 
 # Import reactive offensive components
 try:
-    from reactive_offense import (
+    from security.reactive_offense import (
         ROELevel, OffensiveOrchestrator, OffensiveOperation, AuthorizationLevel,
         ROEEngine, OffensiveArsenal, SovereigntyEnforcer
     )
@@ -1109,6 +1109,11 @@ class DefensiveOffensiveBridge:
     def _share_threat_intelligence(self, response: IntegratedThreatResponse, context: Dict[str, Any]):
         """Share threat intelligence derived from response"""
         
+        roe_name = getattr(response.roe_level, "name", None)
+        if isinstance(roe_name, str) and roe_name:
+            roe_level = roe_name.lower()
+        else:
+            roe_level = str(getattr(response.roe_level, "value", "observe")).lower()
         intelligence_data = {
             'threat_id': response.threat_id,
             'threat_level': response.threat_level.value,
@@ -1118,7 +1123,9 @@ class DefensiveOffensiveBridge:
             'response_effectiveness': response.overall_effectiveness,
             'threat_neutralized': response.threat_neutralized,
             'actionable': True,
-            'confidence': context.get('confidence', 0.5)
+            'confidence': context.get('confidence', 0.5),
+            'roe_level': roe_level,
+            'human_authorized': bool(response.human_authorized),
         }
         
         self.threat_intelligence.share_intelligence(intelligence_data, 'integrated_response_system')

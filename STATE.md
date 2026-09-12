@@ -1,6 +1,6 @@
 # PAN SDK — Current State
 
-**Updated:** 2026-09-11
+**Updated:** 2026-09-12
 **Canon lock:** PLAN.md and docs/research/Building a Sovereign Digital Nation.md
 remain the north-star direction. Do not replace their architecture with an
 invented alternative.
@@ -24,12 +24,18 @@ invented alternative.
 - Security owns the packet border: `security/sovereign_firewall.py`.
 - `security/planetary_immune_system.py` binds USMS (Ed25519 memory DAG) to PAN
   DHT/`UnifiedDataPacket` (RSA transport). High-confidence beliefs broadcast as
-  `THREAT_MEMORY_BULLETIN` packets. That is Erebus/USMS cognition. It does not
+  `THREAT_MEMORY_BULLETIN` packets. ROE OBSERVE/DECEIVE/DEGRADE persist as USMS
+  BELIEF content with neighbor-weighted DAG activation. NEUTRALIZE without
+  human authorization fails loud. That is Erebus/USMS cognition. It does not
   use `core.prompt_bridge`.
+- `security/defensive_offensive_bridge.py` imports the live
+  `security.defensive_sovereignty` / `security.reactive_offense` owners and
+  writes threat events through `PlanetaryImmuneSystem.share_intelligence`.
 - `memory/memory_core.py` and `memory/system_cache.py` are Thyris VM session
   memory. They coexist with USMS in `memory/` and are not the immune DAG.
 - `telecom/vm_supervisor.py` and `telecom/vm_image_manager.py` are the VM owners
-  `phone_orchestrator` already imported. AIPC `PromptSystemBridge` is unbound.
+  `phone_orchestrator` already imported. `ISOConverter._create_disk` is fail-loud
+  and has a real qemu-img consumer. AIPC `PromptSystemBridge` is unbound.
   Thyris does not import or require `core.prompt_bridge`.
 - Direct project gate: `python test/run_pan_gate.py` (immune, treasury,
   email_social, master_db, thyris_memory, thyris_vm slices).
@@ -38,8 +44,19 @@ invented alternative.
 
 ## Verified baseline
 
-- **GREEN, 2026-09-11:** finish-prior combined tree
-  (`cursor/finish-prior-wave-d5ba`, PR #5, not merged to main).
+- **GREEN, 2026-09-12:** qemu-img disk-create + immune ROE DAG
+  `python3 test/run_pan_gate.py` exited 0 in 16.705s on Linux Python 3.12.3.
+  `ISOConverter._create_disk` wrote a 1G qcow2 (196624 bytes on disk,
+  virtual_size 1073741824) via qemu-img 8.2.2. Immune 11/11 including
+  `roe_ladder_persists_through_bridge` and
+  `neutralize_requires_human_authorization`. Compile now includes D/O lineage.
+  Artifacts: `results/pan_gate_20260912_091538.json`,
+  `results/pan_gate_20260912_091538.md`,
+  `test/thyris_vm/runs/20260912_091429/`,
+  `test/immune/runs/20260912_091516/`.
+  qemu-system-x86_64 is present. adb is missing. No Android image. Phones
+  were not booted.
+- **GREEN, 2026-09-11:** finish-prior combined tree merged to main (PR #5).
   `python3 test/run_pan_gate.py` exited 0 in 12.707s on Linux Python 3.12.3
   after merging packet alignment, civic walkthrough, and the inference owner.
   Civic PoI mint now binds PANLIN01 and re-executes `_run_inference`.
@@ -47,17 +64,8 @@ invented alternative.
   `results/pan_gate_20260911_091651.md`,
   `results/pan_sdk_system_test_20260911_091638.json`.
 - **GREEN, 2026-09-11:** `python3 test/run_pan_gate.py` exited 0 in 14.016s on
-  Linux Python 3.12.3 after landing the real `_run_inference` owner. Slices:
-  compile, import, persistence, name_registry, manifest, personal_data,
-  system_scenario, planetary_immune_system, sovereign_treasury (7/7 including
-  forged-output reject), email_social, master_db, thyris_memory, thyris_vm.
-  Artifacts: `results/pan_gate_20260911_085638.json`,
-  `results/pan_gate_20260911_085638.md`.
-- **GREEN, 2026-09-11:** inference consumer 7/7
-  `test/inference/runs/20260911_085509/`.
-- **GREEN, 2026-09-11:** treasury consumer 7/7
-  `test/treasury/runs/20260911_085523/` (focused) and
-  `test/treasury/runs/20260911_085647/` (gate slice).
+  Linux Python 3.12.3 after landing the real `_run_inference` owner.
+  Artifacts: `results/pan_gate_20260911_085638.json`.
 - **GREEN, 2026-09-11 (historical Windows):** `python test/run_pan_gate.py`
   exited 0 in 8.871s on Windows Python 3.14 with `.venv` after unbinding AIPC
   prompt from Thyris. Artifacts: `results/pan_gate_20260911_011502.json`.
@@ -65,15 +73,18 @@ invented alternative.
 
 ## Active frontier
 
-1. QEMU/Android image boot is unproven. Host-tool contract names
-   `qemu-system-x86_64`, `qemu-img`, and `adb`. This Linux gate found all three
-   missing. Import and construct are proven; Thyris VMs do not boot in this gate.
+1. QEMU guest boot is unproven. Host tools: `qemu-system-x86_64` and `qemu-img`
+   are present on this Linux worker; `adb` is missing. No Android image is in
+   the repository. Disk-create is proven; phones do not boot in this gate.
 2. `memory/memory_integration.py` still imports `schemas.session`, which is
    absent. That is leftover AIPC session-memory, not a Thyris telecom
    requirement. Do not scaffold a fake schemas package.
 3. `PAN_SDK/API.server.py` `_run_inference_async` is still an unconsumed
    sleep-and-string subclass. It is not the inference owner.
-4. Orama dashboard / vector memory spaces named in whitepaper section 6.2.
+4. `defensive_sovereignty.BlockchainThreatIntelligence` is still an in-process
+   second chain. The consumed combat-memory path is USMS via
+   `PlanetaryImmuneSystem`.
+5. Orama dashboard / vector memory spaces named in whitepaper section 6.2.
 
 ## Known decision boundaries
 
@@ -103,19 +114,21 @@ invented alternative.
 
 Root AGENTS.md, security/AGENTS.md, and `.cursor/` rules/commands were
 reconciled to the Thyris unbind baseline on 2026-09-11. The stale
-`somnus_erebus/` QWEN tree is no longer the security packet. The inference
-owner landed in snapshots/v0.8; next justified action is qemu
-host-tools/images, not `prompt_bridge`.
+`somnus_erebus/` QWEN tree is not the security packet. Inference owner landed
+in snapshots/v0.8. qemu-img disk-create and immune ROE DAG landed in
+snapshots/v0.9.
 
 ## Generated-map status
 
 `filetree.md` is operator-owned generated navigation. Continuity-doc turns
-must not hand-edit it.
+must not hand-edit it. Snapshot `v0.9` is a new folder; regenerate filetree
+through FileTree Pro.
 
 ## Next justified action
 
-Prove the Thyris host-tool path: install or locate `qemu-img` and
-`qemu-system-x86_64`, obtain an Android image, and run a real disk-create
-consumer. Do not claim phones boot until those tools and images are present
-and tested. Do not pull prompt files. Do not add a second inference engine
-in `API.server.py`.
+Obtain a real Android image (do not dummy one) and install `adb`, then prove a
+Thyris path that still does not claim phones boot until qemu-system actually
+runs a guest. Alternate: retire `BlockchainThreatIntelligence` so
+`defensive_sovereignty.share_threat_intelligence` cannot use a second chain.
+Do not pull prompt files. Do not add a second inference engine in
+`API.server.py`.

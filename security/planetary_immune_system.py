@@ -5,14 +5,13 @@ Source: memory/unified_memory_system.py, PAN_SDK DHT/UnifiedDataPacket,
     security/sovereign_firewall.py
 Integrated: 2026-09-11
 
-Modified: 2026-09-11
+Modified: 2026-09-12
 Modified by: cursor-grok (daeron)
-Justification: I composed the live owners instead of wrapping them. USMS already
-    persists signed EVENT/BELIEF/CONTRADICTION nodes; DHTNode already ledgers
-    packets; the firewall now owns border inspection. A translator around those
-    three would have duplicated persistence, hashing, and inspection. The two
-    SovereignIdentity types are bound here because they are not the same
-    cryptography: Ed25519 memory authors and RSA PAN packet authors.
+Justification: I extended the live immune owner so ROE OBSERVE/DECEIVE/DEGRADE
+    persist as USMS BELIEF content, with neighbor-weighted DAG activation taken
+    further from MTL/USMS. Wrapping defensive_offensive_bridge to avoid this
+    edit is banned. NEUTRALIZE without human authorization fails loud and never
+    becomes an external-host action. RSA PAN and Ed25519 USMS stay bound.
 Provenance: snapshots/v0.2/manifest.json -> domains.immune.edits[0]
 Files: security/planetary_immune_system.py
 """
@@ -24,6 +23,7 @@ import logging
 import sys
 import threading
 from dataclasses import dataclass, field
+from enum import Enum
 from pathlib import Path
 from typing import Callable, Mapping
 
@@ -66,6 +66,20 @@ BULLETIN_DHT_PREFIX = "threat-memory:"
 IDENTITY_DIRNAME = "identities"
 PAN_IDENTITY_FILE = "pan_identity.json"
 USMS_IDENTITY_FILE = "usms_identity.json"
+ROE_ORDER = ("observe", "deceive", "degrade", "neutralize")
+
+
+class ROELevel(str, Enum):
+    """Rules of Engagement ladder persisted on USMS BELIEF nodes.
+
+    Level 4 NEUTRALIZE is a human-authorization receipt only. This owner never
+    opens a network socket or subprocess against an external host.
+    """
+
+    OBSERVE = "observe"
+    DECEIVE = "deceive"
+    DEGRADE = "degrade"
+    NEUTRALIZE = "neutralize"
 
 
 class ImmuneSystemError(Exception):
@@ -98,6 +112,9 @@ class IntelligenceRecord:
     similar_node_ids: tuple[str, ...] = ()
     entanglement_id: str | None = None
     payload: dict[str, object] = field(default_factory=dict)
+    roe_level: str = ROELevel.OBSERVE.value
+    neural_activation: float = 0.0
+    neutralize_denied: bool = False
 
     def to_mapping(self) -> dict[str, object]:
         """Return the historical coordinator mapping consumed by the bridge."""
@@ -115,6 +132,9 @@ class IntelligenceRecord:
             "bulletin_dht_key": self.bulletin_dht_key,
             "similar_node_ids": list(self.similar_node_ids),
             "entanglement_id": self.entanglement_id,
+            "roe_level": self.roe_level,
+            "neural_activation": self.neural_activation,
+            "neutralize_denied": self.neutralize_denied,
         }
 
 
@@ -260,6 +280,10 @@ class PlanetaryImmuneSystem:
                 return record
 
             similar = self._semantic_neighbors(threat_type)
+            human_authorized = bool(payload.get("human_authorized", False))
+            requested_roe = str(payload.get("roe_level") or "").strip().lower()
+            activation = self._neural_activation(confidence, similar)
+            roe = self._resolve_roe_level(requested_roe, activation, human_authorized)
             event_content: dict[str, object] = {
                 "summary": f"threat event {threat_type}",
                 "intel_id": intel_id,
@@ -283,6 +307,11 @@ class PlanetaryImmuneSystem:
                 f"I believe {threat_type} is a live threat at confidence {confidence:.2f} "
                 f"and threat_level {threat_level}"
             )
+            belief_links: dict[LinkageTypeEnum, list[str]] = {
+                LinkageTypeEnum.CAUSAL_PARENT: [event_node.node_id]
+            }
+            if similar:
+                belief_links[LinkageTypeEnum.SYNTHESIS] = [node.node_id for node in similar[:3]]
             belief_node = self.memory.create_memory_node(
                 author=self.memory_identity,
                 kind=NodeKindEnum.BELIEF,
@@ -293,9 +322,16 @@ class PlanetaryImmuneSystem:
                     "threat_level": threat_level,
                     "confidence": confidence,
                     "roe_observe": True,
+                    "roe_deceive": roe in {ROELevel.DECEIVE, ROELevel.DEGRADE, ROELevel.NEUTRALIZE},
+                    "roe_degrade": roe in {ROELevel.DEGRADE, ROELevel.NEUTRALIZE},
+                    "roe_neutralize": roe == ROELevel.NEUTRALIZE,
+                    "roe_level": roe.value,
+                    "neural_activation": activation,
+                    "human_authorized": human_authorized,
+                    "neutralize_denied": False,
                 },
                 parents=[event_node.node_id],
-                linkage_manifest={LinkageTypeEnum.CAUSAL_PARENT: [event_node.node_id]},
+                linkage_manifest=belief_links,
                 semantic_context=threat_type,
             )
             self.memory.attest_belief(
@@ -332,6 +368,9 @@ class PlanetaryImmuneSystem:
                 similar_node_ids=similar_ids,
                 entanglement_id=entanglement_id,
                 payload=payload,
+                roe_level=roe.value,
+                neural_activation=activation,
+                neutralize_denied=False,
             )
             self.persistence.write_state("immune_index", intel_id, record.to_mapping())
             campaign = str(payload.get("campaign_id") or "")
@@ -349,6 +388,73 @@ class PlanetaryImmuneSystem:
                 self.metrics["correlated_threats"] += 1
             self._notify_subscribers(record)
             return record
+
+    def record_roe_decision(
+        self,
+        *,
+        event_node_id: str,
+        roe_level: str,
+        human_authorized: bool = False,
+        summary: str = "",
+    ) -> UnifiedMemoryNode:
+        """
+        Persist an explicit ROE BELIEF on the USMS DAG.
+
+        NEUTRALIZE without human_authorized fails loud. No external host action
+        is taken at any level.
+
+        Args:
+            event_node_id: Parent EVENT already stored in USMS.
+            roe_level: observe | deceive | degrade | neutralize.
+            human_authorized: Required for NEUTRALIZE. Logged, never implied.
+            summary: Optional rationale stored on the BELIEF.
+
+        Returns:
+            The ROE BELIEF node.
+        """
+        requested = str(roe_level or "").strip().lower()
+        if requested not in ROE_ORDER:
+            raise ImmuneSystemError(f"unknown ROE level {roe_level!r}")
+        if requested == ROELevel.NEUTRALIZE.value and not human_authorized:
+            raise ImmuneSystemError(
+                "ROE Level 4 NEUTRALIZE requires human authorization; "
+                "external-host action is not authorized"
+            )
+        roe = ROELevel(requested)
+        with self._lock:
+            event = self.memory.retrieve_memory_node(
+                event_node_id, requester=self.memory_identity
+            )
+            if event is None:
+                raise ImmuneSystemError(f"event node not found: {event_node_id[:12]}")
+            claim = summary or f"ROE {roe.value} recorded for {event.content.get('threat_type')}"
+            belief = self.memory.create_memory_node(
+                author=self.memory_identity,
+                kind=NodeKindEnum.BELIEF,
+                content={
+                    "claim": claim,
+                    "intel_id": event.content.get("intel_id"),
+                    "threat_type": event.content.get("threat_type"),
+                    "roe_observe": True,
+                    "roe_deceive": roe in {ROELevel.DECEIVE, ROELevel.DEGRADE, ROELevel.NEUTRALIZE},
+                    "roe_degrade": roe in {ROELevel.DEGRADE, ROELevel.NEUTRALIZE},
+                    "roe_neutralize": roe == ROELevel.NEUTRALIZE,
+                    "roe_level": roe.value,
+                    "human_authorized": human_authorized,
+                    "neutralize_denied": False,
+                    "explicit_roe_decision": True,
+                },
+                parents=[event_node_id],
+                linkage_manifest={LinkageTypeEnum.CAUSAL_PARENT: [event_node_id]},
+                semantic_context=str(event.content.get("threat_type") or "roe"),
+            )
+            self.memory.attest_belief(
+                belief.node_id,
+                self.memory_identity,
+                1.0 if human_authorized else 0.74,
+                rationale=claim,
+            )
+            return belief
 
     def get_relevant_intelligence(
         self,
@@ -609,6 +715,43 @@ class PlanetaryImmuneSystem:
         LOGGER.info("Broadcast threat bulletin %s key=%s", packet.packet_id[:12], dht_key)
         return packet.packet_id, dht_key
 
+    def _neural_activation(
+        self,
+        confidence: float,
+        similar: list[UnifiedMemoryNode],
+    ) -> float:
+        """MTL-style DAG activation: local confidence plus neighbor belief pull."""
+        neighbor_weight = 0.0
+        for node in similar:
+            node_conf = float(node.content.get("confidence") or 0.0)
+            neighbor_weight += node_conf
+        if similar:
+            neighbor_weight = neighbor_weight / len(similar)
+        return min(1.0, (confidence * 0.7) + (neighbor_weight * 0.3))
+
+    def _resolve_roe_level(
+        self,
+        requested: str,
+        activation: float,
+        human_authorized: bool,
+    ) -> ROELevel:
+        """Map explicit request or DAG activation onto the ROE ladder."""
+        derived = ROELevel.OBSERVE
+        if activation >= 0.95:
+            derived = ROELevel.NEUTRALIZE
+        elif activation >= 0.75:
+            derived = ROELevel.DEGRADE
+        elif activation >= 0.40:
+            derived = ROELevel.DECEIVE
+        if requested in ROE_ORDER:
+            derived = ROELevel(requested)
+        if derived == ROELevel.NEUTRALIZE and not human_authorized:
+            raise ImmuneSystemError(
+                "ROE Level 4 NEUTRALIZE requires human authorization; "
+                "external-host action is not authorized"
+            )
+        return derived
+
     def _semantic_neighbors(self, threat_type: str) -> list[UnifiedMemoryNode]:
         """Return semantically similar EVENT/BELIEF nodes for the current author."""
         try:
@@ -695,6 +838,9 @@ class PlanetaryImmuneSystem:
                 str(stored["entanglement_id"]) if stored.get("entanglement_id") else None
             ),
             payload=payload,
+            roe_level=str(stored.get("roe_level") or ROELevel.OBSERVE.value),
+            neural_activation=float(stored.get("neural_activation") or 0.0),
+            neutralize_denied=bool(stored.get("neutralize_denied", False)),
         )
 
     def _write_identity_binding(self) -> None:

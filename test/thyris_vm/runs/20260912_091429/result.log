@@ -1,0 +1,31 @@
+thyris vm consumer start 20260912_091429
+
+========================================================================
+THYRIS VM CONSUMER
+========================================================================
+phone_orchestrator=/workspace/telecom/phone_orchestrator.py
+PASS phone_orchestrator_imports
+image storage=/tmp/thyris_img_5naqa2uy/images
+PASS image_manager_constructs
+custom vm storage=/tmp/thyris_sup_v508d6hh/vms
+assigned ip=192.168.122.176
+supervisor vms=0
+memory_db=/tmp/thyris_sup_v508d6hh/vms/memory/metadata.db
+idle profile={'profile_name': 'idle', 'vcpus': 1, 'memory_gb': 4, 'gpu_enabled': False, 'description': 'Low power state.'}
+instance state=creating
+PASS supervisor_constructs
+supervisor_file=/workspace/telecom/vm_supervisor.py
+active_vms=0
+PASS aipc_prompt_unbound
+usms_module=memory.unified_memory_system
+immune_module=security.planetary_immune_system
+packet_type=UnifiedDataPacket
+PASS usms_erebus_has_no_prompt
+required_host_tools=['qemu-system-x86_64', 'qemu-img', 'adb']
+host_tools_ok=False missing=['adb']
+PASS telecom_host_tools_contract
+qemu-img=/usr/bin/qemu-img
+qemu-system-x86_64=/usr/bin/qemu-system-x86_64
+qcow2 path=/tmp/thyris_disk_m8v8co49/probe.qcow2 bytes=196624 format=qcow2 virtual_size=1073741824
+PASS qemu_img_disk_create
+thyris vm consumer status=pass

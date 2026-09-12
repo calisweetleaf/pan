@@ -20,11 +20,11 @@ Dependencies:
 - qemu-system-x86_64 (VM creation and management)
 - ssh (Agent deployment to running VMs)
 
-Modified: 2026-09-11
+Modified: 2026-09-12
 Modified by: cursor-grok (daeron)
-Justification: I recorded this file as the telecom-owned VM image manager
-    consumed by telecom.vm_supervisor. Import paths were already stdlib plus
-    pydantic; no foreign package layout to rebind.
+Justification: I made ISOConverter._create_disk fail loud for missing qemu-img
+    and nonzero create so the Thyris disk-create consumer can prove a real
+    qcow2 without wrapping qemu-img or claiming a guest boot.
 Provenance: snapshots/v0.6/manifest.json -> domains.thyris.edits[0]
 Files: telecom/vm_image_manager.py
 """
@@ -928,6 +928,10 @@ WantedBy=multi-user.target
 
 
 
+class QemuImgError(RuntimeError):
+    """Raised when qemu-img cannot create a disk image."""
+
+
 class ISOConverter:
     """Handles conversion of ISO images to bootable QCOW2 disks."""
 
@@ -958,17 +962,27 @@ class ISOConverter:
             return False, str(e)
 
     async def _create_disk(self, path: Path, size_gb: int) -> bool:
-        """Create a new QCOW2 disk image."""
-        cmd = ["qemu-img", "create", "-f", "qcow2", str(path), f"{size_gb}G"]
-        proc = await asyncio.create_subprocess_exec(
-            *cmd,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
-        )
-        stdout, stderr = await proc.communicate()
+        """Create a new QCOW2 disk image. Fails loud if qemu-img is missing or nonzero."""
+        if size_gb <= 0:
+            raise QemuImgError(f"disk size must be positive, got {size_gb}")
+        qemu_img = shutil.which("qemu-img")
+        if not qemu_img:
+            raise QemuImgError("qemu-img is not on PATH")
+        cmd = [qemu_img, "create", "-f", "qcow2", str(path), f"{size_gb}G"]
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+        except FileNotFoundError as exc:
+            raise QemuImgError("qemu-img is not on PATH") from exc
+        _stdout, stderr = await proc.communicate()
         if proc.returncode != 0:
-            logger.error(f"qemu-img create failed: {stderr.decode()}")
-            return False
+            detail = stderr.decode(errors="replace").strip() or "no stderr"
+            raise QemuImgError(f"qemu-img create failed rc={proc.returncode}: {detail}")
+        if not Path(path).is_file():
+            raise QemuImgError(f"qemu-img create returned 0 but {path} is missing")
         return True
 
     async def _create_cloud_init_iso(self, work_dir: Path) -> Path:

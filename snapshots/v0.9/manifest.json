@@ -1,0 +1,46 @@
+{
+  "version": "0.9",
+  "date": "2026-09-12",
+  "author": "daeron",
+  "summary": "Prove ISOConverter._create_disk with real qemu-img and persist ROE ladder beliefs on the USMS DAG through DefensiveOffensiveBridge.",
+  "domains": {
+    "thyris": {
+      "module": "telecom/vm_image_manager.py",
+      "wrapper": null,
+      "tool_count": 1,
+      "provenance": "ISOConverter._create_disk is the blank qcow2 owner; consumer calls it directly",
+      "edits": [
+        {
+          "date": "2026-09-12",
+          "author": "daeron",
+          "summary": "Fail loud when qemu-img is missing or nonzero; prove a real 1G qcow2 exists via qemu-img info. Do not claim guest boot.",
+          "files": [
+            "telecom/vm_image_manager.py",
+            "test/thyris_vm/test_thyris_vm.py"
+          ],
+          "justification_ref": "SCOPE.md"
+        }
+      ]
+    },
+    "immune": {
+      "module": "security/planetary_immune_system.py",
+      "wrapper": null,
+      "tool_count": 2,
+      "provenance": "USMS signed DAG is the neural substrate; D/O writes through PlanetaryImmuneSystem",
+      "edits": [
+        {
+          "date": "2026-09-12",
+          "author": "daeron",
+          "summary": "Persist ROE OBSERVE/DECEIVE/DEGRADE as USMS BELIEF flags with DAG activation; deny L4 without human authorization; import security.defensive_sovereignty and security.reactive_offense from the bridge.",
+          "files": [
+            "security/planetary_immune_system.py",
+            "security/defensive_offensive_bridge.py",
+            "test/immune/test_planetary_immune_system.py",
+            "test/run_pan_gate.py"
+          ],
+          "justification_ref": "SCOPE.md"
+        }
+      ]
+    }
+  }
+}

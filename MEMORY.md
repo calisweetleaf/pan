@@ -3,6 +3,64 @@
 Append durable, evidence-backed findings here. Preserve corrections as new dated
 entries instead of erasing historical truth.
 
+## 2026-09-12 — qemu-img disk-create + immune ROE on the USMS DAG
+
+**Keys:** ISOConverter · QemuImgError · ROELevel · record_roe_decision ·
+DefensiveOffensiveBridge · neural_activation
+
+**Status:** LANDED (disk-create + ROE persist). QEMU guest boot is NOT landed.
+
+### Durable findings
+
+- `ISOConverter._create_disk` now raises `QemuImgError` when qemu-img is
+  missing or nonzero. The thyris_vm consumer calls that owner directly and
+  asserts `qemu-img info` format=qcow2, virtual_size 1GiB. Host tools on this
+  Linux worker: qemu-img and qemu-system-x86_64 present; adb missing. Missing
+  qemu is no longer a silent pass for disk-create.
+- No Android ISO exists in-repo. `_get_android_iso_path` still names
+  android-x86.org filenames. Do not dummy an image. Do not claim phones boot.
+- USMS already was the signed Ed25519 DAG (EVENT/BELIEF, multi-parent,
+  cosine, attest, SYNTHESIS/CONTRADICTION links). Immune now persists
+  `roe_observe` / `roe_deceive` / `roe_degrade` / `roe_level` and
+  `neural_activation` on BELIEF nodes. Neighbor pull is 0.7 local confidence
+  + 0.3 mean neighbor confidence. Explicit `roe_level` from the D/O bridge
+  wins. NEUTRALIZE without `human_authorized` raises `ImmuneSystemError`.
+- `DefensiveOffensiveBridge` imports `security.defensive_sovereignty` and
+  `security.reactive_offense` (previously failed as top-level names and used
+  fallback enums). `process_threat_event` MEDIUM maps to DECEIVE and
+  `_share_threat_intelligence` writes that ROE through USMS. Restart recovers
+  the intel_id.
+- Gate compile now includes the three D/O lineage files. Live immune owner
+  remains `planetary_immune_system.py`. `BlockchainThreatIntelligence` in
+  `defensive_sovereignty.py` is still an in-process second chain and was not
+  retired this unit.
+- `core-directive.md` is not in this repository. Operator packet is
+  AGENTS.md + security/AGENTS.md + rules_of_engagement.md.
+
+### Evidence
+
+- `python3 test/run_pan_gate.py` exit 0, 16.705s, Linux 3.12.3
+- `results/pan_gate_20260912_091538.json`
+- `test/thyris_vm/runs/20260912_091429/result.json` (7/7)
+- `test/immune/runs/20260912_091516/result.json` (11/11)
+- `snapshots/v0.9/manifest.json`
+
+### Boundary
+
+- Do not treat disk-create as guest boot.
+- Do not wrap D/O to avoid editing `planetary_immune_system.py`.
+- Do not collapse PAN RSA and USMS Ed25519.
+- Do not implement autonomous ROE L4 against external hosts.
+
+### Retrieval anchors
+
+- SCOPE.md
+- SOTA_RUN.md
+- telecom/vm_image_manager.py
+- security/planetary_immune_system.py
+- security/defensive_offensive_bridge.py
+- STATE.md
+
 ## 2026-09-11 — Wave-one branches collapsed off main
 
 **Keys:** PR #5 · `cursor/finish-prior-wave-d5ba` · civic PoI · PANLIN01

@@ -1,58 +1,43 @@
-# SCOPE — closed: real SovereignInferenceEngine._run_inference owner
+# SCOPE — closed: qemu-img disk-create + immune ROE DAG
 
-**Status:** CLOSED 2026-09-11 after gate 20260911_085638.
+**Status:** CLOSED 2026-09-12 after gate 20260912_091538.
 **Ledger:** SOTA_RUN.md
-**Snapshot:** snapshots/v0.8/manifest.json
-**Gate:** results/pan_gate_20260911_085638.json
+**Snapshot:** snapshots/v0.9/manifest.json
+**Gate:** results/pan_gate_20260912_091538.json
 
-The next production unit is not declared here. Next justified action (STATE.md):
-prove `qemu-img` / `qemu-system-x86_64` plus an Android image on a real
-disk-create consumer. Do not pull `core.prompt_bridge`. Do not treat
-`API.server.py` as a second inference engine.
-
-## Engagement Mode
+## Engagement 1 — qemu disk-create (CLOSED)
 
 - mode: EDIT
-- target_module: PAN_SDK/PAN_SDK.py
-- target_module_provenance: PAN monolith SovereignInferenceEngine (placeholder `_run_inference` returned a canned string; treasury PoI re-hashed `{prompt, output}`)
-- justification: I am editing the owned inference method in place because wrapping a second engine would duplicate the packet/manifest contract already on SovereignInferenceEngine, and API.server.py is forbidden as a parallel owner. Treasury Proof-of-Inference already calls a commitment helper; that helper cannot stay hash-theater once a local re-executable owner exists. A wrapper around the placeholder would preserve the dummy. Direct edit is the only way for validators to re-run the same decode path the worker ran.
+- target_module: telecom/vm_image_manager.py
+- target_symbol: ISOConverter._create_disk
+- justification: I edited the owned qemu-img create path because it is
+  already the blank-disk owner. A wrapper around qemu-img would duplicate the
+  command the image manager already runs.
 - author: daeron
-- date: 2026-09-11
-- closed: 2026-09-11 after gate 20260911_085638
+- date: 2026-09-12
+- closed: 2026-09-12 after `check_qemu_img_disk_create` wrote a real 1G qcow2
+  via qemu-img 8.2.2. Phones were not booted. No Android image was invented.
 
-## Runtime options (material choice)
+## Engagement 2 — immune ROE on the USMS DAG (CLOSED)
 
-Validators must re-execute the identical deterministic task (whitepaper §4.3). No dummy string. No `prompt_bridge`. No second engine in `PAN_SDK/API.server.py`. No new microservice.
+- mode: EDIT
+- target_module: security/planetary_immune_system.py
+- target_symbols: PlanetaryImmuneSystem.share_intelligence, record_roe_decision
+- coupled: security/defensive_offensive_bridge.py `_share_threat_intelligence`
+- justification: I edited the live immune owner so ROE OBSERVE/DECEIVE/DEGRADE
+  persist as USMS BELIEF content, with neighbor-weighted activation taken
+  further from the MTL/USMS DAG. Wrapping defensive_offensive_bridge to avoid
+  this edit is banned. Combat memory stays USMS. RSA and Ed25519 stay bound.
+  NEUTRALIZE without human authorization fails loud.
+- author: daeron
+- date: 2026-09-12
+- closed: 2026-09-12 after immune consumer 11/11.
 
-| Option | Runtime | Re-executable by treasury validators? | Decision |
-|---|---|---|---|
-| A | In-process stdlib integer linear decoder owned by `SovereignInferenceEngine`. Weights live on disk (`PANLIN01`), SHA-256 matches `ModelManifest.model_hash`, decode is integer matvec + argmax. `numpy` is in requirements.txt but unused in this monolith; floats/BLAS would jeopardize bit-identical replay. | Yes. Same file bytes + prompt + temperature_milli + max_tokens => same latin-1 output. | **SELECTED** |
-| B | In-process numpy float MLP | Fragile across OS/BLAS; not a bit-identical PoI surface. | Rejected |
-| C | torch / llama.cpp / GGUF / remote HTTP model | New runtime, not already the consumed owner, not fail-closed offline, not stdlib. | Rejected |
-| D | Keep SHA-256 of a canned `{prompt, output}` pair | Current theater. No model is run. | Rejected |
-| E | Implement `_run_inference_async` as a second owner in `API.server.py` | Forbidden parallel engine. API path stays unconsumed. | Rejected |
-| F | `core.prompt_bridge` / PromptSystemBridge | Rejected architecture (Thyris/AIPC). | Rejected |
+## Still out of scope / remaining
 
-Choice: **Option A**. Treasury `verify_proof_of_inference` binds that same owner and re-runs `infer` before accepting a mint.
-
-## Targets (closed)
-
-| Target | Owner | Consumed boundary |
-|---|---|---|
-| `PAN_SDK/PAN_SDK.py` | `SovereignInferenceEngine._run_inference` plus disk load / integer decode | Local re-executable inference; `process_request` calls this owner |
-| `PAN_SDK/treasury.py` | `verify_proof_of_inference` / `build_proof` | PoI mint re-executes the bound engine, not a hash of a claimed string |
-| `test/inference/test_sovereign_inference.py` | focused consumer | load fail-loud, replay match, prompt divergence, packet path |
-| `test/treasury/test_sovereign_treasury.py` | existing Fed consumer | mint uses real PoI; forged output is rejected |
-
-## Direct-edit justification
-
-The placeholder lived inside the owning class. A WRAP adapter would either call the dummy or copy decode logic beside it. API.server.py already subclasses the engine with a sleep-and-string async path; that file is out of this unit and must not become the owner. Treasury already owns PoI verification; it must call the real engine or mint stays theater.
-
-## Still out of scope
-
-- qemu / Android images / Thyris boot
+- Android ISO / QEMU guest boot / adb (adb still missing on this host)
+- Retiring `BlockchainThreatIntelligence` RAM chain inside
+  `defensive_sovereignty.py` (unconsumed second store still on disk)
 - `prompt_bridge`, `schemas.session`, `memory_system`
-- Editing `PAN_SDK/API.server.py` into a second engine
-- Orama / vector spaces / master_db §6.2
-- Auto-binding EmailSocialNode onto DHTNode
-- Publication, deploy, purchase
+- master_db §6.2 / Orama
+- Autonomous ROE Level 4 against external hosts

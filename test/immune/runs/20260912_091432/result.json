@@ -1,0 +1,109 @@
+{
+  "name": "planetary_immune_system",
+  "passed": true,
+  "status": "pass",
+  "pass_count": 11,
+  "fail_count": 0,
+  "skip_count": 0,
+  "elapsed_seconds": 5.19495964050293,
+  "checks": [
+    {
+      "name": "firewall_blocks_telemetry",
+      "status": "pass",
+      "detail": {
+        "telemetry_reason": "telemetry_dictionary",
+        "telemetry_ledger_rows": 1
+      }
+    },
+    {
+      "name": "firewall_allows_civic_chat",
+      "status": "pass",
+      "detail": {
+        "civic_chat_allowed": true
+      }
+    },
+    {
+      "name": "inspect_content_compresses_secrets",
+      "status": "pass",
+      "detail": {
+        "compressed_bytes": 65,
+        "original_bytes": 59
+      }
+    },
+    {
+      "name": "signed_secret_packet_is_blocked",
+      "status": "pass",
+      "detail": {
+        "signed_secret_blocked": true
+      }
+    },
+    {
+      "name": "identity_blocklist",
+      "status": "pass",
+      "detail": {
+        "blocked_identity": "e1dde1fa0247"
+      }
+    },
+    {
+      "name": "legacy_ip_routing_blocked",
+      "status": "pass",
+      "detail": {
+        "routing_blocked": true
+      }
+    },
+    {
+      "name": "memory_survives_restart",
+      "status": "pass",
+      "detail": {
+        "intel_id": "1bc950516579d598",
+        "event_node_id": "ef886ab8-465c-4c01-9ab8-a8fd32201440",
+        "belief_node_id": "81b145c9-c365-424b-9c04-2b67d412b703",
+        "bulletin_dht_key": "threat-memory:187fa483989ec8fd3c63ca850882e075e8dbeccdfc2e6cb6982d913cb9802055",
+        "restart_hits": 4
+      }
+    },
+    {
+      "name": "peer_ingests_bulletin",
+      "status": "pass",
+      "detail": {
+        "peer_ingested_intel_id": "9777ccc17641673f",
+        "peer_hits": 4,
+        "packet_kind": "THREAT_MEMORY_BULLETIN"
+      }
+    },
+    {
+      "name": "contradiction_and_campaign_entangle",
+      "status": "pass",
+      "detail": {
+        "entanglement_id": "e36cdc7e-0360-49f4-a5ea-a36c30269fbd",
+        "contradiction_node_id": "71fc678f-1409-42a8-be0b-b0a5c9374c6b",
+        "contradictions": 1
+      }
+    },
+    {
+      "name": "roe_ladder_persists_through_bridge",
+      "status": "pass",
+      "detail": {
+        "roe_level": "deceive",
+        "neural_activation": 0.385,
+        "belief_node_id": "a7a14cd3-02d6-4d46-9202-2c6d2e2b57ea",
+        "restart_recovered": true
+      }
+    },
+    {
+      "name": "neutralize_requires_human_authorization",
+      "status": "pass",
+      "detail": {
+        "share_denied": "ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized",
+        "record_denied": "ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized",
+        "external_host_action": false
+      }
+    }
+  ],
+  "artifacts": {
+    "json": "/workspace/test/immune/runs/20260912_091432/result.json",
+    "md": "/workspace/test/immune/runs/20260912_091432/result.md",
+    "log": "/workspace/test/immune/runs/20260912_091432/result.log",
+    "run_dir": "/workspace/test/immune/runs/20260912_091432"
+  }
+}

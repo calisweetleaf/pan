@@ -2,6 +2,20 @@
 
 Scratch only; current runtime truth belongs in STATE.md.
 
+## 2026-09-12 qemu disk-create + ROE DAG
+
+- Declared EDIT in SCOPE.md. qemu-img 8.2.2 and qemu-system-x86_64 installed
+  on this Linux worker. `ISOConverter._create_disk` fail-loud. Consumer wrote
+  probe.qcow2 (196624 bytes, virtual 1G). adb still missing. No Android ISO.
+  Phones not booted.
+- Immune: ROE flags on USMS BELIEF; bridge MEDIUM → deceive persisted across
+  reopen; L4 deny without human auth. D/O package imports now
+  `security.defensive_sovereignty` / `security.reactive_offense`.
+- Gate 20260912_091538 green 16.705s. Snapshot v0.9.
+- `core-directive.md` not found in repo. Colony Erebus trail claimed mesh-strand
+  / usms_linkage work that is not in this working tree.
+- Next: Android image + adb, or retire BlockchainThreatIntelligence.
+
 ## 2026-09-11 continuity packet lock
 
 - Operator packet, security/AGENTS.md, and `.cursor/` now match live owners.

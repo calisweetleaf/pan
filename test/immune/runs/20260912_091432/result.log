@@ -1,0 +1,74 @@
+immune consumer start 20260912_091432
+
+========================================================================
+CHECK: firewall_blocks_telemetry
+========================================================================
+telemetry action=block reason=telemetry_dictionary
+PASS firewall_blocks_telemetry
+
+========================================================================
+CHECK: firewall_allows_civic_chat
+========================================================================
+civic chat action=allow
+PASS firewall_allows_civic_chat
+
+========================================================================
+CHECK: inspect_content_compresses_secrets
+========================================================================
+secret preflight action=compress
+PASS inspect_content_compresses_secrets
+
+========================================================================
+CHECK: signed_secret_packet_is_blocked
+========================================================================
+signed secret action=block reason=sensitive_plaintext_on_signed_packet
+PASS signed_secret_packet_is_blocked
+
+========================================================================
+CHECK: identity_blocklist
+========================================================================
+blocklist action=block
+PASS identity_blocklist
+
+========================================================================
+CHECK: legacy_ip_routing_blocked
+========================================================================
+routing action=block reason=legacy_routing_artifact
+PASS legacy_ip_routing_blocked
+
+========================================================================
+CHECK: memory_survives_restart
+========================================================================
+first share intel_id=1bc950516579d598 event=ef886ab8-465 belief=81b145c9-c36 dht=threat-memory:187fa483989ec8fd3c63ca850882e075e8dbeccdfc2e6cb6982d913cb9802055
+restart search hits=4
+PASS memory_survives_restart
+
+========================================================================
+CHECK: peer_ingests_bulletin
+========================================================================
+bravo ingested intel_id=9777ccc17641673f event=1779c43a-d3f
+PASS peer_ingests_bulletin
+
+========================================================================
+CHECK: contradiction_and_campaign_entangle
+========================================================================
+campaign vector=network event=95a9d76c-8d1
+campaign vector=filesystem event=3e7fa147-158
+campaign vector=memory event=4ff40529-7ee
+contradiction node=71fc678f-140 targets=['97b871bc-cf19-44e3-8af2-54a9a9841d96']
+PASS contradiction_and_campaign_entangle
+
+========================================================================
+CHECK: roe_ladder_persists_through_bridge
+========================================================================
+bridge threat_id=5b18b502fa46dd38 mapped_roe=DECEIVE
+belief roe_level=deceive deceive=True activation=0.385
+PASS roe_ladder_persists_through_bridge
+
+========================================================================
+CHECK: neutralize_requires_human_authorization
+========================================================================
+share L4 denied: ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized
+record L4 denied: ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized
+PASS neutralize_requires_human_authorization
+immune consumer status=pass

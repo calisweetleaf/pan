@@ -29,10 +29,12 @@ from memory.unified_memory_system import (
     SovereignIdentityError,
     UnifiedMemoryError,
 )
+from security.defensive_offensive_bridge import DefensiveOffensiveBridge, ThreatLevel
 from security.planetary_immune_system import (
     BulletinVerificationError,
     ImmuneSystemError,
     PlanetaryImmuneSystem,
+    ROELevel,
 )
 from security.sovereign_firewall import (
     FirewallError,
@@ -343,6 +345,130 @@ def check_legacy_ip_routing_blocked(details: dict[str, object]) -> None:
             firewall.close()
 
 
+def check_roe_ladder_persists_through_bridge(details: dict[str, object]) -> None:
+    """D/O process_threat_event writes ROE DECEIVE into USMS; it survives reopen."""
+    with tempfile.TemporaryDirectory(prefix="immune_roe_", ignore_cleanup_errors=True) as tmpdir:
+        root = Path(tmpdir)
+        bridge = None
+        reopened = None
+        try:
+            bridge = DefensiveOffensiveBridge(runtime_root=root)
+            response = bridge.process_threat_event(
+                ThreatLevel.MEDIUM,
+                {
+                    "threat_type": "credential_harvester",
+                    "confidence": 0.55,
+                    "attack_vector": "phishing",
+                    "summary": "harvesting civic credentials on the mesh",
+                },
+                source="defensive_sovereignty",
+            )
+            print(
+                f"bridge threat_id={response.threat_id} "
+                f"mapped_roe={getattr(response.roe_level, 'name', response.roe_level)}"
+            )
+            immune = bridge.threat_intelligence
+            hits = immune.get_relevant_intelligence({"threat_type": "credential_harvester"})
+            if not hits:
+                raise CheckFailure("bridge share did not land in USMS")
+            row = hits[0]
+            belief_id = str(row.get("belief_node_id") or "")
+            if not belief_id:
+                raise CheckFailure("USMS hit missing belief_node_id")
+            belief = immune.memory.retrieve_memory_node(
+                belief_id, requester=immune.memory_identity
+            )
+            if belief is None:
+                raise CheckFailure("ROE BELIEF missing after bridge share")
+            print(
+                f"belief roe_level={belief.content.get('roe_level')} "
+                f"deceive={belief.content.get('roe_deceive')} "
+                f"activation={belief.content.get('neural_activation')}"
+            )
+            if belief.content.get("roe_level") != ROELevel.DECEIVE.value:
+                raise CheckFailure(
+                    f"expected roe_deceive, got {belief.content.get('roe_level')}"
+                )
+            if belief.content.get("roe_deceive") is not True:
+                raise CheckFailure("roe_deceive flag was not persisted")
+            if belief.content.get("roe_neutralize") is True:
+                raise CheckFailure("MEDIUM threat must not persist NEUTRALIZE")
+            details["roe_level"] = belief.content.get("roe_level")
+            details["neural_activation"] = belief.content.get("neural_activation")
+            details["belief_node_id"] = belief_id
+            intel_id = str(row.get("intel_id") or "")
+            immune.close()
+            bridge.stop_coordination()
+            bridge = None
+            reopened = PlanetaryImmuneSystem(root, node_name="immune-roe-reopen")
+            recovered = reopened.get_relevant_intelligence(
+                {"threat_type": "credential_harvester"}
+            )
+            recovered_ids = {str(item.get("intel_id")) for item in recovered}
+            if intel_id not in recovered_ids:
+                raise CheckFailure("ROE intelligence did not survive reopen")
+            details["restart_recovered"] = True
+        finally:
+            if bridge is not None:
+                try:
+                    bridge.threat_intelligence.close()
+                except (ImmuneSystemError, OSError, RuntimeError):
+                    pass
+                bridge.stop_coordination()
+            if reopened is not None:
+                reopened.close()
+
+
+def check_neutralize_requires_human_authorization(details: dict[str, object]) -> None:
+    """ROE L4 without human authorization fails loud and never becomes an external action."""
+    with tempfile.TemporaryDirectory(prefix="immune_l4_", ignore_cleanup_errors=True) as tmpdir:
+        immune = None
+        try:
+            immune = PlanetaryImmuneSystem(Path(tmpdir), node_name="immune-l4")
+            try:
+                immune.share_intelligence(
+                    {
+                        "threat_type": "external_host_exploit",
+                        "confidence": 0.99,
+                        "roe_level": ROELevel.NEUTRALIZE.value,
+                        "human_authorized": False,
+                    },
+                    source="reactive_offense",
+                )
+            except ImmuneSystemError as exc:
+                print(f"share L4 denied: {exc}")
+                details["share_denied"] = str(exc)
+            else:
+                raise CheckFailure("L4 share without human auth was allowed")
+            observe = immune.share_intelligence(
+                {
+                    "threat_type": "scanner_noise",
+                    "confidence": 0.2,
+                    "summary": "benign scanner",
+                },
+                source="defensive_sovereignty",
+            )
+            if observe.event_node_id == "":
+                raise CheckFailure("observe share did not persist an event")
+            try:
+                immune.record_roe_decision(
+                    event_node_id=observe.event_node_id,
+                    roe_level=ROELevel.NEUTRALIZE.value,
+                    human_authorized=False,
+                )
+            except ImmuneSystemError as exc:
+                print(f"record L4 denied: {exc}")
+                details["record_denied"] = str(exc)
+            else:
+                raise CheckFailure("record_roe_decision allowed L4 without human auth")
+            if "human authorization" not in str(details.get("share_denied") or "").lower():
+                raise CheckFailure("L4 deny did not name human authorization")
+            details["external_host_action"] = False
+        finally:
+            if immune is not None:
+                immune.close()
+
+
 CHECKS: tuple[tuple[str, CheckFn], ...] = (
     ("firewall_blocks_telemetry", check_firewall_blocks_telemetry),
     ("firewall_allows_civic_chat", check_firewall_allows_civic_chat),
@@ -353,6 +479,8 @@ CHECKS: tuple[tuple[str, CheckFn], ...] = (
     ("memory_survives_restart", check_memory_survives_restart),
     ("peer_ingests_bulletin", check_peer_ingests_bulletin),
     ("contradiction_and_campaign_entangle", check_contradiction_and_campaign_entangle),
+    ("roe_ladder_persists_through_bridge", check_roe_ladder_persists_through_bridge),
+    ("neutralize_requires_human_authorization", check_neutralize_requires_human_authorization),
 )
 
 
@@ -451,6 +579,8 @@ def write_artifacts(payload: dict[str, object], timestamp: str, log_text: str) -
         "I required a real USMS sqlite file, a real firewall ledger, and two PAN DHT nodes.",
         "I required the demo firewall to be gone. I required high-confidence beliefs to",
         "become `THREAT_MEMORY_BULLETIN` packets that a peer can ingest after restart.",
+        "I required ROE DECEIVE/DEGRADE to persist as USMS BELIEF content via the",
+        "defensive-offensive bridge, and ROE Level 4 to fail without human authorization.",
         "",
         "## Checks",
         "",

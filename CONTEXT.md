@@ -16,6 +16,27 @@ source inspection or STATE.md.
 - NOTEPAD.md — current scratch, non-canonical.
 - security/AGENTS.md + security/rules_of_engagement.md — security lane.
 
+## 2026-09-12 — qemu-img disk-create + immune ROE DAG
+
+**Keys:** ISOConverter._create_disk · qemu-img · ROELevel ·
+DefensiveOffensiveBridge · UnifiedMemorySystem
+
+- **State:** `ISOConverter._create_disk` fails loud and wrote a real 1G qcow2
+  on this Linux worker (qemu-img 8.2.2, qemu-system-x86_64 present, adb
+  missing). Immune ROE OBSERVE/DECEIVE/DEGRADE persist as USMS BELIEF content;
+  D/O `process_threat_event` writes through `PlanetaryImmuneSystem`. L4 without
+  human authorization fails loud. Gate 20260912_091538 green in 16.705s.
+  Phones were not booted. No Android image.
+- **Authority:** STATE.md; SOTA_RUN.md; results/pan_gate_20260912_091538.json;
+  test/thyris_vm/runs/20260912_091429/result.json;
+  test/immune/runs/20260912_091516/result.json; snapshots/v0.9/manifest.json.
+- **Boundary:** Do not claim QEMU guest boot. Do not dummy an Android ISO.
+  Do not collapse RSA/Ed25519. `BlockchainThreatIntelligence` still exists in
+  defensive_sovereignty.py and is not the consumed combat-memory path.
+- **Then inspect:** telecom/vm_image_manager.py,
+  security/planetary_immune_system.py, security/defensive_offensive_bridge.py.
+- **Open:** Android image + adb; retire the in-process second threat chain.
+
 ## 2026-09-11 — Operator packet locked to live owners
 
 **Keys:** AGENTS.md · security/AGENTS.md · .cursor/rules · SCOPE.md

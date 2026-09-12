@@ -1,0 +1,57 @@
+{
+  "name": "master_db",
+  "passed": true,
+  "status": "pass",
+  "pass_count": 4,
+  "fail_count": 0,
+  "skip_count": 0,
+  "elapsed_seconds": 2.333003044128418,
+  "checks": [
+    {
+      "name": "offline_nodes_converge",
+      "status": "pass",
+      "detail": {
+        "counter": 11,
+        "docs": [
+          "citizen:ann",
+          "citizen:bea"
+        ]
+      }
+    },
+    {
+      "name": "join_algebra",
+      "status": "pass",
+      "detail": {
+        "commutative": true,
+        "associative": true,
+        "idempotent": true
+      }
+    },
+    {
+      "name": "tombstone_and_orset_remove",
+      "status": "pass",
+      "detail": {
+        "tombstone": true
+      }
+    },
+    {
+      "name": "dht_bind_and_restart",
+      "status": "pass",
+      "detail": {
+        "before": {
+          "emission": 1
+        },
+        "after": {
+          "emission": 1
+        },
+        "cycles": 3
+      }
+    }
+  ],
+  "artifacts": {
+    "json": "/workspace/test/master_db/runs/20260912_091555/result.json",
+    "md": "/workspace/test/master_db/runs/20260912_091555/result.md",
+    "log": "/workspace/test/master_db/runs/20260912_091555/result.log",
+    "run_dir": "/workspace/test/master_db/runs/20260912_091555"
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "name": "thyris_vm",
+  "passed": true,
+  "status": "pass",
+  "pass_count": 7,
+  "fail_count": 0,
+  "skip_count": 0,
+  "elapsed_seconds": 0.1278367042541504,
+  "checks": [
+    {
+      "name": "phone_orchestrator_imports",
+      "status": "pass",
+      "detail": {
+        "module": "/workspace/telecom/phone_orchestrator.py",
+        "thyris_class": "ThyrisPhoneOrchestrator",
+        "vm_state": "creating"
+      }
+    },
+    {
+      "name": "image_manager_constructs",
+      "status": "pass",
+      "detail": {
+        "metadata_file": "/tmp/thyris_img_5naqa2uy/images/image_metadata.json",
+        "os_families": [
+          "ubuntu",
+          "debian",
+          "fedora",
+          "centos",
+          "alpine",
+          "arch",
+          "windows",
+          "custom"
+        ]
+      }
+    },
+    {
+      "name": "supervisor_constructs",
+      "status": "pass",
+      "detail": {
+        "ip": "192.168.122.176",
+        "memory_db": "/tmp/thyris_sup_v508d6hh/vms/memory/metadata.db",
+        "profiles": [
+          "coding",
+          "idle",
+          "media_creation",
+          "research"
+        ],
+        "orchestrator_aliases": {
+          "vm_manager": true,
+          "network": true
+        }
+      }
+    },
+    {
+      "name": "aipc_prompt_unbound",
+      "status": "pass",
+      "detail": {
+        "supervisor_file": "/workspace/telecom/vm_supervisor.py",
+        "prompt_imports": [],
+        "leaked_methods": []
+      }
+    },
+    {
+      "name": "usms_erebus_has_no_prompt",
+      "status": "pass",
+      "detail": {
+        "usms_module": "memory.unified_memory_system",
+        "immune_module": "security.planetary_immune_system",
+        "packet": "UnifiedDataPacket",
+        "prompt_bridge_in_usms": false,
+        "prompt_bridge_in_immune": false
+      }
+    },
+    {
+      "name": "telecom_host_tools_contract",
+      "status": "pass",
+      "detail": {
+        "required": [
+          "qemu-system-x86_64",
+          "qemu-img",
+          "adb"
+        ],
+        "ok": false,
+        "missing": [
+          "adb"
+        ],
+        "orchestrator": "ThyrisPhoneOrchestrator"
+      }
+    },
+    {
+      "name": "qemu_img_disk_create",
+      "status": "pass",
+      "detail": {
+        "qemu_img": "/usr/bin/qemu-img",
+        "qemu_system_x86_64": "/usr/bin/qemu-system-x86_64",
+        "booted": false,
+        "bytes": 196624,
+        "format": "qcow2",
+        "virtual_size": 1073741824,
+        "owner": "telecom.vm_image_manager.ISOConverter._create_disk"
+      }
+    }
+  ],
+  "artifacts": {
+    "json": "/workspace/test/thyris_vm/runs/20260912_091429/result.json",
+    "md": "/workspace/test/thyris_vm/runs/20260912_091429/result.md",
+    "log": "/workspace/test/thyris_vm/runs/20260912_091429/result.log",
+    "run_dir": "/workspace/test/thyris_vm/runs/20260912_091429"
+  }
+}

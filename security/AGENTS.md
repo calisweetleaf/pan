@@ -29,16 +29,18 @@ PAN `SovereignIdentity` (RSA, `PAN_SDK.PAN_SDK`) and USMS `SovereignIdentity`
 (Ed25519, `memory.unified_memory_system`) are different cryptography. Bind them.
 Do not collapse them into one class.
 
-## Present lineage that is not the consumed immune path
+## Present lineage now compile/import consumed via the bridge
 
-These files exist on disk. Nothing in the gate, Thyris, or the immune consumer
-imports them as the live threat-intelligence owner:
+These files exist on disk. The gate compiles them. The immune consumer imports
+`DefensiveOffensiveBridge`, which imports the live `security.*` owners and
+writes combat memory through `PlanetaryImmuneSystem` / USMS. They are still
+not a replacement for the immune owner:
 
 | File | What it is |
 |---|---|
-| defensive_sovereignty.py | historical Somnus defensive coordinator |
-| reactive_offense.py | historical ROE-calibrated offensive coordinator |
-| defensive_offensive_bridge.py | historical D/O bridge; later aliased ThreatIntelligenceCoordinator toward PlanetaryImmuneSystem |
+| defensive_sovereignty.py | historical Somnus defensive coordinator; RAM `threat_intelligence` and `BlockchainThreatIntelligence` remain unconsumed second stores |
+| reactive_offense.py | historical ROE-calibrated offensive coordinator; `ROELevel` is imported by the bridge |
+| defensive_offensive_bridge.py | D/O bridge; `ThreatIntelligenceCoordinator` subclasses `PlanetaryImmuneSystem`; `process_threat_event` shares through USMS |
 
 Do not wrap these files to avoid editing `planetary_immune_system.py`. Do not
 treat an in-process `intelligence_database` as combat memory. Ephemeral RAM

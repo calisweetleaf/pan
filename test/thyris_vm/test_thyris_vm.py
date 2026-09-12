@@ -6,10 +6,13 @@ Prints a run report and writes JSON/MD/LOG artifacts.
 
 from __future__ import annotations
 
+import asyncio
 import ast
 import importlib
 import io
 import json
+import shutil
+import subprocess
 import sys
 import tempfile
 import time
@@ -34,7 +37,7 @@ from telecom.phone_orchestrator import (
     CustomVMManager as OrchestratorVM,
     ThyrisPhoneOrchestrator,
 )
-from telecom.vm_image_manager import OSFamily, VMImageManager
+from telecom.vm_image_manager import ISOConverter, OSFamily, QemuImgError, VMImageManager
 from telecom.vm_supervisor import (
     AIVMInstance,
     CustomNetworkManager,
@@ -242,6 +245,46 @@ def check_telecom_host_tools_contract(details: dict[str, object]) -> None:
             orch.cache.shutdown()
 
 
+def check_qemu_img_disk_create(details: dict[str, object]) -> None:
+    """Prove ISOConverter._create_disk writes a real qcow2. Does not boot a guest."""
+    qemu_img = shutil.which("qemu-img")
+    qemu_system = shutil.which("qemu-system-x86_64")
+    details["qemu_img"] = qemu_img
+    details["qemu_system_x86_64"] = qemu_system
+    details["booted"] = False
+    if not qemu_img:
+        raise CheckFailure("qemu-img missing; disk-create is unproven")
+    print(f"qemu-img={qemu_img}")
+    print(f"qemu-system-x86_64={qemu_system}")
+    with tempfile.TemporaryDirectory(prefix="thyris_disk_") as tmpdir:
+        disk = Path(tmpdir) / "probe.qcow2"
+        created = asyncio.run(ISOConverter()._create_disk(disk, 1))
+        if created is not True:
+            raise CheckFailure("ISOConverter._create_disk did not return True")
+        if not disk.is_file() or disk.stat().st_size <= 0:
+            raise CheckFailure(f"qcow2 was not written at {disk}")
+        info = subprocess.run(
+            [qemu_img, "info", "--output=json", str(disk)],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        payload = json.loads(info.stdout)
+        print(
+            f"qcow2 path={disk} bytes={disk.stat().st_size} "
+            f"format={payload.get('format')} virtual_size={payload.get('virtual-size')}"
+        )
+        if payload.get("format") != "qcow2":
+            raise CheckFailure(f"expected qcow2, got {payload.get('format')}")
+        virtual_size = int(payload.get("virtual-size") or 0)
+        if virtual_size < (1024 * 1024 * 1024):
+            raise CheckFailure(f"virtual-size too small: {virtual_size}")
+        details["bytes"] = disk.stat().st_size
+        details["format"] = payload.get("format")
+        details["virtual_size"] = virtual_size
+        details["owner"] = "telecom.vm_image_manager.ISOConverter._create_disk"
+
+
 def run() -> dict[str, object]:
     """Run Thyris VM owner checks and persist artifacts."""
     _print_banner("THYRIS VM CONSUMER")
@@ -256,6 +299,7 @@ def run() -> dict[str, object]:
         ("aipc_prompt_unbound", check_aipc_prompt_unbound),
         ("usms_erebus_has_no_prompt", check_usms_erebus_has_no_prompt),
         ("telecom_host_tools_contract", check_telecom_host_tools_contract),
+        ("qemu_img_disk_create", check_qemu_img_disk_create),
     )
     for name, fn in runners:
         detail: dict[str, object] = {}
@@ -272,6 +316,7 @@ def run() -> dict[str, object]:
             ValueError,
             TypeError,
             ImportError,
+            QemuImgError,
         ) as exc:
             print(f"FAIL {name}: {type(exc).__name__}: {exc}")
             traceback.print_exc()
@@ -327,7 +372,9 @@ def write_artifacts(payload: dict[str, object], timestamp: str, log_text: str) -
         "I required phone_orchestrator to import against live memory/ and telecom/",
         "owners, VMImageManager and VMSupervisor to construct on tempdirs, AIPC",
         "prompt_bridge to be unbound from the Thyris seam, USMS/Erebus to own",
-        "cognition without prompt_bridge, and host-tool fail-loud to name qemu/adb.",
+        "cognition without prompt_bridge, host-tool fail-loud to name qemu/adb,",
+        "and ISOConverter._create_disk to write a real qcow2 when qemu-img exists.",
+        "This consumer does not boot a guest and does not claim Android images.",
         "",
         "## Checks",
         "",
