@@ -3,6 +3,32 @@
 Append durable, evidence-backed findings here. Preserve corrections as new dated
 entries instead of erasing historical truth.
 
+## 2026-09-12 — unopenable /dev/kvm falls back to TCG
+
+**Keys:** select_qemu_accelerator · Permission denied · ISOLINUX
+
+**Status:** LANDED. PhoneVMState.READY and ADB remain unproven.
+
+### Durable findings
+
+- `os.path.exists("/dev/kvm")` is not sufficient. This Linux worker's kvm
+  node exists, `os.open(..., O_RDWR)` fails, and qemu-system with
+  `-enable-kvm` exits rc=1 before any console. TCG still produced SeaBIOS +
+  ISOLINUX 6.03 on the landed `boot_android_installer` owner.
+- Combined project gate on `c1bcf6b` + this accel fix: exit 0, 16.853s,
+  immune 12/12, qemu-img disk-create proven. Boot consumer 4/4.
+
+### Evidence
+
+- `test/thyris_vm/runs/20260912_094201/result.json`
+- `results/pan_gate_20260912_094045.json`
+- `snapshots/v0.12/manifest.json`
+
+### Boundary
+
+- Do not treat this as PhoneVMState.READY.
+- Do not reopen BlockchainThreatIntelligence.
+
 ## 2026-09-12 — Android-x86 installer boot via nographic console
 
 **Keys:** boot_android_installer · ISO_BOOTLOADER_MARKERS · android-x86_64-9.0-r2

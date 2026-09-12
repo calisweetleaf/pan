@@ -16,7 +16,19 @@ source inspection or STATE.md.
 - NOTEPAD.md — current scratch, non-canonical.
 - security/AGENTS.md + security/rules_of_engagement.md — security lane.
 
+## 2026-09-12 — KVM-inaccessible TCG fallback for Android installer boot
+
+**Keys:** select_qemu_accelerator · /dev/kvm · TCG · ISOLINUX
+
+- **State:** Combined `c1bcf6b` gate green on Linux qemu (16.853s). Boot
+  consumer 4/4 via `-accel tcg` when kvm cannot be opened. `phone_ready`
+  false. Second chain not reopened.
+- **Authority:** results/pan_gate_20260912_094045.json;
+  test/thyris_vm/runs/20260912_094201/result.json; snapshots/v0.12/manifest.json.
+- **Boundary:** Do not treat ISOLINUX as PhoneVMState.READY.
+
 ## 2026-09-12 — retire second chain; bind D/O share to immune/USMS
+
 
 **Keys:** BlockchainThreatIntelligence · ThreatDetectionModule ·
 NetworkThreatMonitor · PlanetaryImmuneSystem

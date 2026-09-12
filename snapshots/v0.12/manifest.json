@@ -1,0 +1,26 @@
+{
+  "version": "0.12",
+  "date": "2026-09-12",
+  "author": "daeron",
+  "summary": "Open /dev/kvm before -enable-kvm; fall back to TCG when the node is not usable so android-x86 installer boot still reaches ISOLINUX. Not PhoneVMState.READY.",
+  "domains": {
+    "thyris": {
+      "module": "telecom/phone_orchestrator.py",
+      "wrapper": null,
+      "tool_count": 1,
+      "provenance": "select_qemu_accelerator is the argv accel owner used by boot_android_installer",
+      "edits": [
+        {
+          "date": "2026-09-12",
+          "author": "daeron",
+          "summary": "Treat unopenable /dev/kvm as TCG. Do not redo disk-create, ROE, or installer-boot design. phone_ready and adb_proven stay false.",
+          "files": [
+            "telecom/phone_orchestrator.py",
+            "test/thyris_vm/test_thyris_android_boot.py"
+          ],
+          "justification_ref": "SCOPE.md"
+        }
+      ]
+    }
+  }
+}
