@@ -33,6 +33,10 @@ alwaysApply: true
 - Never claim success from a plan, static check, old log, or unexecuted command.
   Separate pre-existing baseline failures from introduced failures.
 - Preserve unrelated working-tree changes and historical evidence.
-- Next justified action is qemu-img / qemu-system-x86_64 plus an Android image,
-  or a real SovereignInferenceEngine._run_inference owner. prompt_bridge is
-  rejected, not next work.
+- Next justified action is the real SovereignInferenceEngine._run_inference
+  owner (finish-prior inside already-landed treasury Proof-of-Inference).
+  Present local-model/runtime options before writing code; do not dummy the
+  owner. qemu-img / qemu-system-x86_64 plus an Android image is a later
+  host-tool frontier after that owner is selected and landed, not a co-equal
+  next unit. prompt_bridge is rejected, not next work. Do not expand
+  master_db §6.2.

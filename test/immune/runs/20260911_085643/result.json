@@ -1,0 +1,90 @@
+{
+  "name": "planetary_immune_system",
+  "passed": true,
+  "status": "pass",
+  "pass_count": 9,
+  "fail_count": 0,
+  "skip_count": 0,
+  "elapsed_seconds": 2.553027868270874,
+  "checks": [
+    {
+      "name": "firewall_blocks_telemetry",
+      "status": "pass",
+      "detail": {
+        "telemetry_reason": "telemetry_dictionary",
+        "telemetry_ledger_rows": 1
+      }
+    },
+    {
+      "name": "firewall_allows_civic_chat",
+      "status": "pass",
+      "detail": {
+        "civic_chat_allowed": true
+      }
+    },
+    {
+      "name": "inspect_content_compresses_secrets",
+      "status": "pass",
+      "detail": {
+        "compressed_bytes": 65,
+        "original_bytes": 59
+      }
+    },
+    {
+      "name": "signed_secret_packet_is_blocked",
+      "status": "pass",
+      "detail": {
+        "signed_secret_blocked": true
+      }
+    },
+    {
+      "name": "identity_blocklist",
+      "status": "pass",
+      "detail": {
+        "blocked_identity": "f45205225e07"
+      }
+    },
+    {
+      "name": "legacy_ip_routing_blocked",
+      "status": "pass",
+      "detail": {
+        "routing_blocked": true
+      }
+    },
+    {
+      "name": "memory_survives_restart",
+      "status": "pass",
+      "detail": {
+        "intel_id": "1bc950516579d598",
+        "event_node_id": "a4e0f5dd-a3cd-494e-8ff9-71b2f99b57c5",
+        "belief_node_id": "d0d91d46-4bb8-4d4c-b062-e91c9c3d57f7",
+        "bulletin_dht_key": "threat-memory:49f6a0122938bcb0f575ba401f93d60de8e353c399a6b8471e6723269c012d56",
+        "restart_hits": 4
+      }
+    },
+    {
+      "name": "peer_ingests_bulletin",
+      "status": "pass",
+      "detail": {
+        "peer_ingested_intel_id": "9777ccc17641673f",
+        "peer_hits": 4,
+        "packet_kind": "THREAT_MEMORY_BULLETIN"
+      }
+    },
+    {
+      "name": "contradiction_and_campaign_entangle",
+      "status": "pass",
+      "detail": {
+        "entanglement_id": "986fe740-940b-4f23-ab5f-2c7cf9e49218",
+        "contradiction_node_id": "9370447c-94c8-47d2-93bf-36eccace926a",
+        "contradictions": 1
+      }
+    }
+  ],
+  "artifacts": {
+    "json": "/workspace/test/immune/runs/20260911_085643/result.json",
+    "md": "/workspace/test/immune/runs/20260911_085643/result.md",
+    "log": "/workspace/test/immune/runs/20260911_085643/result.log",
+    "run_dir": "/workspace/test/immune/runs/20260911_085643"
+  }
+}

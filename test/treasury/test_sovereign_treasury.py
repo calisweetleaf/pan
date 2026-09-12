@@ -21,11 +21,13 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
 from PAN_SDK import DHTNode, PANPersistenceStore, SovereignIdentity
+from PAN_SDK.PAN_SDK import ModelManifest, SovereignInferenceEngine, write_linear_model
 from PAN_SDK.treasury import (
     NetworkTelemetry,
     ProposalKind,
     TreasuryContractRejected,
     TreasuryError,
+    TreasuryProofError,
     TreasuryState,
     TreasuryStateError,
     build_proof,
@@ -55,6 +57,27 @@ def _open_node(tmpdir: str, identity: SovereignIdentity) -> DHTNode:
     """Open a DHT node with persistence under tmpdir."""
     store = PANPersistenceStore(base_path=Path(tmpdir) / "pan")
     return DHTNode(identity, persistence=store, enable_consensus=False)
+
+
+def _bind_poi_engine(
+    treasury: object,
+    tmpdir: str,
+    creator: SovereignIdentity,
+) -> SovereignInferenceEngine:
+    """Write PANLIN01 weights and bind them on the treasury for PoI replay."""
+    model_path = Path(tmpdir) / "poi.panlin"
+    model_hash = write_linear_model(model_path, seed=b"pan-poi-linear-v1")
+    model_identity = SovereignIdentity("PoILinearModel")
+    manifest = ModelManifest(
+        model_name="poi-linear-v1",
+        model_hash=model_hash,
+        model_public_key_pem=model_identity.get_public_key_pem(),
+        creator_identity=creator,
+    )
+    engine = SovereignInferenceEngine(str(model_path), manifest)
+    treasury.bind_inference_engine(engine)
+    print(f"bound PoI engine hash={model_hash[:12]} path={model_path}")
+    return engine
 
 
 def _pass_votes(treasury: object, proposal_id: str, voters: tuple[SovereignIdentity, ...]) -> None:
@@ -131,12 +154,14 @@ def check_poi_mint_requires_quorum(details: dict[str, object]) -> None:
             for identity in (chair, one, two):
                 treasury.register_validator(identity.identity_hash)
             treasury.seal_genesis(chair.identity_hash)
+            engine = _bind_poi_engine(treasury, tmpdir, chair)
             proof = build_proof(
                 worker_identity_hash=one.identity_hash,
                 prompt="infer:civic-cycle-1",
-                output="commitment-output-1",
                 verifier_identity_hashes=(chair.identity_hash, two.identity_hash),
+                engine=engine,
             )
+            print(f"poi output_len={len(proof.output)} model={proof.model_hash[:12]}")
             proposal = treasury.submit_proposal(
                 one.identity_hash,
                 ProposalKind.MINT,
@@ -177,11 +202,12 @@ def check_distribute_and_burn_and_halts(details: dict[str, object]) -> None:
             for identity in (chair, one, two):
                 treasury.register_validator(identity.identity_hash)
             treasury.seal_genesis(chair.identity_hash)
+            engine = _bind_poi_engine(treasury, tmpdir, chair)
             proof = build_proof(
                 worker_identity_hash=two.identity_hash,
                 prompt="infer:reserve-fill",
-                output="reserve-output",
                 verifier_identity_hashes=(chair.identity_hash, one.identity_hash),
+                engine=engine,
             )
             mint = treasury.submit_proposal(
                 two.identity_hash,
@@ -352,12 +378,92 @@ def check_restart_hydrates_fsm(details: dict[str, object]) -> None:
             second.persistence.close()
 
 
+def check_poi_rejects_forged_output(details: dict[str, object]) -> None:
+    """A claimed output that the bound decoder does not emit cannot mint."""
+    chair, one, two = _three_identities()
+    with tempfile.TemporaryDirectory(prefix="treas_forge_") as tmpdir:
+        node = _open_node(tmpdir, chair)
+        treasury = node.treasury
+        try:
+            for identity in (chair, one, two):
+                treasury.register_validator(identity.identity_hash)
+            treasury.seal_genesis(chair.identity_hash)
+            engine = _bind_poi_engine(treasury, tmpdir, chair)
+            proof = build_proof(
+                worker_identity_hash=one.identity_hash,
+                prompt="infer:civic-cycle-1",
+                verifier_identity_hashes=(chair.identity_hash, two.identity_hash),
+                engine=engine,
+                output="forged-commitment-output",
+            )
+            proposal = treasury.submit_proposal(
+                one.identity_hash,
+                ProposalKind.MINT,
+                {
+                    "recipient_id": one.identity_hash,
+                    "amount": 5,
+                    "poi": proof.to_mapping(),
+                },
+            )
+            _pass_votes(treasury, proposal.proposal_id, (chair, one, two))
+            try:
+                treasury.execute_proposal(proposal.proposal_id)
+                raise CheckFailure("forged PoI output was minted")
+            except TreasuryProofError as exc:
+                print(f"forged output rejected: {exc}")
+                details["error"] = str(exc)
+            if node.economic_engine.get_balance(one.identity_hash) != 0:
+                raise CheckFailure("forged mint mutated the ledger")
+        finally:
+            node.persistence.close()
+
+
+def check_poi_unbound_engine_fails(details: dict[str, object]) -> None:
+    """Mint fails loud when the treasury has no bound inference owner."""
+    chair, one, two = _three_identities()
+    with tempfile.TemporaryDirectory(prefix="treas_unbound_") as tmpdir:
+        node = _open_node(tmpdir, chair)
+        treasury = node.treasury
+        try:
+            for identity in (chair, one, two):
+                treasury.register_validator(identity.identity_hash)
+            treasury.seal_genesis(chair.identity_hash)
+            engine = _bind_poi_engine(treasury, tmpdir, chair)
+            proof = build_proof(
+                worker_identity_hash=one.identity_hash,
+                prompt="infer:civic-cycle-1",
+                verifier_identity_hashes=(chair.identity_hash, two.identity_hash),
+                engine=engine,
+            )
+            treasury.inference_engine = None
+            proposal = treasury.submit_proposal(
+                one.identity_hash,
+                ProposalKind.MINT,
+                {
+                    "recipient_id": one.identity_hash,
+                    "amount": 5,
+                    "poi": proof.to_mapping(),
+                },
+            )
+            _pass_votes(treasury, proposal.proposal_id, (chair, one, two))
+            try:
+                treasury.execute_proposal(proposal.proposal_id)
+                raise CheckFailure("mint succeeded without a bound engine")
+            except TreasuryProofError as exc:
+                print(f"unbound engine blocked mint: {exc}")
+                details["error"] = str(exc)
+        finally:
+            node.persistence.close()
+
+
 CHECKS = (
     ("genesis_rejects_mint", check_genesis_rejects_mint),
     ("seal_genesis_and_contract_reject", check_seal_genesis_and_contract_reject),
     ("poi_mint_requires_quorum", check_poi_mint_requires_quorum),
     ("distribute_and_burn_and_halts", check_distribute_and_burn_and_halts),
     ("restart_hydrates_fsm", check_restart_hydrates_fsm),
+    ("poi_rejects_forged_output", check_poi_rejects_forged_output),
+    ("poi_unbound_engine_fails", check_poi_unbound_engine_fails),
 )
 
 
@@ -384,6 +490,7 @@ def run() -> dict[str, object]:
             TreasuryError,
             TreasuryStateError,
             TreasuryContractRejected,
+            TreasuryProofError,
             AssertionError,
             OSError,
             RuntimeError,
@@ -443,8 +550,10 @@ def write_artifacts(payload: dict[str, object], timestamp: str, log_text: str) -
         "",
         "## What I required",
         "",
-        "I required a rigid FSM, Proof-of-Inference minting, ceil(n/2)+1 quorum,",
-        "smart-contract rejection, and sqlite hydrate after reopen.",
+        "I required a rigid FSM, Proof-of-Inference minting against the bound",
+        "SovereignInferenceEngine owner, ceil(n/2)+1 quorum, smart-contract",
+        "rejection, sqlite hydrate after reopen, forged-output rejection, and",
+        "fail-loud mint when no engine is bound.",
         "",
         "## Checks",
         "",

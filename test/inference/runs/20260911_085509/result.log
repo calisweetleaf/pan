@@ -1,0 +1,49 @@
+inference consumer start 20260911_085509
+
+========================================================================
+CHECK: missing_model_fails_loud
+========================================================================
+missing model failed loud: model file is missing: /tmp/infer_missing_7jnafl58/absent.panlin
+PASS missing_model_fails_loud
+
+========================================================================
+CHECK: hash_mismatch_fails_loud
+========================================================================
+hash mismatch failed loud: model file hash diverged from ModelManifest.model_hash
+PASS hash_mismatch_fails_loud
+
+========================================================================
+CHECK: corrupt_header_fails_loud
+========================================================================
+corrupt header failed loud: model file is not pan-sovereign-linear-v1
+PASS corrupt_header_fails_loud
+
+========================================================================
+CHECK: reexecution_matches
+========================================================================
+loaded replay hash=523773e1220b bytes=8336
+output_len=24 once==twice=True once==peer=True
+PASS reexecution_matches
+
+========================================================================
+CHECK: prompt_and_temperature_diverge
+========================================================================
+loaded diverge hash=301bc623f4a4 bytes=8336
+civic_len=24 reserve_len=24 civic==reserve=False civic==hot=False
+PASS prompt_and_temperature_diverge
+
+========================================================================
+CHECK: process_request_uses_owner
+========================================================================
+loaded packet hash=35b3dbc9efe9 bytes=8336
+kind=INFERENCE_RESPONSE parent=['7bdc7ff5c1f00526c008ad35382003cc875e7f9aaa35de1370a96e8bc743ce38'] packet==infer=True model_hash=35b3dbc9efe9
+PASS process_request_uses_owner
+
+========================================================================
+CHECK: illegal_args_fail_loud
+========================================================================
+loaded args hash=352ac42acab9 bytes=8336
+max_tokens=0 failed loud: max_tokens must be >= 1
+negative temperature failed loud: temperature must be >= 0
+PASS illegal_args_fail_loud
+inference consumer status=pass

@@ -9,7 +9,9 @@ Prepare an evidence-bound PAN handoff.
    security/AGENTS.md when the security surface changed, only when each
    surface's semantics changed.
 4. Record the exact blocker and one imperative next action if incomplete.
-   Current next action is qemu-img / qemu-system-x86_64 plus an Android image,
-   or a real `_run_inference` owner. Do not list prompt_bridge as next work.
+   Current next action is the real `_run_inference` owner (finish-prior).
+   qemu-img / qemu-system-x86_64 plus an Android image is later, not
+   co-equal. Do not list prompt_bridge as next work. Do not expand
+   master_db §6.2.
 5. Regenerate filetree.md with FileTree Pro if the repository structure
    changed; never hand-edit it.

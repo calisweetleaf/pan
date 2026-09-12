@@ -24,6 +24,9 @@ run the narrowest meaningful consumer test, widen validation as justified, and
 report baseline failures separately from regressions. Update persistent state
 only where its semantic owner changed.
 
-The next justified production unit is qemu-img / qemu-system-x86_64 plus an
-Android image disk-create path, or a real SovereignInferenceEngine._run_inference
-owner. Do not start a prompt_bridge unit.
+The next justified production unit is a real SovereignInferenceEngine._run_inference
+owner in PAN_SDK/PAN_SDK.py (finish-prior; decision packet first, then EDIT in a
+new SCOPE.md). Treasury verify_proof_of_inference must eventually call that
+owner. Do not dummy the engine. Do not start a qemu/Android unit. Do not expand
+master_db §6.2. Do not start a prompt_bridge unit. qemu host tools remain a
+later frontier after the inference owner is selected and landed.

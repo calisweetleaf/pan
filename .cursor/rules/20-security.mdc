@@ -27,3 +27,6 @@ security/rules_of_engagement.md.
 - Use the PAN Python production lane for source changes, including direct
   provenance and real verification
   (`python test/immune/test_planetary_immune_system.py`, then the project gate).
+- Next consumed nation unit is the real `_run_inference` owner, not a qemu
+  install and not wrapping unconsumed security lineage into the live immune
+  path. Do not list prompt_bridge as missing Erebus work.

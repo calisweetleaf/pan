@@ -1,0 +1,227 @@
+pan_sdk_system_scenario start 20260911_084929
+Starting PAN SDK scenario. Persistence path: /tmp/pan_sdk_system_p96md32e
+Created SovereignIdentity for ScenarioNode with ID: b41df5ef93ec in hashchain
+Created SovereignIdentity for ScenarioCitizen with ID: 926581ff85c8 in hashchain
+Created SovereignIdentity for ScenarioDeveloper with ID: 9a882e33d418 in hashchain
+Created SovereignIdentity for ScenarioModel with ID: 37214c375871 in hashchain
+Created SovereignIdentity for ScenarioDistributor with ID: 8e83e4a8990c in hashchain
+PANCitizenRegistry initialized
+PANEconomicEngine initialized
+PANNameRegistry initialized
+SovereignCommunicator initialized for ScenarioNode
+SovereignTreasury online state=GENESIS chair= validators=0
+MasterDatabase online replica=b41df5ef93ec docs=0 counters=0 sets=0
+DHTNode initialized for ScenarioNode at 127.0.0.1:8462, ID: b41df5ef93ecd4b3
+PANCitizenRegistry initialized
+Initializing communicator, manifest, and pipeline
+SovereignCommunicator initialized for ScenarioCitizen
+Created manifest for model test_model
+SovereignPipeline initialized
+Created test_packet packet: b4dd09e530b8
+Created test packet b4dd09e530b8 verified=True
+Manifest verification: True
+Created manifest for model test_model
+Proposed consensus for model:test_model with ID 570e169f-abd
+Proposal 570e169f-abd accepted by consensus
+Vote recorded for proposal 570e169f-abd by b41df5ef93ec
+Created hashchain entry for ScenarioNode, depth: 1
+Stored key model:test_model in PAN DHT with hash ceee5c6c46ea
+Registered model test_model in pipeline and DHT
+Saved preferences for 926581ff85c8
+PANPersonalDataStore initialized for sovereign 926581ff85c8
+PANPhoneAddressRegistry initialized
+--- Phase 1: Initial operations ---
+
+========================================================================
+PHASE 1: Civic census, economy, names, personal data
+========================================================================
+Created hashchain entry for ScenarioNode, depth: 2
+Stored key registry:name:alice in PAN DHT with hash d6d77a0c386f
+Created hashchain entry for ScenarioNode, depth: 3
+Stored key registry:name:bob in PAN DHT with hash bbf4502d139b
+PANCitizen registered: 74e91da1-2e6 (admin)
+Proposed consensus for citizen:74e91da1-2e6e-5bdc-ae3e-d0118a1ee877 with ID a974166e-cab
+Proposal a974166e-cab accepted by consensus
+Vote recorded for proposal a974166e-cab by b41df5ef93ec
+Created hashchain entry for ScenarioNode, depth: 4
+Stored key citizen:74e91da1-2e6e-5bdc-ae3e-d0118a1ee877 in PAN DHT with hash ca6401a9fc8d
+Successfully registered citizen 74e91da1-2e6
+PANCitizen registered: 17ba5b17-081 (developer)
+Proposed consensus for citizen:17ba5b17-0812-5146-be29-060c6045e765 with ID 0e769d07-274
+Proposal 0e769d07-274 accepted by consensus
+Vote recorded for proposal 0e769d07-274 by b41df5ef93ec
+Created hashchain entry for ScenarioNode, depth: 5
+Stored key citizen:17ba5b17-0812-5146-be29-060c6045e765 in PAN DHT with hash 596406ee9e88
+Successfully registered citizen 17ba5b17-081
+Registered governance member 926581ff85c8 (admin)
+PANApplication registered: sovereign-feed (6d660ba6-50f)
+Proposed consensus for app:6d660ba6-50f6-5ed4-99b5-60f5ec722de9 with ID fdf95ec7-c6d
+Proposal fdf95ec7-c6d accepted by consensus
+Vote recorded for proposal fdf95ec7-c6d by b41df5ef93ec
+Created hashchain entry for ScenarioNode, depth: 6
+Stored key app:6d660ba6-50f6-5ed4-99b5-60f5ec722de9 in PAN DHT with hash 1172127159e2
+Successfully registered app sovereign-feed (6d660ba6-50f)
+Created hashchain entry for ScenarioNode, depth: 7
+Executed transaction 132a96b9-a3a on PAN network
+Minted 250 tokens to 926581ff85c8 for genesis_reward. Total supply: 250
+Created hashchain entry for ScenarioNode, depth: 8
+Executed transaction 09f65e1e-38b on PAN network
+Minted 3 tokens to 6d660ba6-50f for usage_reward_app_usage. Total supply: 253
+Created hashchain entry for ScenarioNode, depth: 9
+Stored key usage:8aa31e8b-e1e6-53d2-bd77-56d41b06cee5 in PAN DHT with hash 87cdc581bd78
+Created SovereignIdentity for NeighborNode with ID: 1187b8a3a26a in hashchain
+Added neighbor 1187b8a3a26a1c991a1459f0f2d8142bfb202f411a32cd9f7ffd6d87f8d393bf at 127.0.0.1:8463
+Closest nodes: 1
+Proposed consensus for consensus_test with ID e04848f1-373
+Proposal e04848f1-373 accepted by consensus
+Vote recorded for proposal e04848f1-373 by b41df5ef93ec
+Created hashchain entry for ScenarioNode, depth: 10
+Stored key consensus_test in PAN DHT with hash 059d658190a9
+Consensus store result: True
+Proposed consensus for name:testname with ID 357a8a93-7ea
+Proposal 357a8a93-7ea accepted by consensus
+Vote recorded for proposal 357a8a93-7ea by b41df5ef93ec
+Created hashchain entry for ScenarioNode, depth: 11
+Stored key name:testname in PAN DHT with hash 5cc8bb29adc3
+Successfully registered name testname for identity 926581ff85c8
+Name registration: True
+Citizen balance: 250
+Created hashchain entry for ScenarioNode, depth: 12
+Executed transaction a1f30528-038 on PAN network
+Executed transaction a1f30528-038: 50 tokens from 926581ff85c8 to 9a882e33d418
+Token transfer: True
+Open proposals: 0
+Added constitution article: db1ddcba-5f3
+Proposed consensus for policy:3794fd1c-6819-5381-b312-46da07d97766 with ID a44d4d30-89a
+Proposal a44d4d30-89a accepted by consensus
+Vote recorded for proposal a44d4d30-89a by b41df5ef93ec
+Created hashchain entry for ScenarioNode, depth: 13
+Stored key policy:3794fd1c-6819-5381-b312-46da07d97766 in PAN DHT with hash 0f088d61bbc7
+Registered policy 3794fd1c-681
+Registered policy: 3794fd1c-681
+Usage of sovereign-feed by 74e91da1-2e6 earned 1 tokens
+Added 1 tokens to 74e91da1-2e6 for using_sovereign-feed. Total: 1
+Created hashchain entry for ScenarioNode, depth: 14
+Executed transaction 56f11b15-c89 on PAN network
+Minted 1 tokens to 6d660ba6-50f for usage_reward_app_usage. Total supply: 254
+Created hashchain entry for ScenarioNode, depth: 15
+Stored key usage:42ccdddd-872b-5ee8-8aab-0919d72dbcc5 in PAN DHT with hash d8ecc5f9df77
+Citizen 74e91da1-2e6 used app 6d660ba6-50f, earned 1 tokens
+App usage recorded tokens=1
+Created hashchain entry for ScenarioNode, depth: 16
+Executed transaction 4ef5d0ff-f3d on PAN network
+Executed transaction 4ef5d0ff-f3d: 10 tokens from 926581ff85c8 to treasury:pan
+Submitted proposal 1baceaa4-26e of type policy
+Proposal 1baceaa4-26e not found for voting
+Recorded YES vote on proposal 1baceaa4-26e by 926581ff85c8
+Proposed consensus for policy:b0b4660c-b1da-5f38-addb-fa6f60410f02 with ID c6adaa1a-7b1
+Proposal c6adaa1a-7b1 accepted by consensus
+Vote recorded for proposal c6adaa1a-7b1 by b41df5ef93ec
+Created hashchain entry for ScenarioNode, depth: 17
+Stored key policy:b0b4660c-b1da-5f38-addb-fa6f60410f02 in PAN DHT with hash 5300a498f77e
+Registered policy b0b4660c-b1d
+Created hashchain entry for ScenarioNode, depth: 18
+Executed transaction ebf388c1-076 on PAN network
+Executed transaction ebf388c1-076: 10 tokens from treasury:pan to 926581ff85c8
+Finalized proposal 1baceaa4-26e with status ACCEPTED
+Testing personal data operations...
+Added contact Test Contact (e9f19e28-221) for 926581ff85c8
+Sent message 5993a541-e14 to 9a882e33d418
+Logged outgoing voice call c3d20000-40d
+Saved preferences for 926581ff85c8
+Assigned phone address pan:test_net:test_motif:voice to sovereign 926581ff85c8
+personal contact=e9f19e28-221 message=5993a541-e14 call=c3d20000-40d phone=pan:test_net:test_motif:voice
+
+========================================================================
+PHASE 1b: Nation pillars on one PANPersistenceStore
+========================================================================
+shared sqlite=/tmp/pan_sdk_system_p96md32e/pan_state.db
+treasury bound state=GENESIS
+master_db replica=b41df5ef93ec
+email_social on DHTNode: absent (explicit construct required)
+SovereignFirewall ledger opened at /tmp/pan_sdk_system_p96md32e/fw_civic.sqlite
+SovereignFirewall ledger opened at /tmp/pan_sdk_system_p96md32e/fw_peer.sqlite
+SovereignCommunicator initialized for ScenarioNode
+StatelessRelay online id=b41df5ef93ec events=0
+EmailSocialNode online address=pan:id:b41df5ef93ecd4b324242e826d45c11496419a8fc09e017238261f7b27998334 relay=b41df5ef93ec
+Created SovereignIdentity for ScenarioMailPeer with ID: 98dd1304bd5f in hashchain
+SovereignCommunicator initialized for ScenarioMailPeer
+StatelessRelay online id=98dd1304bd5f events=0
+EmailSocialNode online address=pan:id:98dd1304bd5f3f11489962a242642e518e756dc66e3ed468bdce1aaa55bb77b3 relay=98dd1304bd5f
+explicit EmailSocialNode civic_relay=b41df5ef93ec peer_store=/tmp/pan_sdk_system_p96md32e/mail_peer/pan_state.db
+Registered treasury validator b41df5ef93ec
+Registered treasury validator 926581ff85c8
+Registered treasury validator 9a882e33d418
+seal_genesis status=ok state=MINT_PHASE quorum=3
+Created hashchain entry for ScenarioNode, depth: 19
+Executed transaction 957c57c7-259 on PAN network
+Minted 40 tokens to 926581ff85c8 for proof_of_inference. Total supply: 294
+Created TREASURY_LEDGER packet: d2eeca02e276
+quorum PoI mint status=ok reason=executed
+citizen balance after PoI mint=240
+master_db civic:mint={'proposal_id': '2d40d618e62b7c92135f6f0c8d0a2406', 'amount': 40, 'recipient': '926581ff85c89455b6d824637e977dbb9861aa86456b9197716c1edbc1ae58e7', 'treasury_state': 'MINT_PHASE'} inference_cycles=3
+Created MAIL_SEALED packet: fe1327bbf179
+Relay b41df5ef93ec stored MAIL_SEALED fe1327bbf179
+Relay 98dd1304bd5f stored MAIL_SEALED fe1327bbf179
+published mail packet=fe1327bbf179a2550bececa4f495dc7494d71605202358365bf58e96adb3d1fa ok=True relays=2
+peer opened subject='treasury-cycle' body='fed minted 40 after PoI quorum'
+Created SOCIAL_BROADCAST packet: 941107e52d25
+Relay b41df5ef93ec stored SOCIAL_BROADCAST 941107e52d25
+Relay 98dd1304bd5f stored SOCIAL_BROADCAST 941107e52d25
+social packet=941107e52d2506cfe22860dd32aa64574adaff14a59f6eeea78d895ccc1ef7d4 ok=True
+nation pillars wrote treasury + master_db + email onto the civic sqlite
+--- Phase 1: Snapshotting authoritative persistence ---
+Closed PANPersonalDataStore for sovereign 926581ff85c8
+--- Phase 2: Reloading from persistence ---
+
+========================================================================
+PHASE 2: Reload civic sqlite and compare snapshots
+========================================================================
+PANCitizenRegistry initialized
+PANEconomicEngine initialized
+PANNameRegistry initialized
+SovereignCommunicator initialized for ScenarioNode
+SovereignTreasury online state=MINT_PHASE chair=b41df5ef93ec validators=3
+MasterDatabase online replica=b41df5ef93ec docs=1 counters=1 sets=1
+DHTNode initialized for ScenarioNode at 127.0.0.1:8462, ID: b41df5ef93ecd4b3
+PANCitizenRegistry initialized
+PANPersonalDataStore initialized for sovereign 926581ff85c8
+Reloaded name testname target=926581ff85c8
+State verified for dht_data
+State verified for dht_ledger
+State verified for economy_accounts
+State verified for governance_proposals
+State verified for governance_policies
+State verified for citizens
+State verified for applications
+State verified for name_registry
+State verified for phone_addresses
+State verified for treasury_fsm
+State verified for treasury_validators
+State verified for treasury_proposals
+State verified for master_db_docs
+State verified for master_db_counters
+State verified for master_db_sets
+State verified for master_db_meta
+State verified for email_relay_b41df5ef93ecd4b324242e826d45c11496419a8fc09e017238261f7b27998334
+State verified for pending_transactions
+State verified for usage_metrics
+State verified for personal_contacts
+State verified for personal_messages
+State verified for personal_call_logs
+State verified for personal_preferences
+
+========================================================================
+PHASE 2b: Hydrate nation pillars from the same sqlite
+========================================================================
+reopened treasury state=MINT_PHASE validators=3
+reopened master_db civic:mint={'amount': 40, 'proposal_id': '2d40d618e62b7c92135f6f0c8d0a2406', 'recipient': '926581ff85c89455b6d824637e977dbb9861aa86456b9197716c1edbc1ae58e7', 'treasury_state': 'MINT_PHASE'} cycles=3
+SovereignFirewall ledger opened at /tmp/pan_sdk_system_p96md32e/fw_civic.sqlite
+SovereignCommunicator initialized for ScenarioNode
+StatelessRelay online id=b41df5ef93ec events=2
+EmailSocialNode online address=pan:id:b41df5ef93ecd4b324242e826d45c11496419a8fc09e017238261f7b27998334 relay=b41df5ef93ec
+reopened civic relay mail=1 social=1
+Closed PANPersonalDataStore for sovereign 926581ff85c8
+PAN SDK scenario completed successfully. All persisted state verified.
+scenario passed: civic snapshot + treasury/email/master_db shared sqlite hydrate
+pan_sdk_system_scenario passed=True
