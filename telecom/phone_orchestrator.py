@@ -189,14 +189,24 @@ def resolve_qemu_system() -> Path:
 
 
 def select_qemu_accelerator() -> Tuple[str, ...]:
-    """Choose a real QEMU accelerator. Never pass -enable-kvm on Windows."""
+    """Choose a real QEMU accelerator. Never pass -enable-kvm on Windows.
+
+    /dev/kvm existing is not enough: this process must be able to open it.
+    Otherwise qemu-system exits immediately with Permission denied.
+    """
     forced = os.environ.get("THYRIS_QEMU_ACCEL", "").strip()
     if forced:
         return ("-accel", forced)
     if sys.platform == "win32":
         return ("-accel", "tcg")
-    if os.path.exists("/dev/kvm"):
-        return ("-enable-kvm",)
+    kvm = Path("/dev/kvm")
+    if kvm.exists():
+        try:
+            handle = os.open(kvm, os.O_RDWR)
+            os.close(handle)
+            return ("-enable-kvm",)
+        except OSError:
+            logger.warning("KVM node exists but is not usable; falling back to TCG")
     return ("-accel", "tcg")
 
 

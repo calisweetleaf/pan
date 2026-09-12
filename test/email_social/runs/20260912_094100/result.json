@@ -1,0 +1,57 @@
+{
+  "name": "email_social",
+  "passed": true,
+  "status": "pass",
+  "pass_count": 5,
+  "fail_count": 0,
+  "skip_count": 0,
+  "elapsed_seconds": 2.7041730880737305,
+  "checks": [
+    {
+      "name": "sealed_mail_across_relays",
+      "status": "pass",
+      "detail": {
+        "packet_id": "aed049352e3047ab02a82b3c9322af8debacc6fe3d49b638a12b2919cb90b8a8",
+        "relays": 2,
+        "alice_address": "pan:id:3fdadcd04b17e79f9b02b32d320578df0451d23d886c0c60fdb9d12389b2ac13"
+      }
+    },
+    {
+      "name": "legacy_ip_rejected",
+      "status": "pass",
+      "detail": {
+        "rejected": true
+      }
+    },
+    {
+      "name": "relay_blocks_unsigned_and_routing",
+      "status": "pass",
+      "detail": {
+        "forged_rejected": true,
+        "routing_rejected": true
+      }
+    },
+    {
+      "name": "social_and_knock",
+      "status": "pass",
+      "detail": {
+        "social_id": "292eb8df857ef47b89d89c7814b5a119e6bc54afca11cbbb329c5de8253ac03f",
+        "knocks_dropped": 2
+      }
+    },
+    {
+      "name": "restart_hydrates_relay",
+      "status": "pass",
+      "detail": {
+        "before": 1,
+        "after": 1
+      }
+    }
+  ],
+  "artifacts": {
+    "json": "/workspace/test/email_social/runs/20260912_094100/result.json",
+    "md": "/workspace/test/email_social/runs/20260912_094100/result.md",
+    "log": "/workspace/test/email_social/runs/20260912_094100/result.log",
+    "run_dir": "/workspace/test/email_social/runs/20260912_094100"
+  }
+}

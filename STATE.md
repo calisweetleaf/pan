@@ -50,8 +50,14 @@ invented alternative.
 
 ## Verified baseline
 
-- **GREEN, 2026-09-12:** Android-x86 installer boot on Windows (`32ea3a9` + this
-  unit). `python test/thyris_vm/test_thyris_android_boot.py` exited 0, 4/4, on
+- **GREEN, 2026-09-12:** combined `c1bcf6b` tree on a Linux qemu host, plus
+  TCG fallback when `/dev/kvm` cannot be opened. `python3 test/run_pan_gate.py`
+  exited 0 in 16.853s (immune 12/12 including second-chain retirement;
+  thyris_vm disk-create qcow2 1G). `python3 test/thyris_vm/test_thyris_android_boot.py`
+  4/4 on qemu 8.2.2 TCG; console showed SeaBIOS plus ISOLINUX 6.03.
+  `phone_ready` and `adb_proven` stayed false.
+  Artifacts: `results/pan_gate_20260912_094045.json`,
+  `test/thyris_vm/runs/20260912_094201/`, `snapshots/v0.12/manifest.json`.
   Windows Python 3.14.4 / QEMU 11.1.0 TCG. Official
   `android-x86_64-9.0-r2.iso` SHA-1
   `1cc85b5ed7c830ff71aecf8405c7281a9c995aa0` matched. Console showed
@@ -97,6 +103,9 @@ invented alternative.
 ## Active frontier
 
 1. Android installer media boots (SeaBIOS/ISOLINUX on `-nographic` stdout).
+   Combined Linux gate 20260912_094045 is green. `/dev/kvm` may exist without
+   being usable; TCG fallback is proven. `phone_ready` and `adb_proven` remain
+   false. ADB userspace is the next Thyris unit.
    `PhoneVMState.READY` and ADB userspace are unproven. The ISO is local
    under gitignored `android_images/`; the project gate still does not
    boot phones. Next Thyris unit is ADB userspace, not a second disk-create
@@ -139,17 +148,17 @@ reconciled to the Thyris unbind baseline on 2026-09-11. The stale
 `somnus_erebus/` QWEN tree is not the security packet. Inference owner landed
 in snapshots/v0.8. qemu-img disk-create and immune ROE DAG landed in
 snapshots/v0.9. Second-chain retirement landed in snapshots/v0.10.
+Android-x86 installer boot landed in snapshots/v0.11. KVM-inaccessible TCG
+fallback landed in snapshots/v0.12.
 
 ## Generated-map status
 
 `filetree.md` is operator-owned generated navigation. Continuity-doc turns
-must not hand-edit it. Snapshot `v0.10` is a new folder; regenerate filetree
+must not hand-edit it. Snapshot `v0.12` is a new folder; regenerate filetree
 through FileTree Pro.
 
 ## Next justified action
 
-Obtain a real Android image (do not dummy one) and prove `qemu-img` /
-`qemu-system-x86_64` plus `adb` on a host that has those tools. Do not claim
-phones boot until qemu-system actually runs a guest. Do not pull prompt files.
-Do not add a second inference engine in `API.server.py`. Do not invent
-mesh-strand/`usms_linkage`. Do not construct `BlockchainThreatIntelligence`.
+ADB userspace / `PhoneVMState.READY` on a real Android guest. Do not dummy a
+READY phone from ISOLINUX. Do not pull prompt files. Do not construct
+`BlockchainThreatIntelligence`. Do not invent mesh-strand/`usms_linkage`.

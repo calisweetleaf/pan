@@ -1,0 +1,44 @@
+thyris android boot consumer start 20260912_094123
+
+========================================================================
+THYRIS ANDROID GUEST BOOT CONSUMER
+========================================================================
+qemu-system-x86_64=/usr/bin/qemu-system-x86_64
+accelerator=['-enable-kvm']
+PASS qemu_system_resolves
+iso=/workspace/android_images/android-x86_64-9.0-r2.iso
+bytes=965738496
+sha1=1cc85b5ed7c830ff71aecf8405c7281a9c995aa0
+expected=1cc85b5ed7c830ff71aecf8405c7281a9c995aa0
+PASS android_iso_authentic
+argv=/usr/bin/qemu-system-x86_64 -enable-kvm -cpu qemu64 -name thyris-argv-probe -m 2048 -smp 2 -drive file=/workspace/disk.qcow2,format=qcow2,if=ide,index=0,media=disk -drive file=/workspace/android.iso,format=raw,if=ide,index=1,media=cdrom,readonly=on -boot order=d -no-reboot -nographic -netdev user,id=net0 -device e1000,netdev=net0
+PASS nographic_argv
+disk=/tmp/thyris_boot_ijeeo22k/phone-boot.qcow2 iso=/workspace/android_images/android-x86_64-9.0-r2.iso
+starting qemu-system-x86_64 -nographic Android-x86 installer...
+FAIL android_installer_boot: CheckFailure: Android installer boot failed loud: QEMU exited rc=1 before Android ISO boot evidence. stderr='Could not access KVM kernel module: Permission denied\nqemu-system-x86_64: failed to initialize kvm: Permission denied\n' console=''
+Traceback (most recent call last):
+  File "/workspace/test/thyris_vm/test_thyris_android_boot.py", line 139, in check_android_installer_boot
+    evidence = asyncio.run(
+               ^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/telecom/phone_orchestrator.py", line 1072, in boot_android_installer
+    raise ThyrisBootError(
+telecom.phone_orchestrator.ThyrisBootError: QEMU exited rc=1 before Android ISO boot evidence. stderr='Could not access KVM kernel module: Permission denied\nqemu-system-x86_64: failed to initialize kvm: Permission denied\n' console=''
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workspace/test/thyris_vm/test_thyris_android_boot.py", line 212, in run
+    fn(detail)
+  File "/workspace/test/thyris_vm/test_thyris_android_boot.py", line 190, in check_android_installer_boot
+    raise CheckFailure(f"Android installer boot failed loud: {exc}") from exc
+CheckFailure: Android installer boot failed loud: QEMU exited rc=1 before Android ISO boot evidence. stderr='Could not access KVM kernel module: Permission denied\nqemu-system-x86_64: failed to initialize kvm: Permission denied\n' console=''
+thyris android boot consumer status=fail

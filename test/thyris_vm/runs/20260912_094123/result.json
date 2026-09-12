@@ -1,0 +1,74 @@
+{
+  "name": "thyris_android_boot",
+  "passed": false,
+  "status": "fail",
+  "pass_count": 3,
+  "fail_count": 1,
+  "skip_count": 0,
+  "elapsed_seconds": 1.638427495956421,
+  "checks": [
+    {
+      "name": "qemu_system_resolves",
+      "status": "pass",
+      "detail": {
+        "qemu_system": "/usr/bin/qemu-system-x86_64",
+        "accelerator": [
+          "-enable-kvm"
+        ]
+      }
+    },
+    {
+      "name": "android_iso_authentic",
+      "status": "pass",
+      "detail": {
+        "iso_path": "/workspace/android_images/android-x86_64-9.0-r2.iso",
+        "iso_bytes": 965738496,
+        "sha1": "1cc85b5ed7c830ff71aecf8405c7281a9c995aa0"
+      }
+    },
+    {
+      "name": "nographic_argv",
+      "status": "pass",
+      "detail": {
+        "argv": [
+          "/usr/bin/qemu-system-x86_64",
+          "-enable-kvm",
+          "-cpu",
+          "qemu64",
+          "-name",
+          "thyris-argv-probe",
+          "-m",
+          "2048",
+          "-smp",
+          "2",
+          "-drive",
+          "file=/workspace/disk.qcow2,format=qcow2,if=ide,index=0,media=disk",
+          "-drive",
+          "file=/workspace/android.iso,format=raw,if=ide,index=1,media=cdrom,readonly=on",
+          "-boot",
+          "order=d",
+          "-no-reboot",
+          "-nographic",
+          "-netdev",
+          "user,id=net0",
+          "-device",
+          "e1000,netdev=net0"
+        ]
+      }
+    },
+    {
+      "name": "android_installer_boot",
+      "status": "fail",
+      "error": "CheckFailure: Android installer boot failed loud: QEMU exited rc=1 before Android ISO boot evidence. stderr='Could not access KVM kernel module: Permission denied\\nqemu-system-x86_64: failed to initialize kvm: Permission denied\\n' console=''",
+      "detail": {}
+    }
+  ],
+  "claim": "qemu-system-x86_64 -nographic booted official android-x86_64-9.0-r2.iso far enough for SeaBIOS/ISOLINUX console evidence. Disk came from landed ISOConverter._create_disk. This is not PhoneVMState.READY or ADB userspace.",
+  "error": "1 thyris android boot checks failed",
+  "artifacts": {
+    "json": "/workspace/test/thyris_vm/runs/20260912_094123/result.json",
+    "md": "/workspace/test/thyris_vm/runs/20260912_094123/result.md",
+    "log": "/workspace/test/thyris_vm/runs/20260912_094123/result.log",
+    "run_dir": "/workspace/test/thyris_vm/runs/20260912_094123"
+  }
+}

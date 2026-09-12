@@ -2,7 +2,16 @@
 
 Scratch only; current runtime truth belongs in STATE.md.
 
+## 2026-09-12 KVM inaccessible → TCG
+
+- `select_qemu_accelerator` now opens `/dev/kvm` before `-enable-kvm`.
+  This Linux worker's kvm node exists but is Permission denied; TCG still
+  showed ISOLINUX. Did not dummy READY/ADB. Did not redo disk-create/ROE/
+  installer-boot design.
+- Combined gate 20260912_094045 green 16.853s. Boot 20260912_094201 4/4.
+
 ## 2026-09-12 Android-x86 installer boot
+
 
 - Pulled origin/main `32ea3a9` (immune second-chain retirement). Did not
   touch `security/` or redo ROE/`BlockchainThreatIntelligence`.

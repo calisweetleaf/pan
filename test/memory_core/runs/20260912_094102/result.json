@@ -1,0 +1,45 @@
+{
+  "name": "thyris_memory",
+  "passed": true,
+  "status": "pass",
+  "pass_count": 3,
+  "fail_count": 0,
+  "skip_count": 0,
+  "elapsed_seconds": 0.11343598365783691,
+  "checks": [
+    {
+      "name": "owners_are_not_usms",
+      "status": "pass",
+      "detail": {
+        "memory_manager": "memory.memory_core",
+        "usms": "memory.unified_memory_system"
+      }
+    },
+    {
+      "name": "memory_store_retrieve",
+      "status": "pass",
+      "detail": {
+        "memory_id": "a78ba577-e119-46ba-a33a-01f691e3a69c",
+        "retrieved": 1,
+        "embedding": "LocalHashEmbeddingModel"
+      }
+    },
+    {
+      "name": "cache_set_get",
+      "status": "pass",
+      "detail": {
+        "cache_get": {
+          "vm": "android-13",
+          "ready": true
+        },
+        "metadata_db": "/tmp/thyris_cache_hq4_h832/runtime_cache/cache_metadata.db"
+      }
+    }
+  ],
+  "artifacts": {
+    "json": "/workspace/test/memory_core/runs/20260912_094102/result.json",
+    "md": "/workspace/test/memory_core/runs/20260912_094102/result.md",
+    "log": "/workspace/test/memory_core/runs/20260912_094102/result.log",
+    "run_dir": "/workspace/test/memory_core/runs/20260912_094102"
+  }
+}
