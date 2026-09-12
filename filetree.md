@@ -1,6 +1,6 @@
 # File Tree: pan
 
-**Generated:** 9/11/2026, 1:33:06 AM
+**Generated:** 9/12/2026, 2:30:16 AM
 **Root Path:** `c:\Users\trent\pan`
 
 ```
@@ -46,6 +46,10 @@
 │   ├── pan_gate_20260911_011502.md
 │   ├── pan_gate_20260911_030722.json
 │   ├── pan_gate_20260911_030722.md
+│   ├── pan_gate_20260911_085638.json
+│   ├── pan_gate_20260911_085638.md
+│   ├── pan_gate_20260911_091651.json
+│   ├── pan_gate_20260911_091651.md
 │   ├── pan_sdk_system_test_20251002_005512.txt
 │   ├── pan_sdk_system_test_20260910_225919.json
 │   ├── pan_sdk_system_test_20260910_225919.md
@@ -64,7 +68,19 @@
 │   ├── pan_sdk_system_test_20260911_011503.txt
 │   ├── pan_sdk_system_test_20260911_030723.json
 │   ├── pan_sdk_system_test_20260911_030723.md
-│   └── pan_sdk_system_test_20260911_030723.txt
+│   ├── pan_sdk_system_test_20260911_030723.txt
+│   ├── pan_sdk_system_test_20260911_084929.json
+│   ├── pan_sdk_system_test_20260911_084929.md
+│   ├── pan_sdk_system_test_20260911_084929.txt
+│   ├── pan_sdk_system_test_20260911_085639.json
+│   ├── pan_sdk_system_test_20260911_085639.md
+│   ├── pan_sdk_system_test_20260911_085639.txt
+│   ├── pan_sdk_system_test_20260911_091638.json
+│   ├── pan_sdk_system_test_20260911_091638.md
+│   ├── pan_sdk_system_test_20260911_091638.txt
+│   ├── pan_sdk_system_test_20260911_091652.json
+│   ├── pan_sdk_system_test_20260911_091652.md
+│   └── pan_sdk_system_test_20260911_091652.txt
 ├── security
 │   ├── AGENTS.md
 │   ├── defensive_offensive_bridge.py
@@ -84,7 +100,9 @@
 │   │   └── manifest.json
 │   ├── v0.6
 │   │   └── manifest.json
-│   └── v0.7
+│   ├── v0.7
+│   │   └── manifest.json
+│   └── v0.8
 │       └── manifest.json
 ├── telecom
 │   ├── __init__.py
@@ -107,7 +125,13 @@
 │   │   │   ├── 20260911_004046
 │   │   │   │   ├── result.json
 │   │   │   │   └── result.md
-│   │   │   └── 20260911_011510
+│   │   │   ├── 20260911_011510
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260911_085650
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   └── 20260911_091702
 │   │   │       ├── result.json
 │   │   │       └── result.md
 │   │   ├── __init__.py
@@ -138,11 +162,27 @@
 │   │   │   ├── 20260911_004042
 │   │   │   │   ├── result.json
 │   │   │   │   └── result.md
-│   │   │   └── 20260911_011507
+│   │   │   ├── 20260911_011507
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260911_085643
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   └── 20260911_091656
 │   │   │       ├── result.json
 │   │   │       └── result.md
 │   │   ├── __init__.py
 │   │   └── test_planetary_immune_system.py
+│   ├── inference
+│   │   ├── runs
+│   │   │   ├── 20260911_085509
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   └── 20260911_085511
+│   │   │       ├── result.json
+│   │   │       └── result.md
+│   │   ├── __init__.py
+│   │   └── test_sovereign_inference.py
 │   ├── master_db
 │   │   ├── runs
 │   │   │   ├── 20260910_235058
@@ -157,7 +197,13 @@
 │   │   │   ├── 20260911_004047
 │   │   │   │   ├── result.json
 │   │   │   │   └── result.md
-│   │   │   └── 20260911_011511
+│   │   │   ├── 20260911_011511
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260911_085651
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   └── 20260911_091704
 │   │   │       ├── result.json
 │   │   │       └── result.md
 │   │   ├── __init__.py
@@ -173,7 +219,13 @@
 │   │   │   ├── 20260911_004047
 │   │   │   │   ├── result.json
 │   │   │   │   └── result.md
-│   │   │   └── 20260911_011511
+│   │   │   ├── 20260911_011511
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260911_085651
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   └── 20260911_091704
 │   │   │       ├── result.json
 │   │   │       └── result.md
 │   │   ├── __init__.py
@@ -192,7 +244,13 @@
 │   │   │   ├── 20260911_011453
 │   │   │   │   ├── result.json
 │   │   │   │   └── result.md
-│   │   │   └── 20260911_011511
+│   │   │   ├── 20260911_011511
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260911_085652
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   └── 20260911_091704
 │   │   │       ├── result.json
 │   │   │       └── result.md
 │   │   ├── __init__.py
@@ -214,7 +272,19 @@
 │   │   │   ├── 20260911_004043
 │   │   │   │   ├── result.json
 │   │   │   │   └── result.md
-│   │   │   └── 20260911_011508
+│   │   │   ├── 20260911_011508
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260911_085523
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260911_085527
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260911_085647
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   └── 20260911_091659
 │   │   │       ├── result.json
 │   │   │       └── result.md
 │   │   ├── __init__.py
@@ -243,7 +313,5 @@
 ```
 
 ---
-
 *Generated by FileTree Pro Extension*
-
 ---
