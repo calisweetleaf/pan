@@ -38,7 +38,10 @@ invented alternative.
   memory. They coexist with USMS in `memory/` and are not the immune DAG.
 - `telecom/vm_supervisor.py` and `telecom/vm_image_manager.py` are the VM owners
   `phone_orchestrator` already imported. `ISOConverter._create_disk` is fail-loud
-  and has a real qemu-img consumer. AIPC `PromptSystemBridge` is unbound.
+  and has a real qemu-img consumer (`ba05cf4`). `phone_orchestrator` now also
+  boots official android-x86 9.0-r2 via `qemu-system-x86_64 -nographic` and
+  fails loud without ISOLINUX. That is installer-media boot evidence, not
+  `PhoneVMState.READY` or ADB. AIPC `PromptSystemBridge` is unbound.
   Thyris does not import or require `core.prompt_bridge`.
 - Direct project gate: `python test/run_pan_gate.py` (immune, treasury,
   email_social, master_db, thyris_memory, thyris_vm slices).
@@ -47,6 +50,16 @@ invented alternative.
 
 ## Verified baseline
 
+- **GREEN, 2026-09-12:** Android-x86 installer boot on Windows (`32ea3a9` + this
+  unit). `python test/thyris_vm/test_thyris_android_boot.py` exited 0, 4/4, on
+  Windows Python 3.14.4 / QEMU 11.1.0 TCG. Official
+  `android-x86_64-9.0-r2.iso` SHA-1
+  `1cc85b5ed7c830ff71aecf8405c7281a9c995aa0` matched. Console showed
+  SeaBIOS plus ISOLINUX 6.03. Disk came from landed
+  `ISOConverter._create_disk`. `phone_ready` and `adb_proven` stayed false.
+  Artifacts: `test/thyris_vm/runs/20260912_043438/`,
+  `snapshots/v0.11/manifest.json`. Not in `run_pan_gate.py` (ISO is local
+  and gitignored). Immune/ROE second-chain retirement was not reopened.
 - **GREEN (immune bind), 2026-09-12:** retire in-process second chain
   (`main`, this worker). `python3 test/immune/test_planetary_immune_system.py`
   12/12 including `second_chain_retired_share_uses_immune`.
@@ -83,10 +96,11 @@ invented alternative.
 
 ## Active frontier
 
-1. QEMU guest boot is unproven. This Erebus worker is missing
-   `qemu-system-x86_64`, `qemu-img`, and `adb`. Origin `ba05cf4` proved
-   disk-create on a qemu-equipped host. No Android image is in the repository.
-   Phones do not boot.
+1. Android installer media boots (SeaBIOS/ISOLINUX on `-nographic` stdout).
+   `PhoneVMState.READY` and ADB userspace are unproven. The ISO is local
+   under gitignored `android_images/`; the project gate still does not
+   boot phones. Next Thyris unit is ADB userspace, not a second disk-create
+   and not a redo of `BlockchainThreatIntelligence`.
 2. `memory/memory_integration.py` still imports `schemas.session`, which is
    absent. That is leftover AIPC session-memory, not a Thyris telecom
    requirement. Do not scaffold a fake schemas package.

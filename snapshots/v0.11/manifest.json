@@ -1,0 +1,26 @@
+{
+  "version": "0.11",
+  "date": "2026-09-12",
+  "author": "daeron",
+  "summary": "Prove qemu-system-x86_64 boots official android-x86_64-9.0-r2.iso with SeaBIOS/ISOLINUX console evidence. Disk create remains ISOConverter._create_disk (ba05cf4). snapshots/v0.10 remains the immune second-chain retirement (32ea3a9).",
+  "domains": {
+    "thyris": {
+      "module": "telecom/phone_orchestrator.py",
+      "wrapper": null,
+      "tool_count": 1,
+      "provenance": "ThyrisPhoneOrchestrator.boot_android_installer consumes landed ISOConverter._create_disk plus a legal Android-x86 ISO",
+      "edits": [
+        {
+          "date": "2026-09-12",
+          "author": "daeron",
+          "summary": "Resolve a SHA-1-matched android-x86 9.0-r2 ISO, start qemu-system-x86_64 with TCG/-nographic, and fail loud unless ISOLINUX appears. Do not claim PhoneVMState.READY or ADB. Do not redo immune/ROE/BlockchainThreatIntelligence.",
+          "files": [
+            "telecom/phone_orchestrator.py",
+            "test/thyris_vm/test_thyris_android_boot.py"
+          ],
+          "justification_ref": "SCOPE.md"
+        }
+      ]
+    }
+  }
+}

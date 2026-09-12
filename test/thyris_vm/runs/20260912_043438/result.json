@@ -1,0 +1,96 @@
+{
+  "name": "thyris_android_boot",
+  "passed": true,
+  "status": "pass",
+  "pass_count": 4,
+  "fail_count": 0,
+  "skip_count": 0,
+  "elapsed_seconds": 2.075767755508423,
+  "checks": [
+    {
+      "name": "qemu_system_resolves",
+      "status": "pass",
+      "detail": {
+        "qemu_system": "C:\\Program Files\\qemu\\qemu-system-x86_64.exe",
+        "accelerator": [
+          "-accel",
+          "tcg"
+        ]
+      }
+    },
+    {
+      "name": "android_iso_authentic",
+      "status": "pass",
+      "detail": {
+        "iso_path": "C:\\Users\\trent\\pan\\android_images\\android-x86_64-9.0-r2.iso",
+        "iso_bytes": 965738496,
+        "sha1": "1cc85b5ed7c830ff71aecf8405c7281a9c995aa0"
+      }
+    },
+    {
+      "name": "nographic_argv",
+      "status": "pass",
+      "detail": {
+        "argv": [
+          "C:\\Program Files\\qemu\\qemu-system-x86_64.exe",
+          "-accel",
+          "tcg",
+          "-cpu",
+          "qemu64",
+          "-name",
+          "thyris-argv-probe",
+          "-m",
+          "2048",
+          "-smp",
+          "2",
+          "-drive",
+          "file=C:\\Users\\trent\\pan\\disk.qcow2,format=qcow2,if=ide,index=0,media=disk",
+          "-drive",
+          "file=C:\\Users\\trent\\pan\\android.iso,format=raw,if=ide,index=1,media=cdrom,readonly=on",
+          "-boot",
+          "order=d",
+          "-no-reboot",
+          "-nographic",
+          "-netdev",
+          "user,id=net0",
+          "-device",
+          "e1000,netdev=net0"
+        ]
+      }
+    },
+    {
+      "name": "android_installer_boot",
+      "status": "pass",
+      "detail": {
+        "pid": 23040,
+        "markers": [
+          "SeaBIOS",
+          "Booting from DVD",
+          "ISOLINUX",
+          "isolinux"
+        ],
+        "iso_bootloader_markers": [
+          "ISOLINUX",
+          "isolinux"
+        ],
+        "iso_bytes": 965738496,
+        "accelerator": [
+          "-accel",
+          "tcg"
+        ],
+        "console_excerpt": "\u001bc\u001b[?7l\u001b[2J\u001b[0mSeaBIOS (version rel-1.17.0-0-gb52ca86e094d-prebuilt.qemu.org)\n\n\niPXE (http://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+7EFD1F90+7EF31F90 CA00\nPress Ctrl-B to configure iPXE (PCI 00:03.0)...\n                                                                               \n\n\nBooting from DVD/CD...\n\nISOLINUX 6.03 2014-10-06 ETCD Copyright (C) 1994-2014 H. Peter Anvin et al\n\u001b[01;01H",
+        "phone_ready": false,
+        "adb_proven": false,
+        "qemu_system": "C:\\Program Files\\qemu\\qemu-system-x86_64.exe",
+        "disk_owner": "telecom.vm_image_manager.ISOConverter._create_disk"
+      }
+    }
+  ],
+  "claim": "qemu-system-x86_64 -nographic booted official android-x86_64-9.0-r2.iso far enough for SeaBIOS/ISOLINUX console evidence. Disk came from landed ISOConverter._create_disk. This is not PhoneVMState.READY or ADB userspace.",
+  "artifacts": {
+    "json": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260912_043438\\result.json",
+    "md": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260912_043438\\result.md",
+    "log": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260912_043438\\result.log",
+    "run_dir": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260912_043438"
+  }
+}

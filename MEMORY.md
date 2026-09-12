@@ -3,6 +3,55 @@
 Append durable, evidence-backed findings here. Preserve corrections as new dated
 entries instead of erasing historical truth.
 
+## 2026-09-12 — Android-x86 installer boot via nographic console
+
+**Keys:** boot_android_installer · ISO_BOOTLOADER_MARKERS · android-x86_64-9.0-r2
+· qemu-system-x86_64 · TCG · -nographic
+
+**Status:** LANDED (installer/firmware console) on `32ea3a9`. PhoneVMState.READY
+and ADB are NOT landed. Disk-create remains `ba05cf4`. Immune second-chain
+retirement remains `32ea3a9` and was not reopened.
+
+### Durable findings
+
+- After `git pull --rebase origin main`, HEAD was `32ea3a9` on top of
+  `ba05cf4`. `ISOConverter._create_disk` / `QemuImgError` already exist.
+  A second `qemu-img create` helper is rejected.
+- Official `android-x86_64-9.0-r2.iso` lives under gitignored
+  `android_images/` (965,738,496 bytes). Published SHA-1
+  `1cc85b5ed7c830ff71aecf8405c7281a9c995aa0` is checked. Do not wget a 404
+  or invent a dummy image.
+- Windows QEMU 11.1.0 under `C:\Program Files\qemu` uses `-accel tcg`.
+  Never pass `-enable-kvm` on Windows. `-serial file:` produced empty
+  SeaBIOS on this host; `-nographic` stdout is the consumed console.
+- `boot_android_installer` fails loud unless an ISO bootloader marker
+  (`ISOLINUX` / `Android-x86`) appears. SeaBIOS-only is not an ISO proof.
+  Returned `phone_ready` and `adb_proven` are always false.
+- Snapshot `v0.10` is the immune retirement. This boot unit is `v0.11`.
+- Consumer: `python test/thyris_vm/test_thyris_android_boot.py`. It is not
+  in `test/run_pan_gate.py` because the ISO is local.
+
+### Evidence
+
+- `python test/thyris_vm/test_thyris_android_boot.py` exit 0, 4/4
+- `test/thyris_vm/runs/20260912_043438/result.json`
+- `snapshots/v0.11/manifest.json`
+
+### Boundary
+
+- Do not treat ISOLINUX installer evidence as a READY phone.
+- Do not duplicate disk-create.
+- Do not redo `BlockchainThreatIntelligence` / ROE persist.
+- Do not add this ISO-backed consumer to the Linux project gate.
+
+### Retrieval anchors
+
+- SCOPE.md engagement 4
+- SOTA_RUN.md
+- telecom/phone_orchestrator.py
+- test/thyris_vm/test_thyris_android_boot.py
+- STATE.md
+
 ## 2026-09-12 — retire BlockchainThreatIntelligence; bind D/O share to USMS
 
 **Keys:** SecondCombatChainRetiredError · ThreatDetectionModule.bind_immune_system

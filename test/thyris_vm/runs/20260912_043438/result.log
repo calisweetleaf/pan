@@ -1,0 +1,46 @@
+thyris android boot consumer start 20260912_043438
+
+========================================================================
+THYRIS ANDROID GUEST BOOT CONSUMER
+========================================================================
+qemu-system-x86_64=C:\Program Files\qemu\qemu-system-x86_64.exe
+accelerator=['-accel', 'tcg']
+PASS qemu_system_resolves
+iso=C:\Users\trent\pan\android_images\android-x86_64-9.0-r2.iso
+bytes=965738496
+sha1=1cc85b5ed7c830ff71aecf8405c7281a9c995aa0
+expected=1cc85b5ed7c830ff71aecf8405c7281a9c995aa0
+PASS android_iso_authentic
+argv=C:\Program Files\qemu\qemu-system-x86_64.exe -accel tcg -cpu qemu64 -name thyris-argv-probe -m 2048 -smp 2 -drive file=C:\Users\trent\pan\disk.qcow2,format=qcow2,if=ide,index=0,media=disk -drive file=C:\Users\trent\pan\android.iso,format=raw,if=ide,index=1,media=cdrom,readonly=on -boot order=d -no-reboot -nographic -netdev user,id=net0 -device e1000,netdev=net0
+PASS nographic_argv
+disk=C:\Users\trent\AppData\Local\Temp\thyris_boot_midajg6j\phone-boot.qcow2 iso=C:\Users\trent\pan\android_images\android-x86_64-9.0-r2.iso
+starting qemu-system-x86_64 -nographic Android-x86 installer...
+{
+  "status": "boot_evidence",
+  "pid": 23040,
+  "qemu_system": "C:\\Program Files\\qemu\\qemu-system-x86_64.exe",
+  "accelerator": [
+    "-accel",
+    "tcg"
+  ],
+  "disk_path": "C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_boot_midajg6j\\phone-boot.qcow2",
+  "iso_path": "C:\\Users\\trent\\pan\\android_images\\android-x86_64-9.0-r2.iso",
+  "iso_bytes": 965738496,
+  "console_path": "C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_boot_midajg6j\\console.log",
+  "markers": [
+    "SeaBIOS",
+    "Booting from DVD",
+    "ISOLINUX",
+    "isolinux"
+  ],
+  "iso_bootloader_markers": [
+    "ISOLINUX",
+    "isolinux"
+  ],
+  "console_excerpt": "\u001bc\u001b[?7l\u001b[2J\u001b[0mSeaBIOS (version rel-1.17.0-0-gb52ca86e094d-prebuilt.qemu.org)\n\n\niPXE (http://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+7EFD1F90+7EF31F90 CA00\nPress Ctrl-B to configure iPXE (PCI 00:03.0)...\n                                                                               \n\n\nBooting from DVD/CD...\n\nISOLINUX 6.03 2014-10-06 ETCD Copyright (C) 1994-2014 H. Peter Anvin et al\n\u001b[01;01H",
+  "phone_ready": false,
+  "adb_proven": false
+}
+argv=C:\Program Files\qemu\qemu-system-x86_64.exe -accel tcg -cpu qemu64 -name thyris-android-boot-4f63c839 -m 2048 -smp 2 -drive file=C:\Users\trent\AppData\Local\Temp\thyris_boot_midajg6j\phone-boot.qcow2,format=qcow2,if=ide,index=0,media=disk -drive file=C:\Users\trent\pan\android_images\android-x86_64-9.0-r2.iso,format=raw,if=ide,index=1,media=cdrom,readonly=on -boot order=d -no-reboot -nographic -netdev user,id=net0 -device e1000,netdev=net0
+PASS android_installer_boot
+thyris android boot consumer status=pass

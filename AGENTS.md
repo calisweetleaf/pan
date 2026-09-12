@@ -76,8 +76,8 @@ Do not import a foreign directory layout such as tools/native/ into PAN just to 
 | security/defensive_sovereignty.py, reactive_offense.py, defensive_offensive_bridge.py | present lineage; not imported by the gate. Live immune path is planetary_immune_system.py |
 | telecom/vm_supervisor.py | VMSupervisor, CustomVMManager, CustomNetworkManager, VMState, ResourceProfile. AIPC prompt hook unbound |
 | telecom/vm_image_manager.py | VMImageManager, OSFamily |
-| telecom/phone_orchestrator.py | Thyris V1 phone orchestration (importable; QEMU boot unproven) |
-| telecom/phone_integration.py | browser APK/VNC bridge; not a gate compile target; qemu still unproven |
+| telecom/phone_orchestrator.py | Thyris V1 phone orchestration; android-x86 installer boot proven via `-nographic` SeaBIOS/ISOLINUX. PhoneVMState.READY / ADB unproven |
+| telecom/phone_integration.py | browser APK/VNC bridge; not a gate compile target; ADB userspace still unproven |
 | security/ | defensive sovereignty and ROE-governed security work; see security/AGENTS.md |
 | test/ | direct gate, persistence/name/manifest/personal probes, immune/treasury/email_social/master_db/thyris_memory/thyris_vm consumers, system scenario |
 | reference-code/ | historical lineage; not imported runtime code |
@@ -89,7 +89,7 @@ Do not import a foreign directory layout such as tools/native/ into PAN just to 
 - `python test/run_pan_gate.py` is the current verified Windows gate; see STATE.md. It includes immune, treasury, email_social, master_db, thyris_memory, and thyris_vm slices. POSIX spelling is `python3 test/run_pan_gate.py`.
 - Security owns `security/sovereign_firewall.py`. PAN RSA identity and USMS Ed25519 identity are bound, not collapsed.
 - Thyris VM memory (`memory.memory_core`) and USMS (`memory.unified_memory_system`) coexist in `memory/` and must not be collapsed. Do not create a `memory_system` package.
-- `telecom/phone_orchestrator.py` imports. QEMU boot and Android images are still unproven. AIPC `core.prompt_bridge` is rejected for Thyris telecom (phones have no in-device AI). Do not list prompt_bridge as next work.
+- `telecom/phone_orchestrator.py` imports. Android-x86 9.0-r2 installer boot is proven via `-nographic` ISOLINUX on this Windows host; the ISO is gitignored and is not in the project gate. `PhoneVMState.READY` / ADB remain unproven. AIPC `core.prompt_bridge` is rejected for Thyris telecom (phones have no in-device AI). Do not list prompt_bridge as next work. Do not duplicate `ISOConverter._create_disk`. Do not redo `BlockchainThreatIntelligence` retirement (`32ea3a9`).
 - The stale `somnus_erebus/` / QWEN.md tree described in older security notes is not this repository's layout. Live security owners are in security/AGENTS.md.
 - Historical 2025-10-02 Windows results remain historical evidence only. The 2026-09-11 Windows gate (`results/pan_gate_20260911_011502.json`) is current.
 
@@ -116,16 +116,22 @@ Optional focused consumers:
     python test/master_db/test_master_db.py
     python test/memory_core/test_memory_core.py
     python test/thyris_vm/test_thyris_vm.py
+    python test/thyris_vm/test_thyris_android_boot.py
 
 A green syntax check is structural evidence only. Do not claim a successful PAN integration without the gate artifact. Never mask a known red baseline with skips, changed assertions, or unreported fallback paths.
 
 ## Next justified action
 
-Prove the Thyris host-tool path: locate or install `qemu-img` and `qemu-system-x86_64`, obtain an Android image, and run a real disk-create consumer.
+ADB userspace / `PhoneVMState.READY` on a real Android guest, or a different
+production unit. Disk-create is already landed (`ba05cf4`). Android-x86 9.0-r2
+installer boot is already landed (ISOLINUX on `-nographic` stdout).
+`BlockchainThreatIntelligence` construction is already retired (`32ea3a9`).
+Do not open a second `qemu-img create` owner. Do not reopen the second threat
+chain.
 
 The alternate production unit is a real `SovereignInferenceEngine._run_inference` owner so treasury Proof-of-Inference can leave deterministic commitment re-execution.
 
-Do not pull or invent `core.prompt_bridge`. Do not dummy `_run_inference`. Do not claim phones boot until qemu, qemu-img, and an Android image are present and tested. `schemas.session` / `memory.memory_integration` is leftover AIPC session-memory and is not a Thyris blocker.
+Do not pull or invent `core.prompt_bridge`. Do not dummy `_run_inference`. Do not claim READY phones from ISOLINUX installer evidence. `schemas.session` / `memory.memory_integration` is leftover AIPC session-memory and is not a Thyris blocker.
 
 ## Security and operational boundaries
 

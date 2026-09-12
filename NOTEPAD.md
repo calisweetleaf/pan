@@ -2,6 +2,21 @@
 
 Scratch only; current runtime truth belongs in STATE.md.
 
+## 2026-09-12 Android-x86 installer boot
+
+- Pulled origin/main `32ea3a9` (immune second-chain retirement). Did not
+  touch `security/` or redo ROE/`BlockchainThreatIntelligence`.
+- Declared EDIT in SCOPE.md engagement 4. Disk-create stays
+  `ISOConverter._create_disk` (`ba05cf4`). Snapshot is v0.11 because v0.10
+  is the immune unit.
+- Legal ISO: `android_images/android-x86_64-9.0-r2.iso`, SHA-1 matched,
+  gitignored.
+- Windows QEMU 11.1.0 TCG. `-nographic` stdout showed SeaBIOS + ISOLINUX
+  6.03. Consumer 20260912_043438 4/4. `phone_ready` false, `adb_proven`
+  false. Not in `run_pan_gate.py`.
+- Next: ADB userspace / PhoneVMState.READY. Do not open a second
+  disk-create chain. Do not reopen the retired second threat chain.
+
 ## 2026-09-12 retire second chain
 
 - Rebased onto origin/main `ba05cf4`. Discarded uncommitted mesh-strand /
