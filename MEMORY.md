@@ -3,7 +3,46 @@
 Append durable, evidence-backed findings here. Preserve corrections as new dated
 entries instead of erasing historical truth.
 
+## 2026-09-12 — retire BlockchainThreatIntelligence; bind D/O share to USMS
+
+**Keys:** SecondCombatChainRetiredError · ThreatDetectionModule.bind_immune_system
+· NetworkThreatMonitor · PlanetaryImmuneSystem · ROELevel (unchanged owner)
+
+**Status:** LANDED (second-chain retirement + lineage bind). QEMU guest boot
+is NOT landed on this worker.
+
+### Durable findings
+
+- After `git pull --rebase origin main`, HEAD was `ba05cf4`. Mesh-strand,
+  `usms_linkage`, and signed `pan_refs` are **not** in this tree. Those
+  earlier trail claims were retired rather than invented.
+- ROE OBSERVE/DECEIVE/DEGRADE persist and L4-without-human-auth fail-loud
+  already live on `PlanetaryImmuneSystem` from `ba05cf4`. This unit did not
+  duplicate that owner.
+- `BlockchainThreatIntelligence.__init__` now raises
+  `SecondCombatChainRetiredError`. `DistributedDefenseModule` no longer
+  constructs it. `ThreatDetectionModule.share_threat_intelligence` requires a
+  bound `PlanetaryImmuneSystem` and writes USMS EVENT/BELIEF through
+  `share_intelligence`. Unbound share raises `ImmuneSystemNotBoundError`.
+- `NetworkThreatMonitor` binds the live firewall, parses ISO packet
+  timestamps, and persists detections through the immune owner with explicit
+  observe/deceive/degrade (never neutralize).
+- `DefensiveOffensiveBridge` calls `bind_immune_system` on defensive and
+  offensive owners when present. PAN RSA hash and USMS Ed25519 agent id stay
+  distinct in the bind consumer.
+- Immune consumer 12/12 (`test/immune/runs/20260912_092843/`). Full gate on
+  this worker FAIL only `qemu_img_disk_create` (qemu-img missing). Origin
+  `ba05cf4` already proved disk-create on a qemu-equipped host.
+
+### Evidence
+
+- `test/immune/runs/20260912_092843/`
+- `test/immune/runs/20260912_092917/`
+- `results/pan_gate_20260912_092909.json`
+- `snapshots/v0.10/manifest.json`
+
 ## 2026-09-12 — qemu-img disk-create + immune ROE on the USMS DAG
+
 
 **Keys:** ISOConverter · QemuImgError · ROELevel · record_roe_decision ·
 DefensiveOffensiveBridge · neural_activation

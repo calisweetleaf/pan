@@ -646,6 +646,20 @@ class DefensiveOffensiveBridge:
             )
         if self.defensive_module is not None:
             self.defensive_module.sovereign_firewall = self.threat_intelligence.firewall
+            for candidate in (
+                self.defensive_module,
+                getattr(self.defensive_module, "threat_detector", None),
+                getattr(self.defensive_module, "network_monitor", None),
+            ):
+                if candidate is None:
+                    continue
+                binder = getattr(candidate, "bind_immune_system", None)
+                if callable(binder):
+                    binder(self.threat_intelligence)
+        if self.offensive_module is not None:
+            binder = getattr(self.offensive_module, "bind_immune_system", None)
+            if callable(binder):
+                binder(self.threat_intelligence)
         self.human_authorization = HumanAuthorizationInterface()
         
         # State management

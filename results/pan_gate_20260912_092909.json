@@ -1,0 +1,663 @@
+{
+  "gate": "run_pan_gate",
+  "timestamp": "20260912_092909",
+  "passed": false,
+  "elapsed_seconds": 16.380157232284546,
+  "python": "3.12.3 (main, Mar 23 2026, 19:04:32) [GCC 13.3.0]",
+  "slices": [
+    {
+      "name": "compile",
+      "passed": true,
+      "details": {
+        "compiled": [
+          "PAN_SDK/PAN_SDK.py",
+          "PAN_SDK/personal_data.py",
+          "PAN_SDK/citizen_simulator.py",
+          "PAN_SDK/__init__.py",
+          "PAN_SDK/treasury.py",
+          "PAN_SDK/email_social.py",
+          "PAN_SDK/master_db.py",
+          "security/sovereign_firewall.py",
+          "security/planetary_immune_system.py",
+          "security/defensive_offensive_bridge.py",
+          "security/defensive_sovereignty.py",
+          "security/reactive_offense.py",
+          "memory/unified_memory_system.py",
+          "memory/memory_core.py",
+          "memory/system_cache.py",
+          "telecom/vm_supervisor.py",
+          "telecom/vm_image_manager.py",
+          "telecom/phone_orchestrator.py"
+        ],
+        "skipped": []
+      }
+    },
+    {
+      "name": "import",
+      "passed": true,
+      "details": {
+        "package": "/workspace/PAN_SDK/__init__.py",
+        "has_persist_name": true,
+        "has_store_name": true,
+        "has_get_name": true,
+        "dht_node": "DHTNode",
+        "identity": "SovereignIdentity",
+        "citizen_simulator": "/workspace/PAN_SDK/citizen_simulator.py"
+      }
+    },
+    {
+      "name": "persistence",
+      "passed": true,
+      "details": {
+        "components": [
+          "dht_data",
+          "dht_ledger",
+          "economy_accounts",
+          "governance_proposals",
+          "governance_policies"
+        ],
+        "matches": {
+          "dht_data": true,
+          "dht_ledger": true,
+          "economy_accounts": true,
+          "governance_proposals": true,
+          "governance_policies": true
+        },
+        "account_count": 3,
+        "proposal_count": 1
+      }
+    },
+    {
+      "name": "name_registry",
+      "passed": true,
+      "details": {
+        "registered": true,
+        "invalid_rejected": true,
+        "unauthorized_rejected": true,
+        "persisted_active": true,
+        "hydrated_name": "testname",
+        "hydrated_target": "4a11824fcea6184cb6784bafad6658b44c70c5df1a44d3136180824d489dc586",
+        "missing_is_none": true,
+        "store_name_fail_loud": true
+      }
+    },
+    {
+      "name": "manifest",
+      "passed": true,
+      "details": {
+        "valid": true,
+        "tampered": false,
+        "wrong_key": false
+      }
+    },
+    {
+      "name": "personal_data",
+      "passed": true,
+      "details": {
+        "matches": {
+          "contacts": true,
+          "messages": true,
+          "call_logs": true,
+          "preferences": true,
+          "phone_addresses": true
+        },
+        "phone_address": "pan:netlab:motiflab:voice"
+      }
+    },
+    {
+      "name": "system_scenario",
+      "passed": true,
+      "details": {
+        "comparisons": {
+          "dht_data": "MATCH",
+          "dht_ledger": "MATCH",
+          "economy_accounts": "MATCH",
+          "governance_proposals": "MATCH",
+          "governance_policies": "MATCH",
+          "citizens": "MATCH",
+          "applications": "MATCH",
+          "name_registry": "MATCH",
+          "phone_addresses": "MATCH",
+          "treasury_fsm": "MATCH",
+          "treasury_validators": "MATCH",
+          "treasury_proposals": "MATCH",
+          "master_db_docs": "MATCH",
+          "master_db_counters": "MATCH",
+          "master_db_sets": "MATCH",
+          "master_db_meta": "MATCH",
+          "email_relay_70f2c57594fb606242afcda7fd18e61ec404f72d3f804f667badf16a0a18ffe2": "MATCH",
+          "pending_transactions": "MATCH",
+          "usage_metrics": "MATCH",
+          "personal_contacts": "MATCH",
+          "personal_messages": "MATCH",
+          "personal_call_logs": "MATCH",
+          "personal_preferences": "MATCH",
+          "treasury_fsm_live": "MATCH",
+          "master_db_live": "MATCH",
+          "email_relay_live": "MATCH",
+          "email_not_auto_bound": "MATCH"
+        },
+        "operations": {
+          "citizen_id": "8db5607e-d625-5d28-bb71-61e670c7d785",
+          "developer_id": "68ab6257-b6be-5f55-b785-38139d16c98a",
+          "app_id": "6d660ba6-50f6-5ed4-99b5-60f5ec722de9",
+          "registered_name": "testname",
+          "proposal_id": "bc328314-53ca-5e20-b25d-8aa4d832c94c",
+          "treasury_state": "MINT_PHASE",
+          "treasury_validators": 3,
+          "poi_mint_amount": 40,
+          "poi_balance": 240,
+          "poi_proposal_id": "877fbc458128d30d9824dc02138d7024",
+          "mail_packet_id": "c575a29bdcebd45ec2732a1ac995aab25feea9b93dfd35948b2135f93936a3b9",
+          "social_packet_id": "2a86879331726de642007f6c1db00bbc5abee5c20d4d56a2ab23afc2f4b7a9ef",
+          "master_db_mint": {
+            "proposal_id": "877fbc458128d30d9824dc02138d7024",
+            "amount": 40,
+            "recipient": "7dc6cb8eefccd99a2f0eb50fee5782c30dd4921ee99df57c93d0c3808eff2cc4",
+            "treasury_state": "MINT_PHASE"
+          },
+          "master_db_cycles": 3,
+          "shared_sqlite": "/tmp/pan_sdk_system_hsefkid1/pan_state.db",
+          "email_explicit": true,
+          "email_not_auto_bound": true,
+          "peer_identity_hash": "cd1a0db9e20a88079d44c743c727dc5b47f656002a48afa46446904ea66c91c6",
+          "email_relay_component": "email_relay_70f2c57594fb606242afcda7fd18e61ec404f72d3f804f667badf16a0a18ffe2",
+          "snapshot_sizes": {
+            "dht_data": 12,
+            "dht_ledger": 19,
+            "economy_accounts": 6,
+            "governance_proposals": 1,
+            "governance_policies": 2,
+            "citizens": 2,
+            "applications": 1,
+            "name_registry": 1,
+            "phone_addresses": 1,
+            "treasury_fsm": 1,
+            "treasury_validators": 3,
+            "treasury_proposals": 1,
+            "master_db_docs": 1,
+            "master_db_counters": 1,
+            "master_db_sets": 1,
+            "master_db_meta": 1,
+            "email_relay_70f2c57594fb606242afcda7fd18e61ec404f72d3f804f667badf16a0a18ffe2": 2,
+            "pending_transactions": 1,
+            "usage_metrics": 2,
+            "personal_contacts": 1,
+            "personal_messages": 1,
+            "personal_call_logs": 1,
+            "personal_preferences": 10
+          }
+        },
+        "artifacts": [
+          "/workspace/results/pan_sdk_system_test_20260912_092910.txt",
+          "/workspace/results/pan_sdk_system_test_20260912_092910.json",
+          "/workspace/results/pan_sdk_system_test_20260912_092910.md"
+        ]
+      }
+    },
+    {
+      "name": "planetary_immune_system",
+      "passed": true,
+      "status": "pass",
+      "pass_count": 12,
+      "fail_count": 0,
+      "skip_count": 0,
+      "elapsed_seconds": 5.333459138870239,
+      "checks": [
+        {
+          "name": "firewall_blocks_telemetry",
+          "status": "pass",
+          "detail": {
+            "telemetry_reason": "telemetry_dictionary",
+            "telemetry_ledger_rows": 1
+          }
+        },
+        {
+          "name": "firewall_allows_civic_chat",
+          "status": "pass",
+          "detail": {
+            "civic_chat_allowed": true
+          }
+        },
+        {
+          "name": "inspect_content_compresses_secrets",
+          "status": "pass",
+          "detail": {
+            "compressed_bytes": 65,
+            "original_bytes": 59
+          }
+        },
+        {
+          "name": "signed_secret_packet_is_blocked",
+          "status": "pass",
+          "detail": {
+            "signed_secret_blocked": true
+          }
+        },
+        {
+          "name": "identity_blocklist",
+          "status": "pass",
+          "detail": {
+            "blocked_identity": "c048fd88e043"
+          }
+        },
+        {
+          "name": "legacy_ip_routing_blocked",
+          "status": "pass",
+          "detail": {
+            "routing_blocked": true
+          }
+        },
+        {
+          "name": "memory_survives_restart",
+          "status": "pass",
+          "detail": {
+            "intel_id": "1bc950516579d598",
+            "event_node_id": "10c17b0b-45fd-426f-83dd-c55ecd24471f",
+            "belief_node_id": "b7cfbe7d-d263-4d13-a1ec-2da0ef72129c",
+            "bulletin_dht_key": "threat-memory:5f1845c8550d46a4a9e442647deddb0e4036ae6339bb521d7c7620f83122ba53",
+            "restart_hits": 4
+          }
+        },
+        {
+          "name": "peer_ingests_bulletin",
+          "status": "pass",
+          "detail": {
+            "peer_ingested_intel_id": "9777ccc17641673f",
+            "peer_hits": 4,
+            "packet_kind": "THREAT_MEMORY_BULLETIN"
+          }
+        },
+        {
+          "name": "contradiction_and_campaign_entangle",
+          "status": "pass",
+          "detail": {
+            "entanglement_id": "dd0ba2fd-520d-4045-b8b8-93e90bb90e5a",
+            "contradiction_node_id": "b0ceef4c-dad6-4036-ad74-6fe592ff875e",
+            "contradictions": 1
+          }
+        },
+        {
+          "name": "roe_ladder_persists_through_bridge",
+          "status": "pass",
+          "detail": {
+            "roe_level": "deceive",
+            "neural_activation": 0.385,
+            "belief_node_id": "3ada84a0-e784-41f4-b4d8-de9783cbbe5b",
+            "restart_recovered": true
+          }
+        },
+        {
+          "name": "neutralize_requires_human_authorization",
+          "status": "pass",
+          "detail": {
+            "share_denied": "ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized",
+            "record_denied": "ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized",
+            "external_host_action": false
+          }
+        },
+        {
+          "name": "second_chain_retired_share_uses_immune",
+          "status": "pass",
+          "detail": {
+            "unbound_denied": "ThreatDetectionModule.share_threat_intelligence requires a bound PlanetaryImmuneSystem; BlockchainThreatIntelligence is retired",
+            "retired_construct": true,
+            "detector_intel_id": "e2be0d2086cc8c7f",
+            "detector_roe_level": "observe",
+            "monitor_hits": 6,
+            "identities_distinct": true
+          }
+        }
+      ],
+      "artifacts": {
+        "json": "/workspace/test/immune/runs/20260912_092917/result.json",
+        "md": "/workspace/test/immune/runs/20260912_092917/result.md",
+        "log": "/workspace/test/immune/runs/20260912_092917/result.log",
+        "run_dir": "/workspace/test/immune/runs/20260912_092917"
+      }
+    },
+    {
+      "name": "sovereign_treasury",
+      "passed": true,
+      "status": "pass",
+      "pass_count": 7,
+      "fail_count": 0,
+      "skip_count": 0,
+      "elapsed_seconds": 3.3792901039123535,
+      "checks": [
+        {
+          "name": "genesis_rejects_mint",
+          "status": "pass",
+          "detail": {
+            "state": "GENESIS"
+          }
+        },
+        {
+          "name": "seal_genesis_and_contract_reject",
+          "status": "pass",
+          "detail": {
+            "state": "MINT_PHASE",
+            "quorum": 3
+          }
+        },
+        {
+          "name": "poi_mint_requires_quorum",
+          "status": "pass",
+          "detail": {
+            "minted_balance": 40,
+            "packet_id": "791460ced1ebfcbf97afd889622993f1943dd78ee674d64c3fd7fe646ad5f850"
+          }
+        },
+        {
+          "name": "distribute_and_burn_and_halts",
+          "status": "pass",
+          "detail": {
+            "final_state": "CRITICAL_SUSPEND",
+            "supply": 90,
+            "citizen_balance": 15
+          }
+        },
+        {
+          "name": "restart_hydrates_fsm",
+          "status": "pass",
+          "detail": {
+            "state_before": "MINT_PHASE",
+            "chair_before": "de755742b9b93d94356ad875b8d282782f04387b99c54de4b3f6bacc5873c428",
+            "state_after": "MINT_PHASE",
+            "validators_after": 3
+          }
+        },
+        {
+          "name": "poi_rejects_forged_output",
+          "status": "pass",
+          "detail": {
+            "error": "claimed output diverged from local re-execution"
+          }
+        },
+        {
+          "name": "poi_unbound_engine_fails",
+          "status": "pass",
+          "detail": {
+            "error": "PoI requires a bound SovereignInferenceEngine"
+          }
+        }
+      ],
+      "artifacts": {
+        "json": "/workspace/test/treasury/runs/20260912_092921/result.json",
+        "md": "/workspace/test/treasury/runs/20260912_092921/result.md",
+        "log": "/workspace/test/treasury/runs/20260912_092921/result.log",
+        "run_dir": "/workspace/test/treasury/runs/20260912_092921"
+      }
+    },
+    {
+      "name": "email_social",
+      "passed": true,
+      "status": "pass",
+      "pass_count": 5,
+      "fail_count": 0,
+      "skip_count": 0,
+      "elapsed_seconds": 2.865051746368408,
+      "checks": [
+        {
+          "name": "sealed_mail_across_relays",
+          "status": "pass",
+          "detail": {
+            "packet_id": "56b6248d3b2a41b209050167b654000b0185dc3d630880e6307884b4cb1df543",
+            "relays": 2,
+            "alice_address": "pan:id:72a8b2385508dd33cfc369639950687e7bc316644901b3f3f95a86cbaedfc98c"
+          }
+        },
+        {
+          "name": "legacy_ip_rejected",
+          "status": "pass",
+          "detail": {
+            "rejected": true
+          }
+        },
+        {
+          "name": "relay_blocks_unsigned_and_routing",
+          "status": "pass",
+          "detail": {
+            "forged_rejected": true,
+            "routing_rejected": true
+          }
+        },
+        {
+          "name": "social_and_knock",
+          "status": "pass",
+          "detail": {
+            "social_id": "0e63f276e00b8f665944397811ce695728ea019e759dc7be732c4c457480ff99",
+            "knocks_dropped": 2
+          }
+        },
+        {
+          "name": "restart_hydrates_relay",
+          "status": "pass",
+          "detail": {
+            "before": 1,
+            "after": 1
+          }
+        }
+      ],
+      "artifacts": {
+        "json": "/workspace/test/email_social/runs/20260912_092923/result.json",
+        "md": "/workspace/test/email_social/runs/20260912_092923/result.md",
+        "log": "/workspace/test/email_social/runs/20260912_092923/result.log",
+        "run_dir": "/workspace/test/email_social/runs/20260912_092923"
+      }
+    },
+    {
+      "name": "master_db",
+      "passed": true,
+      "status": "pass",
+      "pass_count": 4,
+      "fail_count": 0,
+      "skip_count": 0,
+      "elapsed_seconds": 1.719604253768921,
+      "checks": [
+        {
+          "name": "offline_nodes_converge",
+          "status": "pass",
+          "detail": {
+            "counter": 11,
+            "docs": [
+              "citizen:ann",
+              "citizen:bea"
+            ]
+          }
+        },
+        {
+          "name": "join_algebra",
+          "status": "pass",
+          "detail": {
+            "commutative": true,
+            "associative": true,
+            "idempotent": true
+          }
+        },
+        {
+          "name": "tombstone_and_orset_remove",
+          "status": "pass",
+          "detail": {
+            "tombstone": true
+          }
+        },
+        {
+          "name": "dht_bind_and_restart",
+          "status": "pass",
+          "detail": {
+            "before": {
+              "emission": 1
+            },
+            "after": {
+              "emission": 1
+            },
+            "cycles": 3
+          }
+        }
+      ],
+      "artifacts": {
+        "json": "/workspace/test/master_db/runs/20260912_092925/result.json",
+        "md": "/workspace/test/master_db/runs/20260912_092925/result.md",
+        "log": "/workspace/test/master_db/runs/20260912_092925/result.log",
+        "run_dir": "/workspace/test/master_db/runs/20260912_092925"
+      }
+    },
+    {
+      "name": "thyris_memory",
+      "passed": true,
+      "status": "pass",
+      "pass_count": 3,
+      "fail_count": 0,
+      "skip_count": 0,
+      "elapsed_seconds": 0.08043837547302246,
+      "checks": [
+        {
+          "name": "owners_are_not_usms",
+          "status": "pass",
+          "detail": {
+            "memory_manager": "memory.memory_core",
+            "usms": "memory.unified_memory_system"
+          }
+        },
+        {
+          "name": "memory_store_retrieve",
+          "status": "pass",
+          "detail": {
+            "memory_id": "2bd235f4-8105-430f-a451-12de42ba8e82",
+            "retrieved": 1,
+            "embedding": "LocalHashEmbeddingModel"
+          }
+        },
+        {
+          "name": "cache_set_get",
+          "status": "pass",
+          "detail": {
+            "cache_get": {
+              "vm": "android-13",
+              "ready": true
+            },
+            "metadata_db": "/tmp/thyris_cache_hry187ub/runtime_cache/cache_metadata.db"
+          }
+        }
+      ],
+      "artifacts": {
+        "json": "/workspace/test/memory_core/runs/20260912_092925/result.json",
+        "md": "/workspace/test/memory_core/runs/20260912_092925/result.md",
+        "log": "/workspace/test/memory_core/runs/20260912_092925/result.log",
+        "run_dir": "/workspace/test/memory_core/runs/20260912_092925"
+      }
+    },
+    {
+      "name": "thyris_vm",
+      "passed": false,
+      "status": "fail",
+      "pass_count": 6,
+      "fail_count": 1,
+      "skip_count": 0,
+      "elapsed_seconds": 0.05514979362487793,
+      "checks": [
+        {
+          "name": "phone_orchestrator_imports",
+          "status": "pass",
+          "detail": {
+            "module": "/workspace/telecom/phone_orchestrator.py",
+            "thyris_class": "ThyrisPhoneOrchestrator",
+            "vm_state": "creating"
+          }
+        },
+        {
+          "name": "image_manager_constructs",
+          "status": "pass",
+          "detail": {
+            "metadata_file": "/tmp/thyris_img_oo9bui_c/images/image_metadata.json",
+            "os_families": [
+              "ubuntu",
+              "debian",
+              "fedora",
+              "centos",
+              "alpine",
+              "arch",
+              "windows",
+              "custom"
+            ]
+          }
+        },
+        {
+          "name": "supervisor_constructs",
+          "status": "pass",
+          "detail": {
+            "ip": "192.168.122.196",
+            "memory_db": "/tmp/thyris_sup_nit8k7z1/vms/memory/metadata.db",
+            "profiles": [
+              "coding",
+              "idle",
+              "media_creation",
+              "research"
+            ],
+            "orchestrator_aliases": {
+              "vm_manager": true,
+              "network": true
+            }
+          }
+        },
+        {
+          "name": "aipc_prompt_unbound",
+          "status": "pass",
+          "detail": {
+            "supervisor_file": "/workspace/telecom/vm_supervisor.py",
+            "prompt_imports": [],
+            "leaked_methods": []
+          }
+        },
+        {
+          "name": "usms_erebus_has_no_prompt",
+          "status": "pass",
+          "detail": {
+            "usms_module": "memory.unified_memory_system",
+            "immune_module": "security.planetary_immune_system",
+            "packet": "UnifiedDataPacket",
+            "prompt_bridge_in_usms": false,
+            "prompt_bridge_in_immune": false
+          }
+        },
+        {
+          "name": "telecom_host_tools_contract",
+          "status": "pass",
+          "detail": {
+            "required": [
+              "qemu-system-x86_64",
+              "qemu-img",
+              "adb"
+            ],
+            "ok": false,
+            "missing": [
+              "qemu-system-x86_64",
+              "qemu-img",
+              "adb"
+            ],
+            "orchestrator": "ThyrisPhoneOrchestrator"
+          }
+        },
+        {
+          "name": "qemu_img_disk_create",
+          "status": "fail",
+          "error": "CheckFailure: qemu-img missing; disk-create is unproven",
+          "detail": {
+            "qemu_img": null,
+            "qemu_system_x86_64": null,
+            "booted": false
+          }
+        }
+      ],
+      "error": "1 thyris vm checks failed",
+      "artifacts": {
+        "json": "/workspace/test/thyris_vm/runs/20260912_092925/result.json",
+        "md": "/workspace/test/thyris_vm/runs/20260912_092925/result.md",
+        "log": "/workspace/test/thyris_vm/runs/20260912_092925/result.log",
+        "run_dir": "/workspace/test/thyris_vm/runs/20260912_092925"
+      }
+    }
+  ],
+  "skipped": []
+}

@@ -31,6 +31,9 @@ invented alternative.
 - `security/defensive_offensive_bridge.py` imports the live
   `security.defensive_sovereignty` / `security.reactive_offense` owners and
   writes threat events through `PlanetaryImmuneSystem.share_intelligence`.
+  `ThreatDetectionModule.share_threat_intelligence` and
+  `NetworkThreatMonitor` detections bind to that same owner.
+  `BlockchainThreatIntelligence` construction fails loud; it is not a live store.
 - `memory/memory_core.py` and `memory/system_cache.py` are Thyris VM session
   memory. They coexist with USMS in `memory/` and are not the immune DAG.
 - `telecom/vm_supervisor.py` and `telecom/vm_image_manager.py` are the VM owners
@@ -44,18 +47,25 @@ invented alternative.
 
 ## Verified baseline
 
+- **GREEN (immune bind), 2026-09-12:** retire in-process second chain
+  (`main`, this worker). `python3 test/immune/test_planetary_immune_system.py`
+  12/12 including `second_chain_retired_share_uses_immune`.
+  `python3 test/run_pan_gate.py` immune slice 12/12; remaining slices PASS
+  except `thyris_vm.qemu_img_disk_create` because qemu-img is absent here.
+  That qemu miss is a host gap versus origin `ba05cf4`, not an immune
+  regression. Identities stayed two types. L4 without human auth still
+  fail-loud. Artifacts: `test/immune/runs/20260912_092843/`,
+  `test/immune/runs/20260912_092917/`,
+  `results/pan_gate_20260912_092909.json`.
 - **GREEN, 2026-09-12:** qemu-img disk-create + immune ROE DAG
-  `python3 test/run_pan_gate.py` exited 0 in 16.705s on Linux Python 3.12.3.
-  `ISOConverter._create_disk` wrote a 1G qcow2 (196624 bytes on disk,
-  virtual_size 1073741824) via qemu-img 8.2.2. Immune 11/11 including
-  `roe_ladder_persists_through_bridge` and
-  `neutralize_requires_human_authorization`. Compile now includes D/O lineage.
+  `python3 test/run_pan_gate.py` exited 0 in 16.705s on a Linux worker that
+  had qemu-img 8.2.2 (`ba05cf4`). `ISOConverter._create_disk` wrote a 1G
+  qcow2. Immune 11/11 including ROE persist and L4 deny. This Erebus worker
+  does not have those host tools.
   Artifacts: `results/pan_gate_20260912_091538.json`,
   `results/pan_gate_20260912_091538.md`,
   `test/thyris_vm/runs/20260912_091429/`,
   `test/immune/runs/20260912_091516/`.
-  qemu-system-x86_64 is present. adb is missing. No Android image. Phones
-  were not booted.
 - **GREEN, 2026-09-11:** finish-prior combined tree merged to main (PR #5).
   `python3 test/run_pan_gate.py` exited 0 in 12.707s on Linux Python 3.12.3
   after merging packet alignment, civic walkthrough, and the inference owner.
@@ -73,18 +83,16 @@ invented alternative.
 
 ## Active frontier
 
-1. QEMU guest boot is unproven. Host tools: `qemu-system-x86_64` and `qemu-img`
-   are present on this Linux worker; `adb` is missing. No Android image is in
-   the repository. Disk-create is proven; phones do not boot in this gate.
+1. QEMU guest boot is unproven. This Erebus worker is missing
+   `qemu-system-x86_64`, `qemu-img`, and `adb`. Origin `ba05cf4` proved
+   disk-create on a qemu-equipped host. No Android image is in the repository.
+   Phones do not boot.
 2. `memory/memory_integration.py` still imports `schemas.session`, which is
    absent. That is leftover AIPC session-memory, not a Thyris telecom
    requirement. Do not scaffold a fake schemas package.
 3. `PAN_SDK/API.server.py` `_run_inference_async` is still an unconsumed
    sleep-and-string subclass. It is not the inference owner.
-4. `defensive_sovereignty.BlockchainThreatIntelligence` is still an in-process
-   second chain. The consumed combat-memory path is USMS via
-   `PlanetaryImmuneSystem`.
-5. Orama dashboard / vector memory spaces named in whitepaper section 6.2.
+4. Orama dashboard / vector memory spaces named in whitepaper section 6.2.
 
 ## Known decision boundaries
 
@@ -116,19 +124,18 @@ Root AGENTS.md, security/AGENTS.md, and `.cursor/` rules/commands were
 reconciled to the Thyris unbind baseline on 2026-09-11. The stale
 `somnus_erebus/` QWEN tree is not the security packet. Inference owner landed
 in snapshots/v0.8. qemu-img disk-create and immune ROE DAG landed in
-snapshots/v0.9.
+snapshots/v0.9. Second-chain retirement landed in snapshots/v0.10.
 
 ## Generated-map status
 
 `filetree.md` is operator-owned generated navigation. Continuity-doc turns
-must not hand-edit it. Snapshot `v0.9` is a new folder; regenerate filetree
+must not hand-edit it. Snapshot `v0.10` is a new folder; regenerate filetree
 through FileTree Pro.
 
 ## Next justified action
 
-Obtain a real Android image (do not dummy one) and install `adb`, then prove a
-Thyris path that still does not claim phones boot until qemu-system actually
-runs a guest. Alternate: retire `BlockchainThreatIntelligence` so
-`defensive_sovereignty.share_threat_intelligence` cannot use a second chain.
-Do not pull prompt files. Do not add a second inference engine in
-`API.server.py`.
+Obtain a real Android image (do not dummy one) and prove `qemu-img` /
+`qemu-system-x86_64` plus `adb` on a host that has those tools. Do not claim
+phones boot until qemu-system actually runs a guest. Do not pull prompt files.
+Do not add a second inference engine in `API.server.py`. Do not invent
+mesh-strand/`usms_linkage`. Do not construct `BlockchainThreatIntelligence`.

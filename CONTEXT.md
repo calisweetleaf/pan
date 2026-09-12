@@ -16,6 +16,24 @@ source inspection or STATE.md.
 - NOTEPAD.md — current scratch, non-canonical.
 - security/AGENTS.md + security/rules_of_engagement.md — security lane.
 
+## 2026-09-12 — retire second chain; bind D/O share to immune/USMS
+
+**Keys:** BlockchainThreatIntelligence · ThreatDetectionModule ·
+NetworkThreatMonitor · PlanetaryImmuneSystem
+
+- **State:** Construction of `BlockchainThreatIntelligence` fails loud.
+  Lineage share/monitor writes through `PlanetaryImmuneSystem` / USMS.
+  Immune 12/12. Gate on this worker red only for missing qemu-img.
+  Mesh-strand/`usms_linkage` are not in this tree and were not invented.
+- **Authority:** STATE.md; SOTA_RUN.md; results/pan_gate_20260912_092909.json;
+  test/immune/runs/20260912_092843/result.json; snapshots/v0.10/manifest.json.
+- **Boundary:** Do not duplicate ROE-on-USMS. Do not collapse RSA/Ed25519.
+  Do not implement L4 against external hosts. Do not install qemu here.
+- **Then inspect:** security/defensive_sovereignty.py,
+  security/defensive_offensive_bridge.py,
+  security/planetary_immune_system.py.
+- **Open:** Android image + qemu host tools + adb.
+
 ## 2026-09-12 — qemu-img disk-create + immune ROE DAG
 
 **Keys:** ISOConverter._create_disk · qemu-img · ROELevel ·

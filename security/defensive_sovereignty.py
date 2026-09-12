@@ -25,9 +25,25 @@ from collections import defaultdict, deque
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from queue import Queue, PriorityQueue
+from datetime import datetime, timezone
 from pathlib import Path
 
+_ROOT = Path(__file__).resolve().parent.parent
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
+from security.planetary_immune_system import (
+    ImmuneSystemNotBoundError,
+    PlanetaryImmuneSystem,
+)
+from security.sovereign_firewall import InspectionLane, InspectionVerdict
+
 logger = logging.getLogger(__name__)
+
+
+class SecondCombatChainRetiredError(RuntimeError):
+    """Raised when a caller constructs the retired RAM blockchain threat store."""
+
 
 
 class APIConfigurationLoader:
@@ -509,6 +525,34 @@ class NetworkThreatMonitor:
         self.enumeration_window = 60
         self.beaconing_interval_variance_threshold = 0.2 # Low variance indicates beaconing
         self.beaconing_min_packets = 20
+        self.immune_system: Optional[PlanetaryImmuneSystem] = None
+        self.sovereign_firewall = None
+
+    @staticmethod
+    def _packet_unix_ts(packet: Any) -> float:
+        """PAN UnifiedDataPacket.timestamp is ISO-8601 text, not a unix float."""
+        raw = getattr(packet, "timestamp", None)
+        if isinstance(raw, (int, float)):
+            return float(raw)
+        if isinstance(raw, str) and raw:
+            normalized = raw.replace("Z", "+00:00")
+            try:
+                parsed = datetime.fromisoformat(normalized)
+            except ValueError as exc:
+                raise TypeError(f"packet.timestamp is not ISO-8601: {raw!r}") from exc
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=timezone.utc)
+            return parsed.timestamp()
+        raise TypeError("packet.timestamp must be a unix float or ISO-8601 string")
+
+    def bind_immune_system(self, immune_system: PlanetaryImmuneSystem) -> None:
+        """Bind the live USMS/PAN immune owner. Do not construct a second chain."""
+        if immune_system is None:
+            raise ImmuneSystemNotBoundError(
+                "NetworkThreatMonitor.bind_immune_system requires PlanetaryImmuneSystem"
+            )
+        self.immune_system = immune_system
+        self.sovereign_firewall = immune_system.firewall
 
     def analyze_pan_packet(self, packet: 'UnifiedDataPacket') -> Dict[str, float]:
         """Analyzes a single PAN packet for threats and returns a dictionary of violations."""
@@ -530,8 +574,39 @@ class NetworkThreatMonitor:
             for threat, score in threats.items():
                 if score > final_threats.get(threat, 0.0):
                     final_threats[threat] = score
-            
+
+            if final_threats and self.immune_system is not None:
+                self._persist_detection(packet, final_threats)
+
             return final_threats
+
+    def _persist_detection(
+        self,
+        packet: 'UnifiedDataPacket',
+        final_threats: Dict[str, float],
+    ) -> None:
+        """Write a detection through PlanetaryImmuneSystem. Never request L4."""
+        max_score = max(final_threats.values())
+        threat_type = max(final_threats, key=final_threats.get)
+        if max_score >= 0.75:
+            roe_level = "degrade"
+        elif max_score >= 0.40:
+            roe_level = "deceive"
+        else:
+            roe_level = "observe"
+        self.immune_system.share_intelligence(
+            {
+                "threat_type": threat_type,
+                "confidence": float(max_score),
+                "actionable": True,
+                "hostile_pan_identity_hash": packet.author_identity_hash,
+                "detected_threats": dict(final_threats),
+                "packet_id": packet.packet_id,
+                "packet_kind": packet.kind,
+                "roe_level": roe_level,
+            },
+            source="network_threat_monitor",
+        )
 
     def _analyze_identity_reputation(self, identity_hash: str) -> Dict[str, float]:
         """Checks the reputation of a PAN identity."""
@@ -561,7 +636,9 @@ class NetworkThreatMonitor:
         history = self.identity_history[identity_hash]
         now = time.time()
         
-        recent_packets = [p for p in history if now - p.timestamp < self.enumeration_window]
+        recent_packets = [
+            p for p in history if now - self._packet_unix_ts(p) < self.enumeration_window
+        ]
         
         if len(recent_packets) > self.enumeration_threshold:
             distinct_packet_kinds = {p.kind for p in recent_packets}
@@ -580,7 +657,7 @@ class NetworkThreatMonitor:
         if len(history) < self.beaconing_min_packets:
             return threats
 
-        timestamps = sorted([p.timestamp for p in history])
+        timestamps = sorted([self._packet_unix_ts(p) for p in history])
         intervals = [timestamps[i] - timestamps[i-1] for i in range(1, len(timestamps))]
         
         if not intervals:
@@ -611,11 +688,22 @@ class NetworkThreatMonitor:
                 threats['pan_packet_high_entropy'] = min((entropy - 4.0) / 2.0, 1.0)
 
             # Check for known malicious keywords or patterns from the firewall module
-            if hasattr(self, 'sovereign_firewall'):
-                inspection_result = self.sovereign_firewall.inspect_content(packet.content)
-                if inspection_result['blocked']:
+            if self.sovereign_firewall is not None:
+                content = packet.content if isinstance(packet.content, dict) else {
+                    "payload": str(packet.content)
+                }
+                verdict = self.sovereign_firewall.inspect_content(
+                    content,
+                    lane=InspectionLane.EGRESS_LEGACY,
+                    author_identity_hash=packet.author_identity_hash,
+                )
+                if isinstance(verdict, InspectionVerdict) and verdict.blocked:
                     threats['pan_packet_firewall_violation'] = 0.9
-                    logger.warning(f"PAN packet {packet.packet_id[:12]} flagged by sovereign firewall: {inspection_result['reason']}")
+                    logger.warning(
+                        "PAN packet %s flagged by sovereign firewall: %s",
+                        packet.packet_id[:12],
+                        verdict.reason,
+                    )
 
         except Exception as e:
             logger.error(f"Failed to analyze packet content for {packet.packet_id[:12]}: {e}")
@@ -1730,9 +1818,11 @@ class ThreatDetectionModule:
         self.system_monitor = SystemIntegrityMonitor()
         self.forensic_collector = ForensicDataCollector()
         
-        # Threat intelligence
+        # Threat intelligence — combat memory is PlanetaryImmuneSystem, not RAM.
         self.threat_intelligence: Dict[str, Any] = {}
         self.intelligence_sources: Set[str] = set()
+        self.immune_system: Optional[PlanetaryImmuneSystem] = None
+        self.sovereign_firewall = None
         
         # Performance metrics
         self.detection_performance = {
@@ -1985,32 +2075,36 @@ class ThreatDetectionModule:
             }
         }
 
+    def bind_immune_system(self, immune_system: PlanetaryImmuneSystem) -> None:
+        """Bind the live immune owner. Combat memory is USMS, not a second chain."""
+        if immune_system is None:
+            raise ImmuneSystemNotBoundError(
+                "ThreatDetectionModule.bind_immune_system requires PlanetaryImmuneSystem"
+            )
+        self.immune_system = immune_system
+        self.sovereign_firewall = immune_system.firewall
+        self.network_monitor.bind_immune_system(immune_system)
+
     def share_threat_intelligence(self, threat_data: Dict[str, Any], source: str = 'internal'):
-        """Share threat intelligence with other systems and agents"""
-        with self._lock:
-            # Add to shared indicators
-            indicator = {
-                'id': hashlib.sha256(f"{time.time()}{threat_data}".encode()).hexdigest()[:16],
-                'timestamp': time.time(),
-                'data': threat_data,
-                'source': source,
-                'confidence': threat_data.get('confidence', 0.5)
-            }
-            
-            self.threat_intelligence['shared_indicators'].append(indicator)
-            
-            # Update source feed
-            if source in self.threat_intelligence['feeds']:
-                self.threat_intelligence['feeds'][source]['indicators'].append(indicator)
-                self.threat_intelligence['feeds'][source]['last_update'] = time.time()
-            
-            # Share with distributed agents
-            self._share_with_agents(indicator)
-            
-            # Add to blockchain for persistent sharing
-            self._share_via_blockchain(indicator)
-            
-            logger.info(f"Shared threat intelligence from source {source}")
+        """Persist threat intelligence through PlanetaryImmuneSystem / USMS."""
+        if self.immune_system is None:
+            raise ImmuneSystemNotBoundError(
+                "ThreatDetectionModule.share_threat_intelligence requires a bound "
+                "PlanetaryImmuneSystem; BlockchainThreatIntelligence is retired"
+            )
+        if not isinstance(threat_data, dict):
+            raise TypeError("threat_data must be a dict")
+        payload = dict(threat_data)
+        if not payload.get("threat_type"):
+            payload["threat_type"] = str(
+                payload.get("attack_vector") or payload.get("type") or "unknown"
+            )
+        record = self.immune_system.share_intelligence(payload, source)
+        logger.info(
+            "Shared threat intelligence from source %s via planetary immune system",
+            source,
+        )
+        return record
 
     def _share_with_agents(self, indicator: Dict[str, Any]):
         """Share threat intelligence with distributed agents"""
@@ -2030,17 +2124,11 @@ class ThreatDetectionModule:
             logger.error(f"Failed to share threat intelligence with agents: {e}")
 
     def _share_via_blockchain(self, indicator: Dict[str, Any]):
-        """Share threat intelligence via blockchain for persistence"""
-        try:
-            # Add to blockchain threat intelligence
-            blockchain_data = {
-                'type': 'threat_indicator',
-                'indicator': indicator,
-                'version': '1.0'
-            }
-            self.distributed_defense.threat_intelligence_chain.add_threat_intelligence(blockchain_data)
-        except Exception as e:
-            logger.error(f"Failed to share threat intelligence via blockchain: {e}")
+        """Retired. Combat memory is PlanetaryImmuneSystem / USMS."""
+        raise SecondCombatChainRetiredError(
+            "BlockchainThreatIntelligence is retired; bind PlanetaryImmuneSystem "
+            "and call share_threat_intelligence"
+        )
 
     def correlate_threat_intelligence(self, context: Dict[str, Any]) -> Dict[str, float]:
         """Correlate threat intelligence from multiple sources"""
@@ -2776,272 +2864,14 @@ class PersistenceModule:
 
 
 class BlockchainThreatIntelligence:
-    """Production-grade blockchain-based threat intelligence sharing system with consensus mechanisms"""
-    
+    """RETIRED. Combat memory is PlanetaryImmuneSystem / USMS. Do not construct."""
+
     def __init__(self, difficulty: int = 4, max_block_size: int = 100):
-        self.chain: List[Dict[str, Any]] = []
-        self.pending_transactions: List[Dict[str, Any]] = []
-        self.difficulty = difficulty  # Number of leading zeros required
-        self.max_block_size = max_block_size
-        self.nodes: Set[str] = set()  # Network nodes for consensus
-        self._lock = threading.RLock()
-        
-        # Consensus parameters
-        self.consensus_threshold = 0.6  # 60% agreement needed
-        self.block_reward = 10  # Reward for mining blocks
-        self.mining_difficulty_adjustment = 10  # Adjust difficulty every 10 blocks
-        
-        # Performance metrics
-        self.mining_performance = {
-            'blocks_mined': 0,
-            'total_transactions': 0,
-            'avg_mining_time': 0.0
-        }
-        
-        self.create_genesis_block()
-    
-    def create_genesis_block(self):
-        """Create the initial block in the blockchain with enhanced security"""
-        genesis_block = {
-            'index': 0,
-            'timestamp': time.time(),
-            'data': {
-                'type': 'genesis', 
-                'content': 'Threat Intelligence Genesis Block',
-                'version': '1.0',
-                'creator': 'Defensive Sovereignty System'
-            },
-            'previous_hash': '0' * 64,
-            'nonce': 0,
-            'hash': '',
-            'merkle_root': '',
-            'signature': ''  # Digital signature for authenticity
-        }
-        
-        # Calculate merkle root for data integrity
-        genesis_block['merkle_root'] = self._calculate_merkle_root([genesis_block['data']])
-        
-        # Calculate block hash
-        genesis_block['hash'] = self.calculate_hash(genesis_block)
-        
-        self.chain.append(genesis_block)
-    
-    def _calculate_merkle_root(self, data_list: List[Dict[str, Any]]) -> str:
-        """Calculate merkle root for data integrity verification"""
-        if not data_list:
-            return hashlib.sha256(b'').hexdigest()
-        
-        # Hash all data items
-        hashes = [hashlib.sha256(json.dumps(item, sort_keys=True).encode()).hexdigest() 
-                 for item in data_list]
-        
-        # Build merkle tree
-        while len(hashes) > 1:
-            if len(hashes) % 2 == 1:
-                hashes.append(hashes[-1])  # Duplicate last item if odd count
-            
-            new_hashes = []
-            for i in range(0, len(hashes), 2):
-                combined = hashes[i] + hashes[i+1]
-                new_hashes.append(hashlib.sha256(combined.encode()).hexdigest())
-            hashes = new_hashes
-        
-        return hashes[0]
-    
-    def calculate_hash(self, block: Dict[str, Any]) -> str:
-        """Calculate the hash of a block with enhanced security"""
-        block_content = json.dumps({
-            'index': block['index'],
-            'timestamp': block['timestamp'],
-            'data': block['data'],
-            'previous_hash': block['previous_hash'],
-            'nonce': block['nonce'],
-            'merkle_root': block['merkle_root']
-        }, sort_keys=True)
-        
-        # Use SHA-3 for quantum resistance
-        return hashlib.sha3_256(block_content.encode()).hexdigest()
-    
-    def add_threat_intelligence(self, threat_data: Dict[str, Any], priority: str = "normal"):
-        """Add threat intelligence to the pending transactions"""
-        with self._lock:
-            transaction = {
-                'id': hashlib.sha256(f"{time.time()}{threat_data}".encode()).hexdigest()[:16],
-                'timestamp': time.time(),
-                'data': threat_data,
-                'priority': priority,
-                'type': 'threat_intelligence'
-            }
-            
-            self.pending_transactions.append(transaction)
-            
-            # If we have enough transactions, create a new block
-            if len(self.pending_transactions) >= self.max_block_size:
-                self.mine_pending_blocks()
-    
-    def mine_pending_blocks(self) -> List[Dict[str, Any]]:
-        """Mine pending transactions into blocks with proof-of-work consensus"""
-        with self._lock:
-            mined_blocks = []
-            
-            # Process transactions in batches
-            while self.pending_transactions:
-                # Get batch of transactions (up to max_block_size)
-                batch_size = min(len(self.pending_transactions), self.max_block_size)
-                transactions = self.pending_transactions[:batch_size]
-                self.pending_transactions = self.pending_transactions[batch_size:]
-                
-                # Create new block
-                previous_block = self.chain[-1] if self.chain else None
-                block = {
-                    'index': len(self.chain),
-                    'timestamp': time.time(),
-                    'data': transactions,
-                    'previous_hash': previous_block['hash'] if previous_block else '0' * 64,
-                    'nonce': 0,
-                    'merkle_root': '',
-                    'signature': ''
-                }
-                
-                # Calculate merkle root
-                block['merkle_root'] = self._calculate_merkle_root(transactions)
-                
-                # Proof-of-work mining
-                start_time = time.time()
-                target = '0' * self.difficulty
-                
-                while not block['hash'].startswith(target):
-                    block['nonce'] += 1
-                    block['hash'] = self.calculate_hash(block)
-                    
-                    # Prevent infinite loops
-                    if block['nonce'] > 1000000000:  # Arbitrary large number
-                        raise RuntimeError("Mining failed - nonce limit exceeded")
-                
-                mining_time = time.time() - start_time
-                
-                # Update performance metrics
-                self.mining_performance['blocks_mined'] += 1
-                self.mining_performance['total_transactions'] += len(transactions)
-                self.mining_performance['avg_mining_time'] = (
-                    (self.mining_performance['avg_mining_time'] * 
-                     (self.mining_performance['blocks_mined'] - 1) + 
-                     mining_time) / self.mining_performance['blocks_mined']
-                )
-                
-                # Add to chain
-                self.chain.append(block)
-                mined_blocks.append(block)
-                
-                # Adjust difficulty periodically
-                if len(self.chain) % self.mining_difficulty_adjustment == 0:
-                    self._adjust_difficulty()
-            
-            return mined_blocks
-    
-    def _adjust_difficulty(self):
-        """Adjust mining difficulty based on recent performance"""
-        if len(self.chain) < self.mining_difficulty_adjustment + 1:
-            return
-        
-        # Calculate average mining time for recent blocks
-        recent_blocks = self.chain[-self.mining_difficulty_adjustment:]
-        mining_times = [block['timestamp'] - self.chain[i-1]['timestamp'] 
-                       for i, block in enumerate(recent_blocks) if i > 0]
-        
-        if not mining_times:
-            return
-            
-        avg_mining_time = sum(mining_times) / len(mining_times)
-        
-        # Adjust difficulty (target 60 seconds per block)
-        target_time = 60.0
-        if avg_mining_time < target_time * 0.8:  # Too fast
-            self.difficulty = min(10, self.difficulty + 1)  # Cap at 10
-        elif avg_mining_time > target_time * 1.2:  # Too slow
-            self.difficulty = max(1, self.difficulty - 1)
-    
-    def get_latest_intelligence(self, limit: int = 10) -> List[Dict[str, Any]]:
-        """Get the latest threat intelligence from the blockchain"""
-        with self._lock:
-            # Collect all threat intelligence transactions
-            threat_intelligence = []
-            
-            for block in reversed(self.chain):
-                for transaction in block['data']:
-                    if transaction.get('type') == 'threat_intelligence':
-                        threat_intelligence.append(transaction)
-                        if len(threat_intelligence) >= limit:
-                            break
-                if len(threat_intelligence) >= limit:
-                    break
-            
-            return threat_intelligence
-    
-    def verify_chain(self) -> bool:
-        """Verify the integrity of the blockchain with enhanced checks"""
-        with self._lock:
-            if not self.chain:
-                return True
-            
-            # Check genesis block
-            genesis_block = self.chain[0]
-            if genesis_block['index'] != 0:
-                return False
-            
-            if genesis_block['previous_hash'] != '0' * 64:
-                return False
-            
-            # Verify each block
-            for i in range(1, len(self.chain)):
-                current_block = self.chain[i]
-                previous_block = self.chain[i-1]
-                
-                # Verify hash calculation
-                if current_block['hash'] != self.calculate_hash(current_block):
-                    logger.error(f"Block {i} hash verification failed")
-                    return False
-                
-                # Verify chain linkage
-                if current_block['previous_hash'] != previous_block['hash']:
-                    logger.error(f"Block {i} linkage verification failed")
-                    return False
-                
-                # Verify merkle root
-                calculated_merkle = self._calculate_merkle_root(current_block['data'])
-                if current_block['merkle_root'] != calculated_merkle:
-                    logger.error(f"Block {i} merkle root verification failed")
-                    return False
-                
-                # Verify proof-of-work
-                target = '0' * self.difficulty
-                if not current_block['hash'].startswith(target):
-                    logger.error(f"Block {i} proof-of-work verification failed")
-                    return False
-            
-            return True
-    
-    def add_node(self, node_address: str):
-        """Add a node to the network for consensus"""
-        with self._lock:
-            self.nodes.add(node_address)
-    
-    def remove_node(self, node_address: str):
-        """Remove a node from the network"""
-        with self._lock:
-            self.nodes.discard(node_address)
-    
-    def get_network_status(self) -> Dict[str, Any]:
-        """Get the status of the blockchain network"""
-        with self._lock:
-            return {
-                'chain_length': len(self.chain),
-                'pending_transactions': len(self.pending_transactions),
-                'network_nodes': len(self.nodes),
-                'difficulty': self.difficulty,
-                'mining_performance': self.mining_performance.copy(),
-                'last_block_timestamp': self.chain[-1]['timestamp'] if self.chain else None
-            }
+        raise SecondCombatChainRetiredError(
+            "BlockchainThreatIntelligence is retired. Bind PlanetaryImmuneSystem "
+            "and persist through share_intelligence / USMS. PAN RSA and USMS "
+            "Ed25519 stay two identity types. This class is not a live store."
+        )
 
 
 class DistributedDefenseModule:
@@ -3051,7 +2881,7 @@ class DistributedDefenseModule:
         self.agent_pool: Dict[str, DefensiveAgent] = {}
         self.replication_factor = 3
         self.max_agents = 100  # Increased for better coverage
-        self.threat_intelligence_chain = BlockchainThreatIntelligence(difficulty=5)
+        self.immune_system: Optional[PlanetaryImmuneSystem] = None
         self._lock = threading.RLock()
         
         # Communication security
@@ -3343,7 +3173,7 @@ class DistributedDefenseModule:
                 'agent_performance': self.agent_performance.copy(),
                 'group_distribution': group_metrics,
                 'message_queue_size': len(self.message_queue),
-                'blockchain_status': self.threat_intelligence_chain.get_network_status(),
+                'combat_memory': 'planetary_immune_system',
                 'total_agents': len(self.agent_pool),
                 'active_agents': len(self.get_active_agents())
             }
@@ -3907,6 +3737,7 @@ class SovereigntyCoordinator:
         )
         self.distributed_defense: DistributedDefenseProtocol = DistributedDefenseModule()
         self.resource_arbitrator: ResourceArbitrationProtocol = ResourceArbitrationModule()
+        self.immune_system: Optional[PlanetaryImmuneSystem] = None
 
         # Enhanced system state
         self.current_threat_level = ThreatLevel.NONE
@@ -5243,13 +5074,6 @@ class SovereigntyCoordinator:
                 maxlen=100
             )
             
-            # Reduce blockchain mining frequency
-            if hasattr(self.distributed_defense, 'threat_intelligence_chain'):
-                self.distributed_defense.threat_intelligence_chain.difficulty = max(
-                    1, 
-                    self.distributed_defense.threat_intelligence_chain.difficulty - 1
-                )
-            
             logger.info("Essential services only enabled for fallback operations")
         except Exception as e:
             logger.error(f"Failed to enable essential services only: {e}")
@@ -5662,19 +5486,25 @@ System Status:
         else:
             return 'stable'
 
+    def bind_immune_system(self, immune_system: PlanetaryImmuneSystem) -> None:
+        """Bind the live immune owner for all defensive combat-memory writes."""
+        if immune_system is None:
+            raise ImmuneSystemNotBoundError(
+                "SovereigntyCoordinator.bind_immune_system requires PlanetaryImmuneSystem"
+            )
+        self.immune_system = immune_system
+        self.threat_detector.bind_immune_system(immune_system)
+        self.distributed_defense.immune_system = immune_system
+
     def _sync_threat_intelligence(self):
-        """Synchronize threat intelligence across all sources"""
+        """Synchronize threat intelligence. Combat memory is USMS, not a second chain."""
         try:
-            # Mine any pending blockchain transactions
-            self.distributed_defense.threat_intelligence_chain.mine_pending_blocks()
-            
-            # Update threat intelligence from external sources if configured
             if self.config.get('external_threat_feeds'):
                 self._update_external_threat_feeds()
-                
-            # Update last sync time
-            self.threat_detector.threat_intelligence['last_sync'] = time.time()
-            
+            if isinstance(self.threat_detector.threat_intelligence, dict):
+                self.threat_detector.threat_intelligence['last_sync'] = time.time()
+        except (ImmuneSystemNotBoundError, SecondCombatChainRetiredError):
+            raise
         except Exception as e:
             logger.error(f"Error synchronizing threat intelligence: {e}")
 
@@ -5764,12 +5594,15 @@ System Status:
                         'confidence': confidence,
                         'threat_level': threat_level,
                         'source': 'external_feed',
-                        'timestamp': time.time()
+                        'timestamp': time.time(),
+                        'threat_type': f"external_{indicator_type}",
                     }
+                    self.threat_detector.share_threat_intelligence(
+                        threat_intel, source='external_feed'
+                    )
                     
-                    # Add to blockchain threat intelligence
-                    self.distributed_defense.threat_intelligence_chain.add_threat_intelligence(threat_intel)
-                    
+        except (ImmuneSystemNotBoundError, SecondCombatChainRetiredError):
+            raise
         except Exception as e:
             logger.error(f"Failed to process external threat intelligence: {e}")
 

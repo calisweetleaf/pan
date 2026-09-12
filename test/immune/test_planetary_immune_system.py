@@ -30,9 +30,17 @@ from memory.unified_memory_system import (
     UnifiedMemoryError,
 )
 from security.defensive_offensive_bridge import DefensiveOffensiveBridge, ThreatLevel
+from security.defensive_sovereignty import (
+    APIConfigurationLoader,
+    BlockchainThreatIntelligence,
+    NetworkThreatMonitor,
+    SecondCombatChainRetiredError,
+    ThreatDetectionModule,
+)
 from security.planetary_immune_system import (
     BulletinVerificationError,
     ImmuneSystemError,
+    ImmuneSystemNotBoundError,
     PlanetaryImmuneSystem,
     ROELevel,
 )
@@ -469,6 +477,81 @@ def check_neutralize_requires_human_authorization(details: dict[str, object]) ->
                 immune.close()
 
 
+def check_second_chain_retired_share_uses_immune(details: dict[str, object]) -> None:
+    """Lineage D/O cannot construct a second chain; share writes USMS via the immune owner."""
+    with tempfile.TemporaryDirectory(prefix="immune_bind_", ignore_cleanup_errors=True) as tmpdir:
+        immune = None
+        try:
+            raised = False
+            try:
+                BlockchainThreatIntelligence(difficulty=5)
+            except SecondCombatChainRetiredError as exc:
+                print(f"construct denied: {exc}")
+                raised = True
+            if not raised:
+                raise CheckFailure("BlockchainThreatIntelligence still constructed")
+            detector = ThreatDetectionModule(APIConfigurationLoader(), None)
+            try:
+                detector.share_threat_intelligence(
+                    {"threat_type": "unbound_probe", "confidence": 0.4},
+                    source="lineage_unbound",
+                )
+            except ImmuneSystemNotBoundError as exc:
+                print(f"unbound share denied: {exc}")
+                details["unbound_denied"] = str(exc)
+            else:
+                raise CheckFailure("unbound share_threat_intelligence did not fail loud")
+            immune = PlanetaryImmuneSystem(Path(tmpdir), node_name="immune-bind")
+            if immune.pan_identity.identity_hash == immune.memory_identity.agent_id:
+                raise CheckFailure("PAN RSA hash collapsed into USMS Ed25519 agent_id")
+            detector.bind_immune_system(immune)
+            record = detector.share_threat_intelligence(
+                {
+                    "threat_type": "credential_harvester",
+                    "confidence": 0.55,
+                    "actionable": True,
+                    "summary": "lineage detector share through live immune owner",
+                },
+                source="threat_detection_module",
+            )
+            print(
+                f"detector intel={record.intel_id} event={record.event_node_id} "
+                f"roe={record.roe_level} bulletin={record.bulletin_dht_key}"
+            )
+            if record.event_node_id == "":
+                raise CheckFailure("detector share did not persist a USMS EVENT")
+            if record.roe_level == ROELevel.NEUTRALIZE.value:
+                raise CheckFailure("detector share persisted NEUTRALIZE without human auth")
+            hits = immune.get_relevant_intelligence({"threat_type": "credential_harvester"})
+            if not hits:
+                raise CheckFailure("detector share was not searchable in USMS")
+            hostile = SovereignIdentity("BindHostile")
+            packet = _make_packet(
+                hostile,
+                "METRICS_UPLOAD",
+                {"message": "export user_activity to google-analytics"},
+            )
+            monitor = NetworkThreatMonitor(APIConfigurationLoader(), None)
+            monitor.bind_immune_system(immune)
+            threats = monitor.analyze_pan_packet(packet)
+            print(f"monitor threats={dict(threats)}")
+            if "pan_packet_firewall_violation" not in threats:
+                raise CheckFailure("bound monitor did not flag firewall violation")
+            firewall_hits = immune.get_relevant_intelligence(
+                {"threat_type": "pan_packet_firewall_violation"}
+            )
+            if not firewall_hits:
+                raise CheckFailure("monitor detection did not persist through PlanetaryImmuneSystem")
+            details["retired_construct"] = True
+            details["detector_intel_id"] = record.intel_id
+            details["detector_roe_level"] = record.roe_level
+            details["monitor_hits"] = len(firewall_hits)
+            details["identities_distinct"] = True
+        finally:
+            if immune is not None:
+                immune.close()
+
+
 CHECKS: tuple[tuple[str, CheckFn], ...] = (
     ("firewall_blocks_telemetry", check_firewall_blocks_telemetry),
     ("firewall_allows_civic_chat", check_firewall_allows_civic_chat),
@@ -481,6 +564,7 @@ CHECKS: tuple[tuple[str, CheckFn], ...] = (
     ("contradiction_and_campaign_entangle", check_contradiction_and_campaign_entangle),
     ("roe_ladder_persists_through_bridge", check_roe_ladder_persists_through_bridge),
     ("neutralize_requires_human_authorization", check_neutralize_requires_human_authorization),
+    ("second_chain_retired_share_uses_immune", check_second_chain_retired_share_uses_immune),
 )
 
 

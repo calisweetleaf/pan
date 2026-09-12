@@ -1,0 +1,83 @@
+immune consumer start 20260912_092843
+
+========================================================================
+CHECK: firewall_blocks_telemetry
+========================================================================
+telemetry action=block reason=telemetry_dictionary
+PASS firewall_blocks_telemetry
+
+========================================================================
+CHECK: firewall_allows_civic_chat
+========================================================================
+civic chat action=allow
+PASS firewall_allows_civic_chat
+
+========================================================================
+CHECK: inspect_content_compresses_secrets
+========================================================================
+secret preflight action=compress
+PASS inspect_content_compresses_secrets
+
+========================================================================
+CHECK: signed_secret_packet_is_blocked
+========================================================================
+signed secret action=block reason=sensitive_plaintext_on_signed_packet
+PASS signed_secret_packet_is_blocked
+
+========================================================================
+CHECK: identity_blocklist
+========================================================================
+blocklist action=block
+PASS identity_blocklist
+
+========================================================================
+CHECK: legacy_ip_routing_blocked
+========================================================================
+routing action=block reason=legacy_routing_artifact
+PASS legacy_ip_routing_blocked
+
+========================================================================
+CHECK: memory_survives_restart
+========================================================================
+first share intel_id=1bc950516579d598 event=d6eaeadf-af5 belief=d32d2c77-c7f dht=threat-memory:b49164b2ca700957c87e0c8bcd1f1530ea75f60822720d1dbc0917ebea1de5d1
+restart search hits=4
+PASS memory_survives_restart
+
+========================================================================
+CHECK: peer_ingests_bulletin
+========================================================================
+bravo ingested intel_id=9777ccc17641673f event=80da290c-005
+PASS peer_ingests_bulletin
+
+========================================================================
+CHECK: contradiction_and_campaign_entangle
+========================================================================
+campaign vector=network event=34c3f8aa-922
+campaign vector=filesystem event=31dab671-492
+campaign vector=memory event=8160a060-b58
+contradiction node=71697e3d-f54 targets=['499a6ac4-ac27-420d-b473-a3e0831191a6']
+PASS contradiction_and_campaign_entangle
+
+========================================================================
+CHECK: roe_ladder_persists_through_bridge
+========================================================================
+bridge threat_id=5b18b502fa46dd38 mapped_roe=DECEIVE
+belief roe_level=deceive deceive=True activation=0.385
+PASS roe_ladder_persists_through_bridge
+
+========================================================================
+CHECK: neutralize_requires_human_authorization
+========================================================================
+share L4 denied: ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized
+record L4 denied: ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized
+PASS neutralize_requires_human_authorization
+
+========================================================================
+CHECK: second_chain_retired_share_uses_immune
+========================================================================
+construct denied: BlockchainThreatIntelligence is retired. Bind PlanetaryImmuneSystem and persist through share_intelligence / USMS. PAN RSA and USMS Ed25519 stay two identity types. This class is not a live store.
+unbound share denied: ThreatDetectionModule.share_threat_intelligence requires a bound PlanetaryImmuneSystem; BlockchainThreatIntelligence is retired
+detector intel=e2be0d2086cc8c7f event=47f27f52-310c-45f0-9144-0c1c1410e0f1 roe=observe bulletin=None
+monitor threats={'pan_packet_firewall_violation': 0.9}
+PASS second_chain_retired_share_uses_immune
+immune consumer status=pass

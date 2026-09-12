@@ -2,7 +2,18 @@
 
 Scratch only; current runtime truth belongs in STATE.md.
 
+## 2026-09-12 retire second chain
+
+- Rebased onto origin/main `ba05cf4`. Discarded uncommitted mesh-strand /
+  usms_linkage work so those trails were not invented.
+- EDIT: BlockchainThreatIntelligence construction fails loud; detector and
+  monitor bind PlanetaryImmuneSystem. Immune 12/12. Gate FAIL only qemu-img
+  missing on this worker.
+- Next: qemu worker / Android image / adb. Do not dummy inference. Do not
+  publish.
+
 ## 2026-09-12 qemu disk-create + ROE DAG
+
 
 - Declared EDIT in SCOPE.md. qemu-img 8.2.2 and qemu-system-x86_64 installed
   on this Linux worker. `ISOConverter._create_disk` fail-loud. Consumer wrote

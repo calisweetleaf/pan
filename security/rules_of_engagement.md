@@ -12,6 +12,12 @@ This document establishes the formal Rules of Engagement for Somnus Sovereign De
 **Classification**: DEFENSIVE OPERATIONS - SOVEREIGN INFRASTRUCTURE  
 **Effective Date**: [DEPLOYMENT DATE]  
 **Review Cycle**: Quarterly or Post-Incident  
+**Live implementation (2026-09-12):** Combat memory is
+`security/planetary_immune_system.py` bound to USMS (Ed25519 DAG) and PAN RSA
+packets. `BlockchainThreatIntelligence` is retired and must not be constructed.
+ROE Level 4 NEUTRALIZE without human authorization fails loud on the immune
+owner and is not an external-host action. PAN RSA and USMS Ed25519 stay two
+identity types.  
 
 ---
 

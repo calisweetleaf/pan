@@ -1,0 +1,28 @@
+{
+  "version": "0.10",
+  "date": "2026-09-12",
+  "author": "daeron",
+  "summary": "Retire BlockchainThreatIntelligence as a live second chain and bind defensive share/monitor writes to PlanetaryImmuneSystem / USMS without collapsing RSA and Ed25519 or duplicating ROE persist.",
+  "domains": {
+    "immune": {
+      "module": "security/planetary_immune_system.py",
+      "wrapper": null,
+      "tool_count": 1,
+      "provenance": "Live combat memory is PlanetaryImmuneSystem + USMS; D/O lineage binds to that owner",
+      "edits": [
+        {
+          "date": "2026-09-12",
+          "author": "daeron",
+          "summary": "BlockchainThreatIntelligence construction fails loud. ThreatDetectionModule.share_threat_intelligence and NetworkThreatMonitor detections persist through PlanetaryImmuneSystem. L4 without human auth stays fail-loud on the existing immune owner.",
+          "files": [
+            "security/defensive_sovereignty.py",
+            "security/defensive_offensive_bridge.py",
+            "security/rules_of_engagement.md",
+            "test/immune/test_planetary_immune_system.py"
+          ],
+          "justification_ref": "SCOPE.md"
+        }
+      ]
+    }
+  }
+}

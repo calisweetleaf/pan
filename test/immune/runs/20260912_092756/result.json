@@ -1,0 +1,118 @@
+{
+  "name": "planetary_immune_system",
+  "passed": false,
+  "status": "fail",
+  "pass_count": 11,
+  "fail_count": 1,
+  "skip_count": 0,
+  "elapsed_seconds": 5.820468425750732,
+  "checks": [
+    {
+      "name": "firewall_blocks_telemetry",
+      "status": "pass",
+      "detail": {
+        "telemetry_reason": "telemetry_dictionary",
+        "telemetry_ledger_rows": 1
+      }
+    },
+    {
+      "name": "firewall_allows_civic_chat",
+      "status": "pass",
+      "detail": {
+        "civic_chat_allowed": true
+      }
+    },
+    {
+      "name": "inspect_content_compresses_secrets",
+      "status": "pass",
+      "detail": {
+        "compressed_bytes": 65,
+        "original_bytes": 59
+      }
+    },
+    {
+      "name": "signed_secret_packet_is_blocked",
+      "status": "pass",
+      "detail": {
+        "signed_secret_blocked": true
+      }
+    },
+    {
+      "name": "identity_blocklist",
+      "status": "pass",
+      "detail": {
+        "blocked_identity": "d0390a437f84"
+      }
+    },
+    {
+      "name": "legacy_ip_routing_blocked",
+      "status": "pass",
+      "detail": {
+        "routing_blocked": true
+      }
+    },
+    {
+      "name": "memory_survives_restart",
+      "status": "pass",
+      "detail": {
+        "intel_id": "1bc950516579d598",
+        "event_node_id": "0c434ad8-1f10-4c44-893e-022de047f344",
+        "belief_node_id": "db0bdb74-b4d6-4aa1-95a7-a69565daf6ff",
+        "bulletin_dht_key": "threat-memory:7db6817b85e4ed6ed49cd674885c11e24478f5dc6b8c34e34c223d07422a321f",
+        "restart_hits": 4
+      }
+    },
+    {
+      "name": "peer_ingests_bulletin",
+      "status": "pass",
+      "detail": {
+        "peer_ingested_intel_id": "9777ccc17641673f",
+        "peer_hits": 4,
+        "packet_kind": "THREAT_MEMORY_BULLETIN"
+      }
+    },
+    {
+      "name": "contradiction_and_campaign_entangle",
+      "status": "pass",
+      "detail": {
+        "entanglement_id": "dd876378-cee9-4087-bfdd-cd2f79d42ed3",
+        "contradiction_node_id": "95b16dcf-adb7-454a-9e46-d22d329318b1",
+        "contradictions": 1
+      }
+    },
+    {
+      "name": "roe_ladder_persists_through_bridge",
+      "status": "pass",
+      "detail": {
+        "roe_level": "deceive",
+        "neural_activation": 0.385,
+        "belief_node_id": "1b5beb69-1065-4a84-bb5d-3613a90016b3",
+        "restart_recovered": true
+      }
+    },
+    {
+      "name": "neutralize_requires_human_authorization",
+      "status": "pass",
+      "detail": {
+        "share_denied": "ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized",
+        "record_denied": "ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized",
+        "external_host_action": false
+      }
+    },
+    {
+      "name": "second_chain_retired_share_uses_immune",
+      "status": "fail",
+      "error": "TypeError: unsupported operand type(s) for -: 'float' and 'str'",
+      "detail": {
+        "unbound_denied": "ThreatDetectionModule.share_threat_intelligence requires a bound PlanetaryImmuneSystem; BlockchainThreatIntelligence is retired"
+      }
+    }
+  ],
+  "error": "1 immune checks failed",
+  "artifacts": {
+    "json": "/workspace/test/immune/runs/20260912_092756/result.json",
+    "md": "/workspace/test/immune/runs/20260912_092756/result.md",
+    "log": "/workspace/test/immune/runs/20260912_092756/result.log",
+    "run_dir": "/workspace/test/immune/runs/20260912_092756"
+  }
+}

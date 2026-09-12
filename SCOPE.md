@@ -1,43 +1,44 @@
-# SCOPE — closed: qemu-img disk-create + immune ROE DAG
+# SCOPE — closed: retire BlockchainThreatIntelligence as combat memory
 
-**Status:** CLOSED 2026-09-12 after gate 20260912_091538.
+**Status:** CLOSED 2026-09-12 after immune consumer 20260912_092843 (12/12).
 **Ledger:** SOTA_RUN.md
-**Snapshot:** snapshots/v0.9/manifest.json
-**Gate:** results/pan_gate_20260912_091538.json
+**Snapshot:** snapshots/v0.10/manifest.json
+**Immune:** test/immune/runs/20260912_092843/
+**Gate:** results/pan_gate_20260912_092909.json (immune PASS 12/12; thyris_vm
+FAIL only `qemu_img_disk_create` because qemu-img is absent on this worker.
+That host-tool gap is pre-existing vs origin `ba05cf4`. This unit did not
+install qemu.)
 
-## Engagement 1 — qemu disk-create (CLOSED)
-
-- mode: EDIT
-- target_module: telecom/vm_image_manager.py
-- target_symbol: ISOConverter._create_disk
-- justification: I edited the owned qemu-img create path because it is
-  already the blank-disk owner. A wrapper around qemu-img would duplicate the
-  command the image manager already runs.
-- author: daeron
-- date: 2026-09-12
-- closed: 2026-09-12 after `check_qemu_img_disk_create` wrote a real 1G qcow2
-  via qemu-img 8.2.2. Phones were not booted. No Android image was invented.
-
-## Engagement 2 — immune ROE on the USMS DAG (CLOSED)
+## Engagement 3 — retire the in-process second threat chain (CLOSED)
 
 - mode: EDIT
-- target_module: security/planetary_immune_system.py
-- target_symbols: PlanetaryImmuneSystem.share_intelligence, record_roe_decision
-- coupled: security/defensive_offensive_bridge.py `_share_threat_intelligence`
-- justification: I edited the live immune owner so ROE OBSERVE/DECEIVE/DEGRADE
-  persist as USMS BELIEF content, with neighbor-weighted activation taken
-  further from the MTL/USMS DAG. Wrapping defensive_offensive_bridge to avoid
-  this edit is banned. Combat memory stays USMS. RSA and Ed25519 stay bound.
-  NEUTRALIZE without human authorization fails loud.
+- target_module: security/defensive_sovereignty.py
+- target_symbols: BlockchainThreatIntelligence.__init__,
+  ThreatDetectionModule.share_threat_intelligence,
+  ThreatDetectionModule.bind_immune_system,
+  DistributedDefenseModule.__init__
+- coupled: security/defensive_offensive_bridge.py bind of defensive owners;
+  test/immune/test_planetary_immune_system.py
+- justification: I edited the lineage owner that still constructed an in-process
+  PoW chain beside USMS. Combat memory stays PlanetaryImmuneSystem + USMS
+  Ed25519 DAG + PAN RSA packets, bound not collapsed. A wrapper that copied
+  USMS into BlockchainThreatIntelligence is banned. ROE persist already lives
+  on the immune owner (ba05cf4); this unit did not duplicate it. L4 without
+  human authorization stays fail-loud on PlanetaryImmuneSystem.
 - author: daeron
 - date: 2026-09-12
-- closed: 2026-09-12 after immune consumer 11/11.
+- closed: 2026-09-12 after `second_chain_retired_share_uses_immune` plus the
+  existing ROE/L4 checks.
 
-## Still out of scope / remaining
+Choice: **retire construction and call sites** of BlockchainThreatIntelligence.
+Rejected: invent mesh-strand/usms_linkage to match a trail that is not in this
+tree; merge USMS sqlite into PANPersistenceStore; collapse RSA/Ed25519;
+implement ROE Level 4 against external hosts.
 
-- Android ISO / QEMU guest boot / adb (adb still missing on this host)
-- Retiring `BlockchainThreatIntelligence` RAM chain inside
-  `defensive_sovereignty.py` (unconsumed second store still on disk)
+## Still out of scope
+
+- Android ISO / QEMU guest boot / adb (qemu-img also missing on this worker)
+- inventing DHT `usms_linkage` / `mesh-strand` / `pan_refs`
 - `prompt_bridge`, `schemas.session`, `memory_system`
 - master_db §6.2 / Orama
 - Autonomous ROE Level 4 against external hosts

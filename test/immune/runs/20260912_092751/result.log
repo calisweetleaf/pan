@@ -1,0 +1,96 @@
+immune consumer start 20260912_092751
+
+========================================================================
+CHECK: firewall_blocks_telemetry
+========================================================================
+telemetry action=block reason=telemetry_dictionary
+PASS firewall_blocks_telemetry
+
+========================================================================
+CHECK: firewall_allows_civic_chat
+========================================================================
+civic chat action=allow
+PASS firewall_allows_civic_chat
+
+========================================================================
+CHECK: inspect_content_compresses_secrets
+========================================================================
+secret preflight action=compress
+PASS inspect_content_compresses_secrets
+
+========================================================================
+CHECK: signed_secret_packet_is_blocked
+========================================================================
+signed secret action=block reason=sensitive_plaintext_on_signed_packet
+PASS signed_secret_packet_is_blocked
+
+========================================================================
+CHECK: identity_blocklist
+========================================================================
+blocklist action=block
+PASS identity_blocklist
+
+========================================================================
+CHECK: legacy_ip_routing_blocked
+========================================================================
+routing action=block reason=legacy_routing_artifact
+PASS legacy_ip_routing_blocked
+
+========================================================================
+CHECK: memory_survives_restart
+========================================================================
+first share intel_id=1bc950516579d598 event=0c434ad8-1f1 belief=db0bdb74-b4d dht=threat-memory:7db6817b85e4ed6ed49cd674885c11e24478f5dc6b8c34e34c223d07422a321f
+restart search hits=4
+PASS memory_survives_restart
+
+========================================================================
+CHECK: peer_ingests_bulletin
+========================================================================
+bravo ingested intel_id=9777ccc17641673f event=bca4bd86-570
+PASS peer_ingests_bulletin
+
+========================================================================
+CHECK: contradiction_and_campaign_entangle
+========================================================================
+campaign vector=network event=39e37fc6-49e
+campaign vector=filesystem event=24426205-72f
+campaign vector=memory event=581081a1-c26
+contradiction node=95b16dcf-adb targets=['b557c2fc-1b23-4ac7-8596-1f0e45303bf7']
+PASS contradiction_and_campaign_entangle
+
+========================================================================
+CHECK: roe_ladder_persists_through_bridge
+========================================================================
+bridge threat_id=5b18b502fa46dd38 mapped_roe=DECEIVE
+belief roe_level=deceive deceive=True activation=0.385
+PASS roe_ladder_persists_through_bridge
+
+========================================================================
+CHECK: neutralize_requires_human_authorization
+========================================================================
+share L4 denied: ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized
+record L4 denied: ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized
+PASS neutralize_requires_human_authorization
+
+========================================================================
+CHECK: second_chain_retired_share_uses_immune
+========================================================================
+construct denied: BlockchainThreatIntelligence is retired. Bind PlanetaryImmuneSystem and persist through share_intelligence / USMS. PAN RSA and USMS Ed25519 stay two identity types. This class is not a live store.
+unbound share denied: ThreatDetectionModule.share_threat_intelligence requires a bound PlanetaryImmuneSystem; BlockchainThreatIntelligence is retired
+detector intel=e2be0d2086cc8c7f event=28ff6929-71c9-45a0-8b1f-009ce11ace49 roe=observe bulletin=None
+FAIL second_chain_retired_share_uses_immune: TypeError: unsupported operand type(s) for -: 'float' and 'str'
+Traceback (most recent call last):
+  File "/workspace/test/immune/test_planetary_immune_system.py", line 580, in run
+    try:
+        ^
+  File "/workspace/test/immune/test_planetary_immune_system.py", line 536, in check_second_chain_retired_share_uses_immune
+    threats = monitor.analyze_pan_packet(packet)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/security/defensive_sovereignty.py", line 550, in analyze_pan_packet
+    threats.update(self._detect_service_enumeration(author_hash))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/security/defensive_sovereignty.py", line 621, in _detect_service_enumeration
+    recent_packets = [p for p in history if now - p.timestamp < self.enumeration_window]
+                                            ~~~~^~~~~~~~~~~~~
+TypeError: unsupported operand type(s) for -: 'float' and 'str'
+immune consumer status=fail
