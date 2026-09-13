@@ -1,0 +1,90 @@
+{
+  "name": "planetary_highway",
+  "passed": false,
+  "status": "fail",
+  "pass_count": 8,
+  "fail_count": 2,
+  "skip_count": 0,
+  "elapsed_seconds": 8.874895811080933,
+  "checks": [
+    {
+      "name": "source_has_no_legacy_mesh",
+      "status": "fail",
+      "error": "highway source still contains ['pickle', 'Fernet', 'PlanetaryARFSNetwork']",
+      "detail": {}
+    },
+    {
+      "name": "requires_explicit_firewall",
+      "status": "pass",
+      "detail": {
+        "refused": true
+      }
+    },
+    {
+      "name": "direct_travel_sealed_cargo",
+      "status": "pass",
+      "detail": {
+        "travel_id": "ebdcc8b4eb03156056bc18f953b8c8fcb3bb815b1626215df77a4592b2b43d3e",
+        "arrived": true
+      }
+    },
+    {
+      "name": "multi_hop_three_nodes",
+      "status": "pass",
+      "detail": {
+        "forwarded": true,
+        "hop_plaintext": false
+      }
+    },
+    {
+      "name": "firewall_blocks_telemetry_on_hop",
+      "status": "fail",
+      "error": "telemetry hop was published",
+      "detail": {}
+    },
+    {
+      "name": "legacy_routing_key_rejected",
+      "status": "pass",
+      "detail": {
+        "rejected": true,
+        "envelope_rejected": true
+      }
+    },
+    {
+      "name": "identity_blocklist_stops_travel",
+      "status": "pass",
+      "detail": {
+        "blocked": true
+      }
+    },
+    {
+      "name": "bad_usms_signature_fails_loud",
+      "status": "pass",
+      "detail": {
+        "refused": true
+      }
+    },
+    {
+      "name": "cargo_survives_restart",
+      "status": "pass",
+      "detail": {
+        "restart_recovered": true
+      }
+    },
+    {
+      "name": "dht_index_optional_and_unbound_to_firewall",
+      "status": "pass",
+      "detail": {
+        "dht_indexed": true,
+        "dht_unbound_to_firewall": true
+      }
+    }
+  ],
+  "error": "2 highway checks failed",
+  "artifacts": {
+    "json": "C:\\Users\\trent\\pan\\test\\highway\\runs\\20260912_235051\\result.json",
+    "md": "C:\\Users\\trent\\pan\\test\\highway\\runs\\20260912_235051\\result.md",
+    "log": "C:\\Users\\trent\\pan\\test\\highway\\runs\\20260912_235051\\result.log",
+    "run_dir": "C:\\Users\\trent\\pan\\test\\highway\\runs\\20260912_235051"
+  }
+}

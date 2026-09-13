@@ -5,9 +5,9 @@ the historical Linux path /home/daeron/LAB/Experiments/projects/pan-sdk; that
 path is not a second layout.
 **Classification:** internal research; offline-first, SQLite-backed
 **Product thesis:** the Planetary Autonomous Network is a sovereign digital-country substrate. It is not a generic web application, microservice estate, or adapter collection.
-**Packet updated:** 2026-09-11
+**Packet updated:** 2026-09-12
 **Current runtime state:** STATE.md
-**Latest verified gate:** results/pan_gate_20260911_011502.json (Windows Python 3.14 `.venv`, exit 0, 8.871s)
+**Latest verified gate:** results/pan_gate_20260912_235357.json (Windows Python 3.14 `.venv`, exit 0, 37.862s)
 
 ## Authority and entry
 
@@ -62,7 +62,7 @@ Do not import a foreign directory layout such as tools/native/ into PAN just to 
 
 | Surface | Owner / role |
 |---|---|
-| PAN_SDK/PAN_SDK.py | PAN monolith: identity, ledger, citizens, economy, governance, policy, persistence. `SovereignInferenceEngine._run_inference` is still a placeholder |
+| PAN_SDK/PAN_SDK.py | PAN monolith: identity, ledger, citizens, economy, governance, policy, persistence. `SovereignInferenceEngine._run_inference` is the PANLIN01 integer decoder |
 | PAN_SDK/treasury.py | Fed FSM: PoI mint, quorum execute, contract rejection |
 | PAN_SDK/email_social.py | Nostr-inspired sealed mail / social relays over UnifiedDataPacket |
 | PAN_SDK/master_db.py | Offline-first CRDT pool on PANPersistenceStore |
@@ -73,25 +73,26 @@ Do not import a foreign directory layout such as tools/native/ into PAN just to 
 | memory/memory_integration.py | unconsumed AIPC session-memory leftover; imports absent `schemas.session`. Not a Thyris blocker |
 | security/sovereign_firewall.py | fail-closed packet border (security-owned) |
 | security/planetary_immune_system.py | USMS EVENT/BELIEF + PAN threat bulletins. Erebus cognition. No prompt_bridge |
-| security/defensive_sovereignty.py, reactive_offense.py, defensive_offensive_bridge.py | present lineage; not imported by the gate. Live immune path is planetary_immune_system.py |
+| security/planetary_highway.py | Sealed USMS itinerary on UnifiedDataPacket / StatelessRelay. Packet fabric, not immune cognition. Not a second internet |
+| security/defensive_sovereignty.py, reactive_offense.py, defensive_offensive_bridge.py | compile + immune-imported lineage. WAN SMTP/webhook/feeds/whois/deauth fail loud. Live immune path is planetary_immune_system.py |
 | telecom/vm_supervisor.py | VMSupervisor, CustomVMManager, CustomNetworkManager, VMState, ResourceProfile. AIPC prompt hook unbound |
 | telecom/vm_image_manager.py | VMImageManager, OSFamily |
 | telecom/phone_orchestrator.py | Thyris V1 phone orchestration; android-x86 installer boot proven via `-nographic` SeaBIOS/ISOLINUX. PhoneVMState.READY / ADB unproven |
 | telecom/phone_integration.py | browser APK/VNC bridge; not a gate compile target; ADB userspace still unproven |
 | security/ | defensive sovereignty and ROE-governed security work; see security/AGENTS.md |
-| test/ | direct gate, persistence/name/manifest/personal probes, immune/treasury/email_social/master_db/thyris_memory/thyris_vm consumers, system scenario |
+| test/ | direct gate, persistence/name/manifest/personal probes, immune/highway/treasury/email_social/master_db/thyris_memory/thyris_vm consumers, system scenario |
 | reference-code/ | historical lineage; not imported runtime code |
 | archives/, results/ | historical evidence; do not rewrite old artifacts |
 
 ## Known baseline and decision boundaries
 
 - Package directory is `PAN_SDK/`. That is the consumed import contract, not an open layout debate.
-- `python test/run_pan_gate.py` is the current verified Windows gate; see STATE.md. It includes immune, treasury, email_social, master_db, thyris_memory, and thyris_vm slices. POSIX spelling is `python3 test/run_pan_gate.py`.
+- `python test/run_pan_gate.py` is the current verified Windows gate; see STATE.md. It includes immune, highway, treasury, email_social, master_db, thyris_memory, and thyris_vm slices. POSIX spelling is `python3 test/run_pan_gate.py`.
 - Security owns `security/sovereign_firewall.py`. PAN RSA identity and USMS Ed25519 identity are bound, not collapsed.
 - Thyris VM memory (`memory.memory_core`) and USMS (`memory.unified_memory_system`) coexist in `memory/` and must not be collapsed. Do not create a `memory_system` package.
 - `telecom/phone_orchestrator.py` imports. Android-x86 9.0-r2 installer boot is proven via `-nographic` ISOLINUX on this Windows host; the ISO is gitignored and is not in the project gate. `PhoneVMState.READY` / ADB remain unproven. AIPC `core.prompt_bridge` is rejected for Thyris telecom (phones have no in-device AI). Do not list prompt_bridge as next work. Do not duplicate `ISOConverter._create_disk`. Do not redo `BlockchainThreatIntelligence` retirement (`32ea3a9`).
 - The stale `somnus_erebus/` / QWEN.md tree described in older security notes is not this repository's layout. Live security owners are in security/AGENTS.md.
-- Historical 2025-10-02 Windows results remain historical evidence only. The 2026-09-11 Windows gate (`results/pan_gate_20260911_011502.json`) is current.
+- Historical 2025-10-02 Windows results remain historical evidence only. The 2026-09-12 Windows gate (`results/pan_gate_20260912_235357.json`) is current.
 
 An agent **may** repair a mechanically demonstrated defect that preserves the existing contract, then prove the consumed path. It must stop and present options before choosing among materially different persistence schemas, protocol/service boundaries, publication, deployment, external communications, credential handling, or destructive operations.
 
@@ -111,6 +112,7 @@ Optional focused consumers:
     python test/probe_personal_data.py
     python test/pan_sdk_system_scenario.py
     python test/immune/test_planetary_immune_system.py
+    python test/highway/test_planetary_highway.py
     python test/treasury/test_sovereign_treasury.py
     python test/email_social/test_email_social.py
     python test/master_db/test_master_db.py
@@ -129,9 +131,7 @@ installer boot is already landed (ISOLINUX on `-nographic` stdout).
 Do not open a second `qemu-img create` owner. Do not reopen the second threat
 chain.
 
-The alternate production unit is a real `SovereignInferenceEngine._run_inference` owner so treasury Proof-of-Inference can leave deterministic commitment re-execution.
-
-Do not pull or invent `core.prompt_bridge`. Do not dummy `_run_inference`. Do not claim READY phones from ISOLINUX installer evidence. `schemas.session` / `memory.memory_integration` is leftover AIPC session-memory and is not a Thyris blocker.
+Do not pull or invent `core.prompt_bridge`. Do not dummy `_run_inference`. Do not claim READY phones from ISOLINUX installer evidence. Do not open a second civic wire or reconnect the public internet. `schemas.session` / `memory.memory_integration` is leftover AIPC session-memory and is not a Thyris blocker.
 
 ## Security and operational boundaries
 

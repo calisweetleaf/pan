@@ -3,6 +3,38 @@
 Append durable, evidence-backed findings here. Preserve corrections as new dated
 entries instead of erasing historical truth.
 
+## 2026-09-12 — I isolated WAN and landed packet-fabric highway
+
+**Keys:** PlanetaryHighway · LegacyInternetEgressError · HIGHWAY_HOP · sealed cargo
+
+**Status:** LANDED. PhoneVMState.READY and ADB remain unproven.
+
+### Durable findings
+
+- I did not connect PAN to the public internet. SMTP, HTTP webhooks, threat
+  feeds, whois, and WiFi deauth raise `LegacyInternetEgressError` before a
+  host socket. L4 without a human stays a USMS receipt.
+- I replaced the consciousness-mesh clone in `security/planetary_highway.py`
+  with identity-hash hops. Cargo is RSA-sealed to the destination. A hop
+  identity cannot open it. A stranger cannot open it. Tracker names on a hop
+  envelope are dropped. `next_hop` is refused. DHT index is optional and
+  unbound to the firewall.
+- I proved it: highway 10/10, immune 18/18, gate exit 0 in 37.862s on
+  Windows Python 3.14.4 `.venv`.
+
+### Evidence
+
+- `test/highway/runs/20260912_235119/result.json`
+- `test/immune/runs/20260912_235256/result.json`
+- `results/pan_gate_20260912_235357.json`
+- `snapshots/v0.13/manifest.json`
+
+### Boundary
+
+- This is not a second internet and not READY phones.
+- Do not restore UDP broadcast or a host:port civic wire.
+- Do not collapse PAN RSA and USMS Ed25519.
+
 ## 2026-09-12 — unopenable /dev/kvm falls back to TCG
 
 **Keys:** select_qemu_accelerator · Permission denied · ISOLINUX

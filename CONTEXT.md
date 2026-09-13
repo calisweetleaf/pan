@@ -16,6 +16,20 @@ source inspection or STATE.md.
 - NOTEPAD.md — current scratch, non-canonical.
 - security/AGENTS.md + security/rules_of_engagement.md — security lane.
 
+## 2026-09-12 — highway packet fabric; lineage WAN isolated
+
+**Keys:** PlanetaryHighway · HIGHWAY_HOP · LegacyInternetEgressError ·
+sealed cargo · PAN_MESH
+
+**Status:** VERIFIED
+
+I replaced the unconsumed consciousness-mesh clone with identity-hash hops
+on `UnifiedDataPacket`. Cargo is RSA-sealed to the destination. Intermediate
+hops cannot decrypt. SMTP, webhooks, threat feeds, whois, and WiFi deauth
+raise `LegacyInternetEgressError` before a host socket. Gate
+`results/pan_gate_20260912_235357.json` exit 0. Highway is not the next
+Thyris unit. `thyris-qemu-unproven` stays: installer boot is not READY/ADB.
+
 ## 2026-09-12 — KVM-inaccessible TCG fallback for Android installer boot
 
 **Keys:** select_qemu_accelerator · /dev/kvm · TCG · ISOLINUX
@@ -209,6 +223,7 @@ SCOPE.md · SOTA_RUN.md
 | email/social | identity-addressed sealed relays | PAN_SDK/email_social.py |
 | master db | CRDT join over local sqlite | PAN_SDK/master_db.py |
 | immune system | USMS EVENT/BELIEF + firewall + PAN threat bulletins | security/planetary_immune_system.py |
+| highway | sealed USMS itinerary on identity-hash hops | security/planetary_highway.py |
 | packet border | fail-closed dictionary/regex/SQLite inspection | security/sovereign_firewall.py |
 | unified memory | signed Ed25519 memory DAG (immune) | memory/unified_memory_system.py |
 | Thyris VM memory | MemoryManager / SomnusCache | memory/memory_core.py, memory/system_cache.py |

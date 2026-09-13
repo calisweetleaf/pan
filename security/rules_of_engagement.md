@@ -17,7 +17,10 @@ This document establishes the formal Rules of Engagement for Somnus Sovereign De
 packets. `BlockchainThreatIntelligence` is retired and must not be constructed.
 ROE Level 4 NEUTRALIZE without human authorization fails loud on the immune
 owner and is not an external-host action. PAN RSA and USMS Ed25519 stay two
-identity types.  
+identity types. Highway hops (`HIGHWAY_HOP` / `HIGHWAY_ARRIVE`) are civic
+packets. They pass `SovereignFirewall` on the PAN_MESH lane and still drop
+tracker names. They are not an external-host action and they are not a
+public-internet path.  
 
 ---
 

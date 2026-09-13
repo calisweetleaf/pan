@@ -1,0 +1,79 @@
+highway consumer start 20260912_235042
+
+========================================================================
+CHECK: source_has_no_legacy_mesh
+========================================================================
+banned tokens found=['pickle', 'Fernet', 'PlanetaryARFSNetwork']
+FAIL source_has_no_legacy_mesh: highway source still contains ['pickle', 'Fernet', 'PlanetaryARFSNetwork']
+Traceback (most recent call last):
+  File "C:\Users\trent\pan\test\highway\test_planetary_highway.py", line 533, in run
+    fn(detail)
+    ~~^^^^^^^^
+  File "C:\Users\trent\pan\test\highway\test_planetary_highway.py", line 155, in check_source_has_no_legacy_mesh
+    raise CheckFailure(f"highway source still contains {found}")
+CheckFailure: highway source still contains ['pickle', 'Fernet', 'PlanetaryARFSNetwork']
+
+========================================================================
+CHECK: requires_explicit_firewall
+========================================================================
+unbound firewall refused: PlanetaryHighway requires SovereignFirewall
+PASS requires_explicit_firewall
+
+========================================================================
+CHECK: direct_travel_sealed_cargo
+========================================================================
+embark travel=ebdcc8b4eb03156056bc18f953b8c8fcb3bb815b1626215df77a4592b2b43d3e packet=84b319511115792cc386094775fc7187f2b5c730f4d623c05d946e263f254357
+stranger correctly failed: sealed envelope is not addressed to this identity
+PASS direct_travel_sealed_cargo
+
+========================================================================
+CHECK: multi_hop_three_nodes
+========================================================================
+multi embark next=380a8ff259f1
+hop USMS hits=1 leaked=0
+hop correctly cannot open: sealed envelope is not addressed to this identity
+PASS multi_hop_three_nodes
+
+========================================================================
+CHECK: firewall_blocks_telemetry_on_hop
+========================================================================
+FAIL firewall_blocks_telemetry_on_hop: telemetry hop was published
+Traceback (most recent call last):
+  File "C:\Users\trent\pan\test\highway\test_planetary_highway.py", line 533, in run
+    fn(detail)
+    ~~^^^^^^^^
+  File "C:\Users\trent\pan\test\highway\test_planetary_highway.py", line 304, in check_firewall_blocks_telemetry_on_hop
+    raise CheckFailure("telemetry hop was published")
+CheckFailure: telemetry hop was published
+
+========================================================================
+CHECK: legacy_routing_key_rejected
+========================================================================
+legacy routing refused: legacy routing key forbidden: next_hop
+envelope next_hop refused: legacy routing key forbidden: next_hop
+PASS legacy_routing_key_rejected
+
+========================================================================
+CHECK: identity_blocklist_stops_travel
+========================================================================
+blocklist stopped travel: highway blocked after signing: identity_blocklist
+PASS identity_blocklist_stops_travel
+
+========================================================================
+CHECK: bad_usms_signature_fails_loud
+========================================================================
+bad USMS signature refused: USMS cargo signature is invalid
+PASS bad_usms_signature_fails_loud
+
+========================================================================
+CHECK: cargo_survives_restart
+========================================================================
+locate after restart=arrived
+PASS cargo_survives_restart
+
+========================================================================
+CHECK: dht_index_optional_and_unbound_to_firewall
+========================================================================
+dht index present=True
+PASS dht_index_optional_and_unbound_to_firewall
+highway consumer status=fail

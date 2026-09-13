@@ -1,0 +1,92 @@
+{
+  "name": "planetary_highway",
+  "passed": true,
+  "status": "pass",
+  "pass_count": 10,
+  "fail_count": 0,
+  "skip_count": 0,
+  "elapsed_seconds": 8.97777009010315,
+  "checks": [
+    {
+      "name": "source_has_no_legacy_mesh",
+      "status": "pass",
+      "detail": {
+        "banned_absent": true,
+        "source_chars": 34421
+      }
+    },
+    {
+      "name": "requires_explicit_firewall",
+      "status": "pass",
+      "detail": {
+        "refused": true
+      }
+    },
+    {
+      "name": "direct_travel_sealed_cargo",
+      "status": "pass",
+      "detail": {
+        "travel_id": "ed2fd95dbec915fe641dab4c1b1247d3ab31b3b1152372aeb35e69aa41700ed5",
+        "arrived": true
+      }
+    },
+    {
+      "name": "multi_hop_three_nodes",
+      "status": "pass",
+      "detail": {
+        "forwarded": true,
+        "hop_plaintext": false
+      }
+    },
+    {
+      "name": "firewall_blocks_telemetry_on_hop",
+      "status": "pass",
+      "detail": {
+        "blocked": true
+      }
+    },
+    {
+      "name": "legacy_routing_key_rejected",
+      "status": "pass",
+      "detail": {
+        "rejected": true,
+        "envelope_rejected": true
+      }
+    },
+    {
+      "name": "identity_blocklist_stops_travel",
+      "status": "pass",
+      "detail": {
+        "blocked": true
+      }
+    },
+    {
+      "name": "bad_usms_signature_fails_loud",
+      "status": "pass",
+      "detail": {
+        "refused": true
+      }
+    },
+    {
+      "name": "cargo_survives_restart",
+      "status": "pass",
+      "detail": {
+        "restart_recovered": true
+      }
+    },
+    {
+      "name": "dht_index_optional_and_unbound_to_firewall",
+      "status": "pass",
+      "detail": {
+        "dht_indexed": true,
+        "dht_unbound_to_firewall": true
+      }
+    }
+  ],
+  "artifacts": {
+    "json": "C:\\Users\\trent\\pan\\test\\highway\\runs\\20260912_235119\\result.json",
+    "md": "C:\\Users\\trent\\pan\\test\\highway\\runs\\20260912_235119\\result.md",
+    "log": "C:\\Users\\trent\\pan\\test\\highway\\runs\\20260912_235119\\result.log",
+    "run_dir": "C:\\Users\\trent\\pan\\test\\highway\\runs\\20260912_235119"
+  }
+}

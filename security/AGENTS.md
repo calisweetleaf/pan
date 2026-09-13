@@ -4,7 +4,7 @@
 **Parent packet:** ../AGENTS.md
 **Runtime truth:** ../STATE.md
 **ROE:** rules_of_engagement.md
-**Packet updated:** 2026-09-11
+**Packet updated:** 2026-09-12
 
 This folder is the security lane of the PAN monolith. It is not a standalone
 `somnus_erebus/` project and it is not an in-phone AI stack.
@@ -16,10 +16,14 @@ Erebus cognition in this repository is USMS bound to the PAN mesh:
 - `memory/unified_memory_system.py` persists signed Ed25519 EVENT/BELIEF/CONTRADICTION nodes.
 - `security/planetary_immune_system.py` binds that DAG to PAN RSA `UnifiedDataPacket` / DHT and broadcasts high-confidence beliefs as `THREAT_MEMORY_BULLETIN`.
 - `security/sovereign_firewall.py` is the fail-closed packet border. Security owns it.
+- `security/planetary_highway.py` is the consumed packet fabric. AI travel is
+  sealed USMS cargo on `UnifiedDataPacket` hops. It is not Erebus cognition
+  and it is not a second internet.
 
-Those two security modules are gate compile targets. The immune consumer is
-`test/immune/test_planetary_immune_system.py`. The project gate includes that
-slice (`python test/run_pan_gate.py`).
+Those three security modules are gate compile targets. Consumers are
+`test/immune/test_planetary_immune_system.py` and
+`test/highway/test_planetary_highway.py`. The project gate includes both
+slices (`python test/run_pan_gate.py`).
 
 Do not pull or invent `core.prompt_bridge` as "Erebus cognition." Thyris phones
 are telecommunications VMs. They do not contain in-device AI. USMS already owns
@@ -38,9 +42,10 @@ not a replacement for the immune owner:
 
 | File | What it is |
 |---|---|
-| defensive_sovereignty.py | historical Somnus defensive coordinator; RAM `threat_intelligence` and `BlockchainThreatIntelligence` remain unconsumed second stores |
-| reactive_offense.py | historical ROE-calibrated offensive coordinator; `ROELevel` is imported by the bridge |
-| defensive_offensive_bridge.py | D/O bridge; `ThreatIntelligenceCoordinator` subclasses `PlanetaryImmuneSystem`; `process_threat_event` shares through USMS |
+| defensive_sovereignty.py | historical coordinator; SMTP/webhook/feeds fail loud; RAM `threat_intelligence` is not combat memory |
+| reactive_offense.py | historical ROE coordinator; whois/deauth fail loud; `ROELevel` is imported by the bridge |
+| defensive_offensive_bridge.py | D/O bridge; writes through `PlanetaryImmuneSystem`; L4 without a human fails loud |
+| planetary_highway.py | consumed packet fabric; identity-hash hops; cargo sealed to destination RSA |
 
 Do not wrap these files to avoid editing `planetary_immune_system.py`. Do not
 treat an in-process `intelligence_database` as combat memory. Ephemeral RAM
@@ -65,9 +70,10 @@ security/
 ├── rules_of_engagement.md
 ├── sovereign_firewall.py          # consumed packet border
 ├── planetary_immune_system.py     # consumed USMS+PAN bind
-├── defensive_sovereignty.py       # unconsumed lineage
-├── reactive_offense.py            # unconsumed lineage
-└── defensive_offensive_bridge.py  # unconsumed lineage
+├── planetary_highway.py           # consumed packet fabric
+├── defensive_sovereignty.py       # lineage; WAN fail-loud
+├── reactive_offense.py            # lineage; WAN fail-loud
+└── defensive_offensive_bridge.py  # lineage; immune-imported
 ```
 
 ## Rules of Engagement
@@ -87,6 +93,7 @@ landing and is not authorized by it.
 ## Verification
 
     python test/immune/test_planetary_immune_system.py
+    python test/highway/test_planetary_highway.py
     python test/run_pan_gate.py
 
 POSIX spelling: `python3` in place of `python`.
@@ -96,4 +103,7 @@ POSIX spelling: `python3` in place of `python`.
 - Do not log, commit, or print credentials, keys, or tokens.
 - Do not invent a `memory_system` package or wrap USMS to look like Thyris `MemoryManager`.
 - Do not dummy `schemas.session` or `core.prompt_bridge`.
+- Do not restore a host:port consciousness mesh, UDP broadcast, or serialized
+  RAM dump as civic travel. Do not collapse PAN RSA and USMS Ed25519.
+- Do not reconnect SMTP, HTTP feeds, whois, or RF neutralization.
 - Read this packet and `rules_of_engagement.md` before modifying security/.

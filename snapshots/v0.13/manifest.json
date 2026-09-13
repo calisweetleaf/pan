@@ -1,0 +1,32 @@
+{
+  "version": "0.13",
+  "date": "2026-09-12",
+  "author": "daeron",
+  "summary": "Isolate lineage WAN behind LegacyInternetEgressError and rewrite planetary_highway as sealed USMS itinerary on UnifiedDataPacket. Not a second internet.",
+  "domains": {
+    "highway": {
+      "module": "security/planetary_highway.py",
+      "wrapper": null,
+      "tool_count": 1,
+      "provenance": "PlanetaryHighway is the identity-hash itinerary owner. Cargo is RSA-sealed to the destination. Relays stay blind. SovereignFirewall is required and is never constructed on DHTNode.",
+      "edits": [
+        {
+          "date": "2026-09-12",
+          "author": "daeron",
+          "summary": "Replace the consciousness-mesh clone with packet-fabric travel. Isolate SMTP/webhook/feeds/whois/deauth. HIGHWAY_ kinds use the PAN_MESH lane. L4 stays a USMS receipt.",
+          "files": [
+            "security/planetary_highway.py",
+            "security/sovereign_firewall.py",
+            "security/defensive_sovereignty.py",
+            "security/reactive_offense.py",
+            "security/defensive_offensive_bridge.py",
+            "test/highway/test_planetary_highway.py",
+            "test/immune/test_planetary_immune_system.py",
+            "test/run_pan_gate.py"
+          ],
+          "justification_ref": "SCOPE.md"
+        }
+      ]
+    }
+  }
+}

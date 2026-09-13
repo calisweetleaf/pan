@@ -5,15 +5,13 @@ Source: PAN whitepaper Table 2 (ingress sanitization, telemetry regex,
     sensitive-payload compression, identity blocklist, SQLite ledger)
 Integrated: 2026-09-11
 
-Modified: 2026-09-11
-Modified by: cursor-grok (daeron)
-Justification: I replaced the demo firewall because it printed packet
-    contents, swallowed inspection errors, and faked .lacka compression with a
-    size string. Security owns this border; wrapping the demo would have
-    preserved a non-production inspection pipeline. Compress-then-sign is
-    enforced: inspect_content may envelope plaintext before packaging;
-    inspect_packet never mutates a signed packet.
-Provenance: snapshots/v0.2/manifest.json -> domains.immune.edits[0]
+Modified: 2026-09-12
+Modified by: daeron
+Justification: I added LegacyInternetEgressError as the shared fail-loud
+    type for SMTP/HTTP/socket lineage and mapped HIGHWAY_* packet kinds onto
+    PAN_MESH so AI itinerary hops use the civic lane. Wrapping a second
+    firewall would have split the border. Unknown kinds stay EGRESS_LEGACY.
+Provenance: snapshots/v0.13/manifest.json -> domains.highway.edits[0]
 Files: security/sovereign_firewall.py
 """
 
@@ -113,6 +111,10 @@ class FirewallInspectionError(FirewallError):
 
 class FirewallLedgerError(FirewallError):
     """SQLite ledger could not record a border decision."""
+
+
+class LegacyInternetEgressError(FirewallError):
+    """Raised when a security owner attempts legacy internet egress."""
 
 
 class InspectionLane(str, Enum):
@@ -458,8 +460,9 @@ class SovereignFirewall:
                 raise FirewallLedgerError(f"failed to initialize firewall ledger: {exc}") from exc
 
     def _lane_for_packet(self, packet: UnifiedDataPacket) -> InspectionLane:
-        """Choose PAN_MESH for immune bulletins, otherwise EGRESS_LEGACY."""
-        if packet.kind == THREAT_BULLETIN_KIND:
+        """Choose PAN_MESH for immune bulletins and highway hops."""
+        kind = str(packet.kind or "")
+        if kind == THREAT_BULLETIN_KIND or kind.startswith("HIGHWAY_"):
             return InspectionLane.PAN_MESH
         return InspectionLane.EGRESS_LEGACY
 

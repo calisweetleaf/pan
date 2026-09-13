@@ -1,0 +1,73 @@
+{
+  "name": "sovereign_treasury",
+  "passed": true,
+  "status": "pass",
+  "pass_count": 7,
+  "fail_count": 0,
+  "skip_count": 0,
+  "elapsed_seconds": 1.9631383419036865,
+  "checks": [
+    {
+      "name": "genesis_rejects_mint",
+      "status": "pass",
+      "detail": {
+        "state": "GENESIS"
+      }
+    },
+    {
+      "name": "seal_genesis_and_contract_reject",
+      "status": "pass",
+      "detail": {
+        "state": "MINT_PHASE",
+        "quorum": 3
+      }
+    },
+    {
+      "name": "poi_mint_requires_quorum",
+      "status": "pass",
+      "detail": {
+        "minted_balance": 40,
+        "packet_id": "e50689770b1cdb4e3f637e1f072614e920ad824cf0c7fddc66fbccecb2faf309"
+      }
+    },
+    {
+      "name": "distribute_and_burn_and_halts",
+      "status": "pass",
+      "detail": {
+        "final_state": "CRITICAL_SUSPEND",
+        "supply": 90,
+        "citizen_balance": 15
+      }
+    },
+    {
+      "name": "restart_hydrates_fsm",
+      "status": "pass",
+      "detail": {
+        "state_before": "MINT_PHASE",
+        "chair_before": "ad7cca21a0bee89064ff3f6b055ec8d849341fb55a68717cce32b1e34820bd4d",
+        "state_after": "MINT_PHASE",
+        "validators_after": 3
+      }
+    },
+    {
+      "name": "poi_rejects_forged_output",
+      "status": "pass",
+      "detail": {
+        "error": "claimed output diverged from local re-execution"
+      }
+    },
+    {
+      "name": "poi_unbound_engine_fails",
+      "status": "pass",
+      "detail": {
+        "error": "PoI requires a bound SovereignInferenceEngine"
+      }
+    }
+  ],
+  "artifacts": {
+    "json": "C:\\Users\\trent\\pan\\test\\treasury\\runs\\20260912_235428\\result.json",
+    "md": "C:\\Users\\trent\\pan\\test\\treasury\\runs\\20260912_235428\\result.md",
+    "log": "C:\\Users\\trent\\pan\\test\\treasury\\runs\\20260912_235428\\result.log",
+    "run_dir": "C:\\Users\\trent\\pan\\test\\treasury\\runs\\20260912_235428"
+  }
+}

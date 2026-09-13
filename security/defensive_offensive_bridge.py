@@ -13,13 +13,14 @@ Key Features:
 - Human authorization workflow for high-impact operations
 - Complete audit trail and compliance monitoring
 
-Modified: 2026-09-11
-Modified by: cursor-grok (daeron)
-Justification: I bound ThreatIntelligenceCoordinator to PlanetaryImmuneSystem
-    because the in-process intelligence_database was amnesiac across restarts.
-    Wrapping USMS would have duplicated signed EVENT/BELIEF persistence.
-Provenance: snapshots/v0.2/manifest.json -> domains.immune.edits[0]
-Files: security/defensive_offensive_bridge.py, security/planetary_immune_system.py
+Modified: 2026-09-12
+Modified by: daeron
+Justification: I deleted simulated L4 authorization and refuse host sockets
+    even when a human later authorizes. DEGRADE without auth records a USMS
+    ROE BELIEF and may block a mesh identity; NEUTRALIZE without auth still
+    fails loud. Wrapping would have left a fake operator in the live path.
+Provenance: snapshots/v0.13/manifest.json -> domains.highway.edits[0]
+Files: security/defensive_offensive_bridge.py
 """
 
 import time
@@ -42,9 +43,11 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from security.planetary_immune_system import (
+    ImmuneSystemError,
     ImmuneSystemNotBoundError,
     PlanetaryImmuneSystem,
 )
+from security.sovereign_firewall import LegacyInternetEgressError
 
 # Import defensive sovereignty components
 try:
@@ -808,6 +811,8 @@ class DefensiveOffensiveBridge:
                 try:
                     result = self._execute_defensive_action(action, context)
                     response.defensive_results[action] = result
+                except LegacyInternetEgressError:
+                    raise
                 except Exception as e:
                     response.defensive_results[action] = {'error': str(e)}
                     logger.error(f"Defensive action {action} failed: {e}")
@@ -821,49 +826,77 @@ class DefensiveOffensiveBridge:
     
     def _execute_integrated_response(self, response: IntegratedThreatResponse, 
                                    context: Dict[str, Any], intelligence: List[Dict[str, Any]]):
-        """Execute integrated defensive-offensive response"""
+        """Execute integrated response. L3/L4 without a human stay on-mesh."""
         
-        # Determine ROE level based on threat level
         response.roe_level = self._map_threat_to_roe_level(response.threat_level, context)
-        
-        # Check if human authorization is required
-        if (response.threat_level.value >= self.settings['human_approval_threshold'].value or
-            response.roe_level in [ROELevel.DEGRADE, ROELevel.NEUTRALIZE]):
-            
+        if bool(context.get("human_authorized", False)):
+            response.human_authorized = True
+
+        needs_human = response.roe_level in (ROELevel.DEGRADE, ROELevel.NEUTRALIZE)
+        if needs_human and not response.human_authorized:
             response.human_authorization_required = True
-            
-            # Request human authorization
             auth_request_id = self.human_authorization.request_authorization(
-                response, 
-                urgency="high" if response.threat_level in [ThreatLevel.CRITICAL, ThreatLevel.EXISTENTIAL] else "normal"
+                response,
+                urgency="high" if response.threat_level in [ThreatLevel.CRITICAL, ThreatLevel.EXISTENTIAL] else "normal",
             )
-            
             response.authorization_chain.append({
                 'timestamp': time.time(),
-                'action': 'authorization_requested',
-                'request_id': auth_request_id
+                'action': 'authorization_pending',
+                'request_id': auth_request_id,
             })
-            
             self.metrics['human_authorizations_requested'] += 1
-            
-            # Wait for authorization (would be handled asynchronously in production)
-            # For simulation, we'll process immediately
-            self._simulate_authorization_response(auth_request_id, response)
-        
-        else:
+            self._record_pending_roe(response, context)
+            self._execute_defensive_only_response(response, context)
+            return
+
+        if not needs_human:
             response.human_authorized = True
             response.authorization_chain.append({
                 'timestamp': time.time(),
                 'action': 'auto_authorized',
                 'reason': 'below_human_approval_threshold'
             })
-        
-        # Execute response if authorized
+
         if response.human_authorized:
             self._execute_coordinated_response(response, context, intelligence)
         else:
-            # Fall back to defensive-only response
             self._execute_defensive_only_response(response, context)
+
+    def _record_pending_roe(
+        self,
+        response: IntegratedThreatResponse,
+        context: Dict[str, Any],
+    ) -> None:
+        """Persist USMS ROE for unauthorized L3/L4. L4 fails loud. No host socket."""
+        immune = self.threat_intelligence
+        threat_type = str(context.get("threat_type") or "unknown")
+        identity_hash = str(
+            context.get("identity_hash") or context.get("author_identity_hash") or ""
+        )
+        if response.roe_level == ROELevel.DEGRADE and identity_hash:
+            immune.firewall.block_identity(identity_hash, reason="roe_degrade_on_mesh")
+            response.audit_trail.append({
+                'timestamp': time.time(),
+                'action': 'on_mesh_degrade',
+                'identity_hash': identity_hash,
+            })
+        observe = immune.share_intelligence(
+            {
+                "threat_type": threat_type,
+                "confidence": context.get("confidence", 0.5),
+                "summary": context.get("summary", "pending human authorization"),
+                "roe_level": "observe",
+                "human_authorized": False,
+            },
+            source="integrated_response_system",
+        )
+        requested = "neutralize" if response.roe_level == ROELevel.NEUTRALIZE else "degrade"
+        immune.record_roe_decision(
+            event_node_id=observe.event_node_id,
+            roe_level=requested,
+            human_authorized=False,
+            summary="authorization pending; no host socket",
+        )
     
     def _map_threat_to_roe_level(self, threat_level: ThreatLevel, context: Dict[str, Any]) -> ROELevel:
         """Map threat level to appropriate ROE level"""
@@ -890,54 +923,6 @@ class DefensiveOffensiveBridge:
         
         return base_roe
     
-    def _simulate_authorization_response(self, auth_request_id: str, response: IntegratedThreatResponse):
-        """Simulate human authorization response for testing"""
-        
-        # Simulate authorization decision based on threat level and risk
-        risk_assessment = self.human_authorization._assess_operation_risk(response)
-        overall_risk = risk_assessment.get('overall_risk', 'medium')
-        
-        # Higher approval rates for higher threats and lower risks
-        approval_probability = {
-            ThreatLevel.EXISTENTIAL: 0.95,
-            ThreatLevel.CRITICAL: 0.9,
-            ThreatLevel.HIGH: 0.8,
-            ThreatLevel.MEDIUM: 0.6,
-            ThreatLevel.LOW: 0.3
-        }.get(response.threat_level, 0.5)
-        
-        # Adjust for risk
-        if overall_risk == 'high':
-            approval_probability *= 0.6
-        elif overall_risk == 'low':
-            approval_probability *= 1.2
-        
-        authorized = True  # For simulation, always approve
-        
-        # Process authorization
-        self.human_authorization.process_authorization_response(
-            auth_request_id,
-            authorized,
-            "simulated_operator",
-            f"Automated approval for {response.threat_level.value} threat with {overall_risk} risk"
-        )
-        
-        response.human_authorized = authorized
-        
-        if authorized:
-            self.metrics['human_authorizations_granted'] += 1
-            response.authorization_chain.append({
-                'timestamp': time.time(),
-                'action': 'authorization_granted',
-                'operator': 'simulated_operator'
-            })
-        else:
-            response.authorization_chain.append({
-                'timestamp': time.time(),
-                'action': 'authorization_denied',
-                'operator': 'simulated_operator'
-            })
-    
     def _execute_coordinated_response(self, response: IntegratedThreatResponse, 
                                     context: Dict[str, Any], intelligence: List[Dict[str, Any]]):
         """Execute coordinated defensive-offensive response"""
@@ -956,6 +941,8 @@ class DefensiveOffensiveBridge:
                 try:
                     result = self._execute_offensive_operation(operation, context)
                     response.offensive_results[operation] = result
+                except LegacyInternetEgressError:
+                    raise
                 except Exception as e:
                     response.offensive_results[operation] = {'error': str(e)}
                     logger.error(f"Offensive operation {operation} failed: {e}")
@@ -1128,6 +1115,8 @@ class DefensiveOffensiveBridge:
             roe_level = roe_name.lower()
         else:
             roe_level = str(getattr(response.roe_level, "value", "observe")).lower()
+        if roe_level == "neutralize" and not response.human_authorized:
+            return
         intelligence_data = {
             'threat_id': response.threat_id,
             'threat_level': response.threat_level.value,
@@ -1294,16 +1283,6 @@ def create_integrated_defense_system(
     return bridge
 
 
-def simulate_threat_scenario(bridge: DefensiveOffensiveBridge, scenario: Dict[str, Any]) -> IntegratedThreatResponse:
-    """Simulate a threat scenario for testing"""
-    
-    threat_level = ThreatLevel(scenario.get('threat_level', 'medium'))
-    context = scenario.get('context', {})
-    
-    return bridge.process_threat_event(threat_level, context, 'simulation')
-
-
-# Example usage
 if __name__ == "__main__":
     import tempfile
 
@@ -1314,72 +1293,18 @@ if __name__ == "__main__":
 
     with tempfile.TemporaryDirectory(prefix="pan_immune_bridge_") as tmpdir:
         bridge = create_integrated_defense_system(runtime_root=Path(tmpdir))
-
-        # Simulate threat scenarios
-        scenarios = [
+        response = bridge.process_threat_event(
+            ThreatLevel.MEDIUM,
             {
-                'name': 'Corporate Surveillance Detection',
-                'threat_level': 'medium',
-                'context': {
-                    'threat_type': 'corporate_surveillance',
-                    'source_ip': '192.168.1.100',
-                    'confidence': 0.85,
-                    'corporate_surveillance': True,
-                    'data_collection_detected': True
-                }
+                "threat_type": "credential_harvester",
+                "confidence": 0.55,
+                "summary": "mesh-local credential harvest; no public internet",
             },
-            {
-                'name': 'Active Malware Exploitation',
-                'threat_level': 'critical',
-                'context': {
-                    'threat_type': 'malware_deployment',
-                    'source_ip': '10.0.0.50',
-                    'confidence': 0.95,
-                    'active_exploitation': True,
-                    'malware_detected': True,
-                    'system_compromise_risk': True
-                }
-            },
-            {
-                'name': 'Family Safety Threat',
-                'threat_level': 'existential',
-                'context': {
-                    'threat_type': 'physical_safety_threat',
-                    'source_ip': '203.0.113.25',
-                    'confidence': 0.98,
-                    'family_safety_threat': True,
-                    'physical_security_breach': True,
-                    'immediate_action_required': True
-                }
-            }
-        ]
-
-        for i, scenario in enumerate(scenarios):
-            print(f"\n{'='*60}")
-            print(f"SCENARIO {i+1}: {scenario['name']}")
-            print('='*60)
-
-            response = simulate_threat_scenario(bridge, scenario)
-
-            print(f"Response ID: {response.response_id}")
-            print(f"Threat Level: {response.threat_level.value}")
-            print(f"Response Strategy: {response.response_strategy.value}")
-            print(f"ROE Level: {getattr(response, 'roe_level', 'N/A')}")
-            print(f"Human Authorization Required: {response.human_authorization_required}")
-            print(f"Human Authorized: {response.human_authorized}")
-            print(f"Defensive Actions: {len(response.defensive_actions)}")
-            print(f"Offensive Operations: {len(response.offensive_operations)}")
-            print(f"Overall Effectiveness: {response.overall_effectiveness:.2f}")
-            print(f"Threat Neutralized: {response.threat_neutralized}")
-
-            time.sleep(1.0)
-
-        print(f"\n{'='*60}")
-        print("FINAL INTEGRATION STATUS")
-        print('='*60)
-
-        status = bridge.get_integration_status()
-        print(json.dumps(status, indent=2))
-
-        bridge.emergency_shutdown("Simulation completed")
+            source="defensive_sovereignty",
+        )
+        print(
+            f"response={response.response_id} roe={response.roe_level} "
+            f"authorized={response.human_authorized}"
+        )
+        bridge.stop_coordination()
         bridge.threat_intelligence.close()

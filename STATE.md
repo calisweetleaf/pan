@@ -43,13 +43,29 @@ invented alternative.
   fails loud without ISOLINUX. That is installer-media boot evidence, not
   `PhoneVMState.READY` or ADB. AIPC `PromptSystemBridge` is unbound.
   Thyris does not import or require `core.prompt_bridge`.
-- Direct project gate: `python test/run_pan_gate.py` (immune, treasury,
-  email_social, master_db, thyris_memory, thyris_vm slices).
+- Direct project gate: `python test/run_pan_gate.py` (immune, highway,
+  treasury, email_social, master_db, thyris_memory, thyris_vm slices).
+- `security/planetary_highway.py` is the packet-fabric itinerary. Kinds
+  `HIGHWAY_EMBARK` / `HIGHWAY_HOP` / `HIGHWAY_ARRIVE` / `HIGHWAY_LOCATE`.
+  Cargo is RSA-sealed to the destination identity. Intermediate hops
+  forward the envelope and cannot decrypt. `SovereignFirewall` is required
+  and is never constructed on `DHTNode`. This is not a public-internet
+  socket plane.
 - Historical lineage: reference-code/, archives/, and the 2025-10-02 Windows
   result under results/ (append-only; not rewritten).
 
 ## Verified baseline
 
+- **GREEN, 2026-09-12 (highway + isolation):** Windows Python 3.14.4 `.venv`.
+  `python test/highway/test_planetary_highway.py` 10/10
+  (`test/highway/runs/20260912_235119/`).
+  `python test/immune/test_planetary_immune_system.py` 18/18 including
+  SMTP/webhook/feed/whois/deauth fail-loud and no fake operator
+  (`test/immune/runs/20260912_235256/`).
+  `.\.venv\Scripts\python.exe test/run_pan_gate.py` exited 0 in 37.862s.
+  Artifact: `results/pan_gate_20260912_235357.json`. Snapshot
+  `snapshots/v0.13/manifest.json`. `phone_ready` and `adb_proven` stayed
+  false. Highway is not the next Thyris unit.
 - **GREEN, 2026-09-12:** combined `c1bcf6b` tree on a Linux qemu host, plus
   TCG fallback when `/dev/kvm` cannot be opened. `python3 test/run_pan_gate.py`
   exited 0 in 16.853s (immune 12/12 including second-chain retirement;
@@ -149,12 +165,13 @@ reconciled to the Thyris unbind baseline on 2026-09-11. The stale
 in snapshots/v0.8. qemu-img disk-create and immune ROE DAG landed in
 snapshots/v0.9. Second-chain retirement landed in snapshots/v0.10.
 Android-x86 installer boot landed in snapshots/v0.11. KVM-inaccessible TCG
-fallback landed in snapshots/v0.12.
+fallback landed in snapshots/v0.12. Highway packet fabric and WAN isolation
+landed in snapshots/v0.13.
 
 ## Generated-map status
 
 `filetree.md` is operator-owned generated navigation. Continuity-doc turns
-must not hand-edit it. Snapshot `v0.12` is a new folder; regenerate filetree
+must not hand-edit it. Snapshot `v0.13` is a new folder; regenerate filetree
 through FileTree Pro.
 
 ## Next justified action
@@ -162,3 +179,4 @@ through FileTree Pro.
 ADB userspace / `PhoneVMState.READY` on a real Android guest. Do not dummy a
 READY phone from ISOLINUX. Do not pull prompt files. Do not construct
 `BlockchainThreatIntelligence`. Do not invent mesh-strand/`usms_linkage`.
+Do not reconnect the public internet. Do not open a second civic wire.

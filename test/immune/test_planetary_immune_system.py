@@ -35,8 +35,10 @@ from security.defensive_sovereignty import (
     BlockchainThreatIntelligence,
     NetworkThreatMonitor,
     SecondCombatChainRetiredError,
+    SovereigntyCoordinator,
     ThreatDetectionModule,
 )
+from security.reactive_offense import NetworkJammer, TracebackHunter
 from security.planetary_immune_system import (
     BulletinVerificationError,
     ImmuneSystemError,
@@ -48,6 +50,7 @@ from security.sovereign_firewall import (
     FirewallError,
     InspectionAction,
     InspectionLane,
+    LegacyInternetEgressError,
     SovereignFirewall,
     THREAT_BULLETIN_KIND,
 )
@@ -552,6 +555,178 @@ def check_second_chain_retired_share_uses_immune(details: dict[str, object]) -> 
                 immune.close()
 
 
+def _make_coordinator() -> SovereigntyCoordinator:
+    """Bind the real coordinator class without the lineage constructor graph.
+
+    SovereigntyCoordinator.__init__ still walks DistributedDefense / ResourcePriority
+    and is not this campaign's owner. The WAN methods live on the class and raise
+    as their first statement. I call those methods on an unbound instance so the
+    test never opens SMTP, HTTP, or a host socket.
+    """
+    coord = object.__new__(SovereigntyCoordinator)
+    coord.config = {
+        "alert_channels": ["log"],
+        "alerting_enabled": False,
+        "external_threat_feeds": False,
+    }
+    return coord
+
+
+def _close_coordinator(coord: SovereigntyCoordinator) -> None:
+    """No threads were started. Keep the hook so later ctor repair stays cheap."""
+    shutdown = getattr(coord, "shutdown", None)
+    if callable(shutdown) and hasattr(coord, "_lock"):
+        shutdown()
+
+
+def check_smtp_alert_fails_loud(details: dict[str, object]) -> None:
+    """SMTP never leaves the nation. Civic mail is email_social."""
+    coord = _make_coordinator()
+    try:
+        try:
+            coord._send_email_alert({"message": "do not mail the isp", "severity": "HIGH"})
+        except LegacyInternetEgressError as exc:
+            print(f"smtp refused: {exc}")
+            details["refused"] = True
+        else:
+            raise CheckFailure("SMTP alert did not fail loud")
+    finally:
+        _close_coordinator(coord)
+
+
+def check_webhook_alert_fails_loud(details: dict[str, object]) -> None:
+    """HTTP webhooks never leave the nation."""
+    coord = _make_coordinator()
+    try:
+        try:
+            coord._send_webhook_alert({"message": "do not post to the old web", "severity": "HIGH"})
+        except LegacyInternetEgressError as exc:
+            print(f"webhook refused: {exc}")
+            details["refused"] = True
+        else:
+            raise CheckFailure("webhook alert did not fail loud")
+    finally:
+        _close_coordinator(coord)
+
+
+def check_threat_feed_fetch_fails_loud(details: dict[str, object]) -> None:
+    """External threat feeds stay dead. Combat memory is USMS."""
+    coord = _make_coordinator()
+    try:
+        try:
+            coord._fetch_threat_intelligence_feed("https://example.invalid/feed", "otx")
+        except LegacyInternetEgressError as exc:
+            print(f"feed fetch refused: {exc}")
+        else:
+            raise CheckFailure("threat feed fetch did not fail loud")
+        coord.config["external_threat_feeds"] = True
+        try:
+            coord._sync_threat_intelligence()
+        except LegacyInternetEgressError as exc:
+            print(f"feed sync refused: {exc}")
+            details["sync_refused"] = True
+        else:
+            raise CheckFailure("threat feed sync swallowed LegacyInternetEgressError")
+    finally:
+        _close_coordinator(coord)
+
+
+def check_whois_fails_loud(details: dict[str, object]) -> None:
+    """WHOIS and public-IP recon never open a host socket."""
+    hunter = TracebackHunter()
+    try:
+        hunter._perform_whois_lookup("203.0.113.10")
+    except LegacyInternetEgressError as exc:
+        print(f"whois refused: {exc}")
+    else:
+        raise CheckFailure("whois lookup did not fail loud")
+    try:
+        hunter.map_infrastructure({"source_ip": "203.0.113.10"})
+    except LegacyInternetEgressError as exc:
+        print(f"map_infrastructure refused: {exc}")
+        details["map_refused"] = True
+    else:
+        raise CheckFailure("map_infrastructure with source_ip did not fail loud")
+
+
+def check_wifi_deauth_fails_loud(details: dict[str, object]) -> None:
+    """WiFi deauth is not a country. ROE L4 is a USMS receipt."""
+    jammer = NetworkJammer()
+    try:
+        jammer._execute_wifi_deauth("mesh-peer", {"protocol": "wifi"})
+    except LegacyInternetEgressError as exc:
+        print(f"wifi deauth refused: {exc}")
+    else:
+        raise CheckFailure("wifi deauth did not fail loud")
+    try:
+        jammer._execute_deauth_packets("wlan0", "00:00:00:00:00:00", "FF:FF:FF:FF:FF:FF")
+    except LegacyInternetEgressError as exc:
+        print(f"deauth packets refused: {exc}")
+        details["deauth_refused"] = True
+    else:
+        raise CheckFailure("deauth packet injection did not fail loud")
+
+
+def check_bridge_refuses_simulated_authorization(details: dict[str, object]) -> None:
+    """L3/L4 never invent a simulated_operator. L4 without a human fails loud."""
+    source = Path(ROOT_DIR / "security" / "defensive_offensive_bridge.py").read_text(encoding="utf-8")
+    if "_simulate_authorization_response" in source:
+        raise CheckFailure("simulated authorization method is still present")
+    if "simulate_threat_scenario" in source:
+        raise CheckFailure("simulate_threat_scenario is still present")
+    if "simulated_operator" in source:
+        raise CheckFailure("simulated_operator is still present")
+    with tempfile.TemporaryDirectory(prefix="immune_no_sim_", ignore_cleanup_errors=True) as tmpdir:
+        bridge = None
+        try:
+            bridge = DefensiveOffensiveBridge(runtime_root=Path(tmpdir))
+            high = bridge.process_threat_event(
+                ThreatLevel.HIGH,
+                {
+                    "threat_type": "mesh_credential_replay",
+                    "confidence": 0.8,
+                    "identity_hash": "ab" * 32,
+                    "summary": "on-mesh degrade only",
+                },
+                source="defensive_sovereignty",
+            )
+            print(
+                f"HIGH authorized={high.human_authorized} "
+                f"pending={any(item.get('action') == 'authorization_pending' for item in high.authorization_chain)}"
+            )
+            if high.human_authorized:
+                raise CheckFailure("HIGH/DEGRADE was auto-authorized without a human")
+            if not any(item.get("action") == "authorization_pending" for item in high.authorization_chain):
+                raise CheckFailure("HIGH/DEGRADE did not record authorization_pending")
+            if not bridge.threat_intelligence.firewall.is_identity_blocked("ab" * 32):
+                raise CheckFailure("on-mesh degrade did not block the identity")
+            try:
+                bridge.process_threat_event(
+                    ThreatLevel.CRITICAL,
+                    {
+                        "threat_type": "external_host_exploit",
+                        "confidence": 0.99,
+                        "summary": "must not leave the mesh",
+                    },
+                    source="reactive_offense",
+                )
+            except ImmuneSystemError as exc:
+                print(f"CRITICAL L4 denied: {exc}")
+                details["l4_denied"] = str(exc)
+            else:
+                raise CheckFailure("CRITICAL/NEUTRALIZE did not fail loud")
+            if "human authorization" not in str(details.get("l4_denied") or "").lower():
+                raise CheckFailure("L4 deny did not name human authorization")
+            details["no_simulated_operator"] = True
+        finally:
+            if bridge is not None:
+                try:
+                    bridge.threat_intelligence.close()
+                except (ImmuneSystemError, OSError, RuntimeError):
+                    pass
+                bridge.stop_coordination()
+
+
 CHECKS: tuple[tuple[str, CheckFn], ...] = (
     ("firewall_blocks_telemetry", check_firewall_blocks_telemetry),
     ("firewall_allows_civic_chat", check_firewall_allows_civic_chat),
@@ -565,6 +740,12 @@ CHECKS: tuple[tuple[str, CheckFn], ...] = (
     ("roe_ladder_persists_through_bridge", check_roe_ladder_persists_through_bridge),
     ("neutralize_requires_human_authorization", check_neutralize_requires_human_authorization),
     ("second_chain_retired_share_uses_immune", check_second_chain_retired_share_uses_immune),
+    ("smtp_alert_fails_loud", check_smtp_alert_fails_loud),
+    ("webhook_alert_fails_loud", check_webhook_alert_fails_loud),
+    ("threat_feed_fetch_fails_loud", check_threat_feed_fetch_fails_loud),
+    ("whois_fails_loud", check_whois_fails_loud),
+    ("wifi_deauth_fails_loud", check_wifi_deauth_fails_loud),
+    ("bridge_refuses_simulated_authorization", check_bridge_refuses_simulated_authorization),
 )
 
 
@@ -598,6 +779,7 @@ def run() -> dict[str, object]:
             ImmuneSystemError,
             BulletinVerificationError,
             FirewallError,
+            LegacyInternetEgressError,
             UnifiedMemoryError,
             AssertionError,
             OSError,

@@ -1,0 +1,66 @@
+highway consumer start 20260912_235119
+
+========================================================================
+CHECK: source_has_no_legacy_mesh
+========================================================================
+banned tokens found=[]
+PASS source_has_no_legacy_mesh
+
+========================================================================
+CHECK: requires_explicit_firewall
+========================================================================
+unbound firewall refused: PlanetaryHighway requires SovereignFirewall
+PASS requires_explicit_firewall
+
+========================================================================
+CHECK: direct_travel_sealed_cargo
+========================================================================
+embark travel=ed2fd95dbec915fe641dab4c1b1247d3ab31b3b1152372aeb35e69aa41700ed5 packet=9f0aa21358d2fbf9f6eb613d7025bfde94bdc4a706f2669f83f4fca223fc339a
+stranger correctly failed: sealed envelope is not addressed to this identity
+PASS direct_travel_sealed_cargo
+
+========================================================================
+CHECK: multi_hop_three_nodes
+========================================================================
+multi embark next=e142b9cc9308
+hop USMS hits=1 leaked=0
+hop correctly cannot open: sealed envelope is not addressed to this identity
+PASS multi_hop_three_nodes
+
+========================================================================
+CHECK: firewall_blocks_telemetry_on_hop
+========================================================================
+telemetry hop blocked: highway tracker blocked: telemetry_dictionary
+PASS firewall_blocks_telemetry_on_hop
+
+========================================================================
+CHECK: legacy_routing_key_rejected
+========================================================================
+legacy routing refused: legacy routing key forbidden: next_hop
+envelope next_hop refused: legacy routing key forbidden: next_hop
+PASS legacy_routing_key_rejected
+
+========================================================================
+CHECK: identity_blocklist_stops_travel
+========================================================================
+blocklist stopped travel: highway blocked after signing: identity_blocklist
+PASS identity_blocklist_stops_travel
+
+========================================================================
+CHECK: bad_usms_signature_fails_loud
+========================================================================
+bad USMS signature refused: USMS cargo signature is invalid
+PASS bad_usms_signature_fails_loud
+
+========================================================================
+CHECK: cargo_survives_restart
+========================================================================
+locate after restart=arrived
+PASS cargo_survives_restart
+
+========================================================================
+CHECK: dht_index_optional_and_unbound_to_firewall
+========================================================================
+dht index present=True
+PASS dht_index_optional_and_unbound_to_firewall
+highway consumer status=pass

@@ -1,3 +1,16 @@
+"""
+Defensive sovereignty coordinator — lineage owner with fail-loud WAN isolation.
+
+Modified: 2026-09-12
+Modified by: daeron
+Justification: I made SMTP, HTTP webhooks, and external threat-feed fetches
+    raise LegacyInternetEgressError in this owner so civic mail stays on
+    email_social and combat memory stays on USMS. A wrapper would have left
+    the live socket bodies in place.
+Provenance: snapshots/v0.13/manifest.json -> domains.highway.edits[0]
+Files: security/defensive_sovereignty.py
+"""
+
 import time
 import threading
 import hashlib
@@ -36,7 +49,11 @@ from security.planetary_immune_system import (
     ImmuneSystemNotBoundError,
     PlanetaryImmuneSystem,
 )
-from security.sovereign_firewall import InspectionLane, InspectionVerdict
+from security.sovereign_firewall import (
+    InspectionLane,
+    InspectionVerdict,
+    LegacyInternetEgressError,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -2574,13 +2591,13 @@ class QuantumResistantCrypto:
         self.nonce_size = 16  # 128-bit nonce
         self.tag_size = 32  # 256-bit authentication tag
         
+        # Secure random generator
+        self._rng = os.urandom
+        
         # Key management
         self.master_key = self._generate_master_key()
         self.key_rotation_interval = 86400  # 24 hours
         self.last_rotation = time.time()
-        
-        # Secure random generator
-        self._rng = os.urandom
     
     def _generate_master_key(self) -> bytes:
         """Generate a cryptographically secure master key"""
@@ -5279,117 +5296,20 @@ class SovereigntyCoordinator:
                     self._send_email_alert(alert)
                 elif channel == 'webhook':
                     self._send_webhook_alert(alert)
+            except LegacyInternetEgressError:
+                raise
             except Exception as e:
                 logger.error(f"Failed to send alert via {channel}: {e}")
 
     def _send_email_alert(self, alert: Dict[str, Any]):
-        """Send alert via email"""
-        try:
-            import smtplib
-            from email.mime.text import MIMEText
-            from email.mime.multipart import MIMEMultipart
-            
-            # Get email configuration
-            email_config = self.config.get('email_alert_config', {})
-            smtp_server = email_config.get('smtp_server')
-            smtp_port = email_config.get('smtp_port', 587)
-            username = email_config.get('username')
-            password = email_config.get('password')
-            from_addr = email_config.get('from_address')
-            to_addr = email_config.get('to_address')
-            
-            # Validate configuration
-            if not all([smtp_server, username, password, from_addr, to_addr]):
-                logger.warning("Email alert configuration incomplete")
-                return
-            
-            # Create message
-            msg = MIMEMultipart()
-            msg['From'] = from_addr
-            msg['To'] = to_addr
-            msg['Subject'] = f"Security Alert: {alert['type']}"
-            
-            # Create alert body
-            body = f"""
-Security Alert Notification
-
-Type: {alert['type']}
-Severity: {alert['severity']}
-Time: {time.ctime()}
-Message: {alert['message']}
-
-System Status:
-- Current State: {self.current_state.value}
-- Threat Level: {self.current_threat_level.value}
-- Defense Mode: {self.defense_mode.value}
-            """
-            
-            msg.attach(MIMEText(body, 'plain'))
-            
-            # Send email
-            server = smtplib.SMTP(smtp_server, smtp_port)
-            server.starttls()
-            server.login(username, password)
-            server.send_message(msg)
-            server.quit()
-            
-            logger.info(f"Email alert sent successfully: {alert['type']}")
-            
-        except Exception as e:
-            logger.error(f"Failed to send email alert: {e}")
+        """Refuse SMTP. Civic mail is PAN email_social."""
+        raise LegacyInternetEgressError(
+            "SMTP egress is forbidden; use PAN email_social"
+        )
 
     def _send_webhook_alert(self, alert: Dict[str, Any]):
-        """Send alert via webhook"""
-        try:
-            import urllib.request
-            import json
-            
-            # Get webhook configuration
-            webhook_config = self.config.get('webhook_alert_config', {})
-            webhook_url = webhook_config.get('url')
-            webhook_auth = webhook_config.get('auth')
-            
-            # Validate configuration
-            if not webhook_url:
-                logger.warning("Webhook alert configuration incomplete")
-                return
-            
-            # Create alert payload
-            payload = {
-                'timestamp': time.time(),
-                'type': alert['type'],
-                'severity': alert['severity'],
-                'message': alert['message'],
-                'system_status': {
-                    'state': self.current_state.value,
-                    'threat_level': self.current_threat_level.value,
-                    'defense_mode': self.defense_mode.value
-                }
-            }
-            
-            # Convert to JSON
-            data = json.dumps(payload).encode('utf-8')
-            
-            # Create request
-            request = urllib.request.Request(webhook_url, data=data)
-            request.add_header('Content-Type', 'application/json')
-            request.add_header('Content-Length', len(data))
-            
-            # Add authentication if provided
-            if webhook_auth:
-                if 'bearer_token' in webhook_auth:
-                    request.add_header('Authorization', f"Bearer {webhook_auth['bearer_token']}")
-                elif 'api_key' in webhook_auth:
-                    request.add_header('X-API-Key', webhook_auth['api_key'])
-            
-            # Send webhook
-            with urllib.request.urlopen(request, timeout=30) as response:
-                response_data = response.read()
-                
-            logger.info(f"Webhook alert sent successfully: {alert['type']}")
-            
-        except Exception as e:
-            logger.error(f"Failed to send webhook alert: {e}")
+        """Refuse HTTP webhooks. Combat notices stay on the PAN mesh."""
+        raise LegacyInternetEgressError("HTTP webhook egress is forbidden")
 
     def _update_monitoring_metrics(self, diagnostics: Dict[str, Any]):
         """Update continuous monitoring metrics"""
@@ -5503,74 +5423,22 @@ System Status:
                 self._update_external_threat_feeds()
             if isinstance(self.threat_detector.threat_intelligence, dict):
                 self.threat_detector.threat_intelligence['last_sync'] = time.time()
-        except (ImmuneSystemNotBoundError, SecondCombatChainRetiredError):
+        except (ImmuneSystemNotBoundError, SecondCombatChainRetiredError, LegacyInternetEgressError):
             raise
         except Exception as e:
             logger.error(f"Error synchronizing threat intelligence: {e}")
 
     def _update_external_threat_feeds(self):
-        """Update threat intelligence from external feeds"""
-        try:
-            # Get configured external threat feeds
-            threat_feeds = self.config.get('external_threat_feeds', [])
-            
-            if not threat_feeds:
-                logger.debug("No external threat feeds configured")
-                return
-            
-            # Process each threat feed
-            for feed_config in threat_feeds:
-                feed_url = feed_config.get('url')
-                feed_type = feed_config.get('type', 'json')
-                feed_auth = feed_config.get('auth')
-                
-                if not feed_url:
-                    continue
-                
-                try:
-                    # Fetch threat intelligence from external source
-                    threat_data = self._fetch_threat_intelligence_feed(feed_url, feed_type, feed_auth)
-                    
-                    if threat_data:
-                        # Process and integrate threat intelligence
-                        self._process_external_threat_intelligence(threat_data)
-                        
-                except Exception as e:
-                    logger.error(f"Failed to update threat feed {feed_url}: {e}")
-                    
-        except Exception as e:
-            logger.error(f"Error updating external threat feeds: {e}")
+        """Refuse external HTTP threat feeds. Combat memory is USMS."""
+        raise LegacyInternetEgressError(
+            "external threat feeds are forbidden; combat memory is USMS"
+        )
 
     def _fetch_threat_intelligence_feed(self, url: str, feed_type: str, auth=None):
-        """Fetch threat intelligence from external feed"""
-        try:
-            import urllib.request
-            import json
-            
-            # Create request with authentication if provided
-            request = urllib.request.Request(url)
-            
-            if auth:
-                # Add authentication headers
-                if 'bearer_token' in auth:
-                    request.add_header('Authorization', f"Bearer {auth['bearer_token']}")
-                elif 'api_key' in auth:
-                    request.add_header('X-API-Key', auth['api_key'])
-            
-            # Fetch data
-            with urllib.request.urlopen(request, timeout=30) as response:
-                data = response.read()
-                
-            # Parse based on feed type
-            if feed_type == 'json':
-                return json.loads(data.decode('utf-8'))
-            else:
-                # Handle other feed types
-                return data.decode('utf-8')
-                
-        except Exception as e:
-            logger.error(f"Failed to fetch threat intelligence feed from {url}: {e}")
-            return None
+        """Refuse fetching threat intelligence from the legacy internet."""
+        raise LegacyInternetEgressError(
+            "external threat feeds are forbidden; combat memory is USMS"
+        )
 
     def _process_external_threat_intelligence(self, threat_data):
         """Process and integrate external threat intelligence"""

@@ -48,8 +48,12 @@ take unless Daeron explicitly changes the product thesis.
   `security/sovereign_firewall.py` and `security/planetary_immune_system.py`.
 - **Unconsumed security lineage as immune owner:** `defensive_sovereignty.py`,
   `reactive_offense.py`, and `defensive_offensive_bridge.py` exist on disk.
-  They are not the gate immune path. Do not wrap them to avoid editing
-  `planetary_immune_system.py`.
+  They are compile/import lineage, not the immune owner. Do not wrap them to
+  avoid editing `planetary_immune_system.py`.
+- **Second civic wire / public internet:** do not reconnect PAN to ISPs,
+  SMTP, HTTP webhooks, whois, RF deauth, or a host:port consciousness mesh.
+  `planetary_highway.py` is identity-hash packet travel on the existing
+  fabric. Rewriting it does not authorize sockets to the old internet.
 - **Email overlay on every DHTNode:** do not auto-construct `EmailSocialNode`
   (and its firewall sqlite) inside `DHTNode.__init__`. Civic tests use
   TemporaryDirectory; an extra unclosed sqlite handle fails Windows cleanup.
@@ -67,6 +71,6 @@ take unless Daeron explicitly changes the product thesis.
   PYTHONPATH shim.
 - Historical reference-code/ and archives/ preserve lineage; they are not
   production runtime authority.
-- Next justified production work is qemu host tools plus an Android image,
-  or a real `_run_inference` owner. AIPC `prompt_bridge` is a rejected
-  layer, not a missing owner to fetch.
+- Next justified production work is ADB userspace / `PhoneVMState.READY` on
+  a real Android guest. AIPC `prompt_bridge` is a rejected layer. Connecting
+  PAN to the public internet is a rejected transition.

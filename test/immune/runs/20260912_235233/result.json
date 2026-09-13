@@ -1,0 +1,163 @@
+{
+  "name": "planetary_immune_system",
+  "passed": false,
+  "status": "fail",
+  "pass_count": 17,
+  "fail_count": 1,
+  "skip_count": 0,
+  "elapsed_seconds": 8.812764406204224,
+  "checks": [
+    {
+      "name": "firewall_blocks_telemetry",
+      "status": "pass",
+      "detail": {
+        "telemetry_reason": "telemetry_dictionary",
+        "telemetry_ledger_rows": 1
+      }
+    },
+    {
+      "name": "firewall_allows_civic_chat",
+      "status": "pass",
+      "detail": {
+        "civic_chat_allowed": true
+      }
+    },
+    {
+      "name": "inspect_content_compresses_secrets",
+      "status": "pass",
+      "detail": {
+        "compressed_bytes": 65,
+        "original_bytes": 59
+      }
+    },
+    {
+      "name": "signed_secret_packet_is_blocked",
+      "status": "pass",
+      "detail": {
+        "signed_secret_blocked": true
+      }
+    },
+    {
+      "name": "identity_blocklist",
+      "status": "pass",
+      "detail": {
+        "blocked_identity": "b4d29a395107"
+      }
+    },
+    {
+      "name": "legacy_ip_routing_blocked",
+      "status": "pass",
+      "detail": {
+        "routing_blocked": true
+      }
+    },
+    {
+      "name": "memory_survives_restart",
+      "status": "pass",
+      "detail": {
+        "intel_id": "1bc950516579d598",
+        "event_node_id": "40402da0-b9e0-4277-8bf5-d85ed9cbfe9f",
+        "belief_node_id": "0c7945d1-cade-4bae-a761-499453fde80a",
+        "bulletin_dht_key": "threat-memory:79dbddaec27ca9d1809c61ba7e3283f0b3c872e8d57427548a6db5ec5c50a563",
+        "restart_hits": 4
+      }
+    },
+    {
+      "name": "peer_ingests_bulletin",
+      "status": "pass",
+      "detail": {
+        "peer_ingested_intel_id": "9777ccc17641673f",
+        "peer_hits": 4,
+        "packet_kind": "THREAT_MEMORY_BULLETIN"
+      }
+    },
+    {
+      "name": "contradiction_and_campaign_entangle",
+      "status": "pass",
+      "detail": {
+        "entanglement_id": "d9f5ac48-5673-43d0-b227-3d699b433527",
+        "contradiction_node_id": "0b08e835-3cbb-489c-b9da-82bf72fa0054",
+        "contradictions": 1
+      }
+    },
+    {
+      "name": "roe_ladder_persists_through_bridge",
+      "status": "pass",
+      "detail": {
+        "roe_level": "deceive",
+        "neural_activation": 0.385,
+        "belief_node_id": "d404c858-56fb-41de-8d38-4198a1395dfa",
+        "restart_recovered": true
+      }
+    },
+    {
+      "name": "neutralize_requires_human_authorization",
+      "status": "pass",
+      "detail": {
+        "share_denied": "ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized",
+        "record_denied": "ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized",
+        "external_host_action": false
+      }
+    },
+    {
+      "name": "second_chain_retired_share_uses_immune",
+      "status": "pass",
+      "detail": {
+        "unbound_denied": "ThreatDetectionModule.share_threat_intelligence requires a bound PlanetaryImmuneSystem; BlockchainThreatIntelligence is retired",
+        "retired_construct": true,
+        "detector_intel_id": "e2be0d2086cc8c7f",
+        "detector_roe_level": "observe",
+        "monitor_hits": 6,
+        "identities_distinct": true
+      }
+    },
+    {
+      "name": "smtp_alert_fails_loud",
+      "status": "pass",
+      "detail": {
+        "refused": true
+      }
+    },
+    {
+      "name": "webhook_alert_fails_loud",
+      "status": "pass",
+      "detail": {
+        "refused": true
+      }
+    },
+    {
+      "name": "threat_feed_fetch_fails_loud",
+      "status": "pass",
+      "detail": {
+        "sync_refused": true
+      }
+    },
+    {
+      "name": "whois_fails_loud",
+      "status": "pass",
+      "detail": {
+        "map_refused": true
+      }
+    },
+    {
+      "name": "wifi_deauth_fails_loud",
+      "status": "pass",
+      "detail": {
+        "deauth_refused": true
+      }
+    },
+    {
+      "name": "bridge_refuses_simulated_authorization",
+      "status": "fail",
+      "error": "simulated_operator is still present",
+      "detail": {}
+    }
+  ],
+  "error": "1 immune checks failed",
+  "artifacts": {
+    "json": "C:\\Users\\trent\\pan\\test\\immune\\runs\\20260912_235233\\result.json",
+    "md": "C:\\Users\\trent\\pan\\test\\immune\\runs\\20260912_235233\\result.md",
+    "log": "C:\\Users\\trent\\pan\\test\\immune\\runs\\20260912_235233\\result.log",
+    "run_dir": "C:\\Users\\trent\\pan\\test\\immune\\runs\\20260912_235233"
+  }
+}

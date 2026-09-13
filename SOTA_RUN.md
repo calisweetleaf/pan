@@ -1,31 +1,30 @@
-# SOTA_RUN — KVM-inaccessible Linux falls back to TCG installer boot
+# SOTA_RUN — sovereign highway packet fabric, WAN isolated
 
 **Date:** 2026-09-12
-**Mode:** EDIT (see SCOPE.md engagement 5)
-**Claim:** `select_qemu_accelerator` opens `/dev/kvm` before passing
-`-enable-kvm`. When the node exists but is not writable, QEMU uses `-accel tcg`
-and `boot_android_installer` still shows ISOLINUX. `phone_ready` and
-`adb_proven` stay false. Disk-create, ROE, and BlockchainThreatIntelligence
-were not redone.
+**Mode:** EDIT (see SCOPE.md campaign security-highway-completion)
+**Claim:** Lineage SMTP/webhook/feeds/whois/deauth fail loud with
+`LegacyInternetEgressError`. `PlanetaryHighway` moves sealed USMS cargo over
+in-process `UnifiedDataPacket` hops. Intermediate identities cannot open cargo.
+This is not a public-internet connection and not a second civic wire.
 
 ## Commands
 
 ```bash
-python3 test/thyris_vm/test_thyris_android_boot.py
-python3 test/run_pan_gate.py
+python test/highway/test_planetary_highway.py
+python test/immune/test_planetary_immune_system.py
+.\.venv\Scripts\python.exe test/run_pan_gate.py
 ```
 
-- Android boot consumer: **PASS**, 4/4, run `20260912_094201`
-- Project gate: **PASS**, exit 0, 16.853s (`results/pan_gate_20260912_094045.json`)
-- Python: 3.12.3 (Linux)
-- qemu-system-x86_64 8.2.2, qemu-img 8.2.2, adb 1.0.41
-- accelerator: `-accel tcg` (KVM Permission denied)
-- Console: SeaBIOS, Booting from DVD, ISOLINUX 6.03
+- Highway consumer: **PASS**, 10/10, run `20260912_235119`
+- Immune consumer: **PASS**, 18/18 including six WAN isolation checks, run `20260912_235256`
+- Project gate: **PASS**, exit 0, 37.862s (`results/pan_gate_20260912_235357.json`)
+- Python: Windows 3.14.4 `.venv`
 - `phone_ready`: false
 - `adb_proven`: false
 
 ## Artifacts
 
-- Boot: `test/thyris_vm/runs/20260912_094201/`
-- Gate: `results/pan_gate_20260912_094045.json`
-- Snapshot: `snapshots/v0.12/manifest.json`
+- Highway: `test/highway/runs/20260912_235119/`
+- Immune: `test/immune/runs/20260912_235256/`
+- Gate: `results/pan_gate_20260912_235357.json`
+- Snapshot: `snapshots/v0.13/manifest.json`

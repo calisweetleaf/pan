@@ -1,0 +1,123 @@
+immune consumer start 20260912_235256
+
+========================================================================
+CHECK: firewall_blocks_telemetry
+========================================================================
+telemetry action=block reason=telemetry_dictionary
+PASS firewall_blocks_telemetry
+
+========================================================================
+CHECK: firewall_allows_civic_chat
+========================================================================
+civic chat action=allow
+PASS firewall_allows_civic_chat
+
+========================================================================
+CHECK: inspect_content_compresses_secrets
+========================================================================
+secret preflight action=compress
+PASS inspect_content_compresses_secrets
+
+========================================================================
+CHECK: signed_secret_packet_is_blocked
+========================================================================
+signed secret action=block reason=sensitive_plaintext_on_signed_packet
+PASS signed_secret_packet_is_blocked
+
+========================================================================
+CHECK: identity_blocklist
+========================================================================
+blocklist action=block
+PASS identity_blocklist
+
+========================================================================
+CHECK: legacy_ip_routing_blocked
+========================================================================
+routing action=block reason=legacy_routing_artifact
+PASS legacy_ip_routing_blocked
+
+========================================================================
+CHECK: memory_survives_restart
+========================================================================
+first share intel_id=1bc950516579d598 event=0200d474-2b8 belief=279ac247-4b6 dht=threat-memory:767e0b74e911251c783d2da8504cff47770d3df0a9064ddac8284354d35f7771
+restart search hits=4
+PASS memory_survives_restart
+
+========================================================================
+CHECK: peer_ingests_bulletin
+========================================================================
+bravo ingested intel_id=9777ccc17641673f event=29ffa736-b8b
+PASS peer_ingests_bulletin
+
+========================================================================
+CHECK: contradiction_and_campaign_entangle
+========================================================================
+campaign vector=network event=f9f98c45-f0f
+campaign vector=filesystem event=a2e82ad8-3a2
+campaign vector=memory event=d0d1848c-f3e
+contradiction node=772d51d5-c24 targets=['4d1b1847-b096-4399-bdc4-bc77cb3758b8']
+PASS contradiction_and_campaign_entangle
+
+========================================================================
+CHECK: roe_ladder_persists_through_bridge
+========================================================================
+bridge threat_id=5b18b502fa46dd38 mapped_roe=DECEIVE
+belief roe_level=deceive deceive=True activation=0.385
+PASS roe_ladder_persists_through_bridge
+
+========================================================================
+CHECK: neutralize_requires_human_authorization
+========================================================================
+share L4 denied: ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized
+record L4 denied: ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized
+PASS neutralize_requires_human_authorization
+
+========================================================================
+CHECK: second_chain_retired_share_uses_immune
+========================================================================
+construct denied: BlockchainThreatIntelligence is retired. Bind PlanetaryImmuneSystem and persist through share_intelligence / USMS. PAN RSA and USMS Ed25519 stay two identity types. This class is not a live store.
+unbound share denied: ThreatDetectionModule.share_threat_intelligence requires a bound PlanetaryImmuneSystem; BlockchainThreatIntelligence is retired
+detector intel=e2be0d2086cc8c7f event=f8e2d979-770b-4f99-b2ff-b5495e04c29f roe=observe bulletin=None
+monitor threats={'pan_packet_firewall_violation': 0.9}
+PASS second_chain_retired_share_uses_immune
+
+========================================================================
+CHECK: smtp_alert_fails_loud
+========================================================================
+smtp refused: SMTP egress is forbidden; use PAN email_social
+PASS smtp_alert_fails_loud
+
+========================================================================
+CHECK: webhook_alert_fails_loud
+========================================================================
+webhook refused: HTTP webhook egress is forbidden
+PASS webhook_alert_fails_loud
+
+========================================================================
+CHECK: threat_feed_fetch_fails_loud
+========================================================================
+feed fetch refused: external threat feeds are forbidden; combat memory is USMS
+feed sync refused: external threat feeds are forbidden; combat memory is USMS
+PASS threat_feed_fetch_fails_loud
+
+========================================================================
+CHECK: whois_fails_loud
+========================================================================
+whois refused: legacy internet recon is forbidden
+map_infrastructure refused: legacy internet recon is forbidden
+PASS whois_fails_loud
+
+========================================================================
+CHECK: wifi_deauth_fails_loud
+========================================================================
+wifi deauth refused: RF/host neutralization is forbidden; ROE L4 is a USMS receipt only
+deauth packets refused: RF/host neutralization is forbidden; ROE L4 is a USMS receipt only
+PASS wifi_deauth_fails_loud
+
+========================================================================
+CHECK: bridge_refuses_simulated_authorization
+========================================================================
+HIGH authorized=False pending=True
+CRITICAL L4 denied: ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized
+PASS bridge_refuses_simulated_authorization
+immune consumer status=pass

@@ -8,6 +8,15 @@ bounded by sovereignty constraints and human authorization requirements.
 
 DARPA-grade implementation with modular architecture, zero-trust principles,
 and comprehensive audit trails. Designed for autonomous defensive operations.
+
+Modified: 2026-09-12
+Modified by: daeron
+Justification: I made WAN recon, SMTP-adjacent sockets, port scans, and RF
+    neutralization fail loud with LegacyInternetEgressError in the owning
+    methods. Completing deauth or whois would reconnect the old internet.
+    Wrapping these owners would duplicate the isolation contract.
+Provenance: snapshots/v0.13/manifest.json -> domains.highway.edits[0]
+Files: security/reactive_offense.py
 """
 
 import time
@@ -36,6 +45,8 @@ from queue import Queue, PriorityQueue
 import urllib.request
 import urllib.parse
 from contextlib import contextmanager
+
+from security.sovereign_firewall import LegacyInternetEgressError
 
 # Import defensive sovereignty components
 try:
@@ -775,29 +786,8 @@ class TracebackHunter:
     
     def map_infrastructure(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """Map attacker infrastructure"""
-        
-        source_ip = context.get('source_ip', 'unknown')
-        
-        # Perform reconnaissance (simulated)
-        infrastructure_data = {
-            'source_ip': source_ip,
-            'discovery_time': time.time(),
-            'infrastructure_type': self._classify_infrastructure(source_ip),
-            'associated_domains': self._discover_domains(source_ip),
-            'network_topology': self._map_network_topology(source_ip),
-            'threat_attribution': self._attribute_threat(context)
-        }
-        
-        # Store in intelligence database
-        self.infrastructure_map[source_ip] = infrastructure_data
-        self.intelligence_database.append(infrastructure_data)
-        
-        return {
-            'success': True,
-            'infrastructure_mapped': True,
-            'intelligence_collected': True,
-            'data': infrastructure_data
-        }
+        raise LegacyInternetEgressError('legacy internet recon is forbidden')
+
     
     def _classify_infrastructure(self, ip: str) -> str:
         """Classify infrastructure type using WHOIS and geolocation data"""
@@ -841,102 +831,20 @@ class TracebackHunter:
             else:
                 return 'external_network'
                 
+        except LegacyInternetEgressError:
+            raise
         except Exception as e:
             logger.error(f"Infrastructure classification failed for {ip}: {e}")
             return 'unknown_network'
     
     def _discover_domains(self, ip: str) -> List[str]:
-        """Discover associated domains through reverse DNS and certificate transparency"""
-        domains = []
-        
-        try:
-            # Reverse DNS lookup
-            import socket
-            try:
-                hostname, aliaslist, ipaddrlist = socket.gethostbyaddr(ip)
-                if hostname and hostname != ip:
-                    domains.append(hostname)
-                domains.extend(aliaslist)
-            except socket.herror:
-                pass  # No reverse DNS record
-            
-            # Certificate Transparency Log search
-            ct_domains = self._search_certificate_transparency(ip)
-            domains.extend(ct_domains)
-            
-            # Passive DNS lookup
-            passive_domains = self._passive_dns_lookup(ip)
-            domains.extend(passive_domains)
-            
-            # Remove duplicates and validate
-            unique_domains = list(set(domains))
-            validated_domains = [d for d in unique_domains if self._validate_domain(d)]
-            
-            return validated_domains[:20]  # Limit to top 20 domains
-            
-        except Exception as e:
-            logger.error(f"Domain discovery failed for {ip}: {e}")
-            return []
+        """Refuse reverse DNS and CT. Civic names stay on the PAN mesh."""
+        raise LegacyInternetEgressError("legacy internet recon is forbidden")
     
     def _map_network_topology(self, ip: str) -> Dict[str, Any]:
-        """Map network topology using traceroute and network scanning"""
-        topology = {
-            'gateway': None,
-            'subnet': None,
-            'adjacent_hosts': [],
-            'traceroute_hops': [],
-            'network_range': None,
-            'autonomous_system': None
-        }
-        
-        try:
-            import ipaddress
-            import subprocess
-            
-            # Perform traceroute to map path
-            traceroute_result = self._perform_traceroute(ip)
-            topology['traceroute_hops'] = traceroute_result
-            
-            # Determine likely gateway (first hop in private network)
-            if traceroute_result:
-                first_hop = traceroute_result[0]
-                try:
-                    first_ip = ipaddress.ip_address(first_hop)
-                    if first_ip.is_private:
-                        topology['gateway'] = first_hop
-                except:
-                    pass
-            
-            # Get BGP information for AS mapping
-            as_info = self._get_bgp_info(ip)
-            if as_info:
-                topology['autonomous_system'] = as_info['asn']
-                topology['network_range'] = as_info['prefix']
-            
-            # Determine subnet based on network class
-            ip_obj = ipaddress.ip_address(ip)
-            if ip_obj.is_private:
-                if ip.startswith('192.168.'):
-                    network = ipaddress.IPv4Network(f"{'.'.join(ip.split('.')[:-1])}.0/24", strict=False)
-                elif ip.startswith('10.'):
-                    network = ipaddress.IPv4Network(f"{'.'.join(ip.split('.')[:-2])}.0.0/16", strict=False)
-                elif ip.startswith('172.'):
-                    network = ipaddress.IPv4Network(f"{'.'.join(ip.split('.')[:-1])}.0/24", strict=False)
-                else:
-                    network = ipaddress.IPv4Network(f"{ip}/24", strict=False)
-                
-                topology['subnet'] = str(network)
-                
-                # Scan for adjacent hosts (limited scope for security)
-                adjacent_hosts = self._scan_adjacent_hosts(str(network), ip)
-                topology['adjacent_hosts'] = adjacent_hosts
-            
-            return topology
-            
-        except Exception as e:
-            logger.error(f"Network topology mapping failed for {ip}: {e}")
-            return topology
-    
+        """Refuse traceroute, BGP, and adjacent-host scans."""
+        raise LegacyInternetEgressError("legacy internet recon is forbidden")
+
     def _attribute_threat(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """Attribute threat to known actors using threat intelligence"""
         attribution = {
@@ -1006,132 +914,18 @@ class TracebackHunter:
     
     def _perform_whois_lookup(self, ip: str) -> str:
         """Perform WHOIS lookup for IP address"""
-        try:
-            import socket
-            import subprocess
-            import re
-            
-            # Try using whois command if available
-            try:
-                result = subprocess.run(['whois', ip], capture_output=True, text=True, timeout=30)
-                if result.returncode == 0 and result.stdout:
-                    return result.stdout.lower()
-            except (subprocess.SubprocessError, FileNotFoundError):
-                pass
-            
-            # Fallback to basic DNS reverse lookup
-            try:
-                hostname = socket.gethostbyaddr(ip)[0]
-                return f"hostname: {hostname.lower()}"
-            except socket.herror:
-                pass
-            
-            # Last resort - use online WHOIS API (simulated for security)
-            import urllib.request
-            import json
-            
-            # In production, use legitimate WHOIS API services
-            # This is a placeholder that would connect to services like:
-            # - ARIN, RIPE, APNIC regional registries
-            # - Commercial APIs like WhoisXML, IPInfo, etc.
-            return f"owner: unknown isp for {ip}"
-            
-        except Exception as e:
-            logger.error(f"WHOIS lookup failed for {ip}: {e}")
-            return "whois: lookup_failed"
+        raise LegacyInternetEgressError('legacy internet recon is forbidden')
+
     
     def _search_certificate_transparency(self, ip: str) -> List[str]:
         """Search Certificate Transparency logs for domains associated with IP"""
-        try:
-            import urllib.request
-            import json
-            import ssl
-            import socket
-            
-            domains = []
-            
-            # Try to get SSL certificate from common ports
-            common_ssl_ports = [443, 8443, 9443]
-            
-            for port in common_ssl_ports:
-                try:
-                    context = ssl.create_default_context()
-                    context.check_hostname = False
-                    context.verify_mode = ssl.CERT_NONE
-                    
-                    with socket.create_connection((ip, port), timeout=10) as sock:
-                        with context.wrap_socket(sock, server_hostname=ip) as ssock:
-                            cert = ssock.getpeercert()
-                            
-                            # Extract Subject Alternative Names
-                            if 'subjectAltName' in cert:
-                                for san_type, san_value in cert['subjectAltName']:
-                                    if san_type == 'DNS':
-                                        domains.append(san_value)
-                            
-                            # Extract Common Name
-                            for subject in cert.get('subject', []):
-                                for attr, value in subject:
-                                    if attr == 'commonName':
-                                        domains.append(value)
-                
-                except Exception:
-                    continue
-            
-            # In production, would also query CT log APIs like:
-            # - crt.sh API
-            # - Google Certificate Transparency API
-            # - Censys certificate search
-            # This requires API keys and proper rate limiting
-            
-            return list(set(domains))[:10]  # Limit results
-            
-        except Exception as e:
-            logger.error(f"Certificate transparency search failed for {ip}: {e}")
-            return []
+        raise LegacyInternetEgressError('legacy internet recon is forbidden')
+
     
     def _passive_dns_lookup(self, ip: str) -> List[str]:
         """Perform passive DNS lookup to find historical domain associations"""
-        try:
-            import socket
-            
-            domains = []
-            
-            # Try reverse DNS lookup
-            try:
-                hostname = socket.gethostbyaddr(ip)[0]
-                if hostname and hostname != ip:
-                    domains.append(hostname)
-            except socket.herror:
-                pass
-            
-            # In production, would query passive DNS databases like:
-            # - VirusTotal API
-            # - PassiveTotal/RiskIQ
-            # - Farsight DNSDB
-            # - IBM X-Force
-            # These require API keys and subscription services
-            
-            # Simulate common domain patterns based on IP structure
-            ip_parts = ip.split('.')
-            if len(ip_parts) == 4:
-                # Generate plausible domain patterns
-                potential_domains = [
-                    f"host-{'-'.join(ip_parts)}.provider.com",
-                    f"{ip_parts[2]}-{ip_parts[3]}.datacenter.net",
-                    f"server{ip_parts[3]}.hosting.org"
-                ]
-                
-                # In production, these would be actual lookups
-                for domain in potential_domains[:2]:  # Limit simulated results
-                    if self._validate_domain(domain):
-                        domains.append(domain)
-            
-            return list(set(domains))[:5]  # Limit results
-            
-        except Exception as e:
-            logger.error(f"Passive DNS lookup failed for {ip}: {e}")
-            return []
+        raise LegacyInternetEgressError('legacy internet recon is forbidden')
+
     
     def _validate_domain(self, domain: str) -> bool:
         """Validate domain name format and basic checks"""
@@ -1168,199 +962,18 @@ class TracebackHunter:
     
     def _perform_traceroute(self, ip: str) -> List[Dict[str, Any]]:
         """Perform traceroute to map network path"""
-        try:
-            import subprocess
-            import re
-            import platform
-            
-            hops = []
-            
-            # Determine traceroute command based on OS
-            if platform.system().lower() == 'windows':
-                cmd = ['tracert', '-h', '15', ip]
-            else:
-                cmd = ['traceroute', '-m', '15', ip]
-            
-            try:
-                result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
-                
-                if result.returncode == 0:
-                    lines = result.stdout.split('\n')
-                    
-                    for line in lines:
-                        # Parse hop information (simplified)
-                        if platform.system().lower() == 'windows':
-                            # Windows tracert format
-                            match = re.search(r'^\s*(\d+)\s+.*?(\d+\.\d+\.\d+\.\d+)', line)
-                        else:
-                            # Unix traceroute format
-                            match = re.search(r'^\s*(\d+)\s+.*?(\d+\.\d+\.\d+\.\d+)', line)
-                        
-                        if match:
-                            hop_num = int(match.group(1))
-                            hop_ip = match.group(2)
-                            
-                            # Get hostname if possible
-                            hostname = "unknown"
-                            try:
-                                import socket
-                                hostname = socket.gethostbyaddr(hop_ip)[0]
-                            except:
-                                pass
-                            
-                            hops.append({
-                                'hop': hop_num,
-                                'ip': hop_ip,
-                                'hostname': hostname,
-                                'rtt': 'unknown'  # Could parse RTT from output
-                            })
-                
-            except subprocess.SubprocessError:
-                # Fallback to basic connectivity test
-                hops.append({
-                    'hop': 1,
-                    'ip': ip,
-                    'hostname': 'destination',
-                    'rtt': 'unknown'
-                })
-            
-            return hops[:15]  # Limit to 15 hops
-            
-        except Exception as e:
-            logger.error(f"Traceroute failed for {ip}: {e}")
-            return []
+        raise LegacyInternetEgressError('legacy internet recon is forbidden')
+
     
     def _get_bgp_info(self, ip: str) -> Dict[str, Any]:
         """Get BGP/AS information for IP address"""
-        try:
-            import subprocess
-            import re
-            
-            as_info = {}
-            
-            # Try using whois for AS info
-            try:
-                result = subprocess.run(['whois', ip], capture_output=True, text=True, timeout=30)
-                
-                if result.returncode == 0:
-                    output = result.stdout.lower()
-                    
-                    # Extract AS number
-                    as_match = re.search(r'origin(?:as)?\s*:?\s*as(\d+)', output)
-                    if as_match:
-                        as_info['asn'] = f"AS{as_match.group(1)}"
-                    
-                    # Extract organization name
-                    org_patterns = [
-                        r'org-name\s*:?\s*(.+)',
-                        r'organization\s*:?\s*(.+)',
-                        r'orgname\s*:?\s*(.+)'
-                    ]
-                    
-                    for pattern in org_patterns:
-                        org_match = re.search(pattern, output)
-                        if org_match:
-                            as_info['organization'] = org_match.group(1).strip()
-                            break
-                    
-                    # Extract country
-                    country_match = re.search(r'country\s*:?\s*([a-z]{2})', output)
-                    if country_match:
-                        as_info['country'] = country_match.group(1).upper()
-            
-            except (subprocess.SubprocessError, FileNotFoundError):
-                pass
-            
-            # In production, would use BGP looking glass servers or APIs like:
-            # - Hurricane Electric BGP Toolkit
-            # - RIPE STAT API
-            # - Team Cymru IP to ASN lookup
-            # - IPInfo.io ASN API
-            
-            # If no AS info found, provide basic classification
-            if not as_info:
-                as_info = {
-                    'asn': 'unknown',
-                    'organization': 'unknown provider',
-                    'country': 'unknown'
-                }
-            
-            return as_info
-            
-        except Exception as e:
-            logger.error(f"BGP info lookup failed for {ip}: {e}")
-            return {'asn': 'lookup_failed', 'organization': 'unknown', 'country': 'unknown'}
+        raise LegacyInternetEgressError('legacy internet recon is forbidden')
+
     
     def _scan_adjacent_hosts(self, network: str, source_ip: str) -> List[str]:
         """Scan for adjacent hosts in the same network (limited scope for security)"""
-        try:
-            import ipaddress
-            import socket
-            import threading
-            import time
-            
-            adjacent_hosts = []
-            
-            # Parse network
-            try:
-                net = ipaddress.ip_network(network, strict=False)
-                source_obj = ipaddress.ip_address(source_ip)
-                
-                # Only scan very small networks for security
-                if net.num_addresses > 256:
-                    logger.warning(f"Network {network} too large for adjacent host scan")
-                    return adjacent_hosts
-                
-                # Limit scan to immediate neighbors (±5 IPs)
-                source_int = int(source_obj)
-                start_range = max(int(net.network_address), source_int - 5)
-                end_range = min(int(net.broadcast_address), source_int + 5)
-                
-                def check_host(ip_int):
-                    try:
-                        ip_addr = str(ipaddress.ip_address(ip_int))
-                        if ip_addr != source_ip:  # Don't include source
-                            # Quick ping-style check
-                            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                            sock.settimeout(2)
-                            
-                            # Check common ports
-                            common_ports = [22, 80, 443, 135, 139, 445]
-                            for port in common_ports[:2]:  # Limit to 2 ports
-                                try:
-                                    result = sock.connect_ex((ip_addr, port))
-                                    if result == 0:
-                                        adjacent_hosts.append(ip_addr)
-                                        break
-                                except:
-                                    continue
-                            sock.close()
-                    except Exception:
-                        pass
-                
-                # Threaded scanning with limits
-                threads = []
-                for ip_int in range(start_range, end_range + 1):
-                    if len(threads) >= 5:  # Limit concurrent threads
-                        break
-                    
-                    thread = threading.Thread(target=check_host, args=(ip_int,))
-                    thread.daemon = True
-                    thread.start()
-                    threads.append(thread)
-                
-                # Wait for completion with timeout
-                for thread in threads:
-                    thread.join(timeout=5)
-                
-            except Exception as e:
-                logger.error(f"Network parsing failed: {e}")
-            
-            return adjacent_hosts[:10]  # Limit results
-            
-        except Exception as e:
-            logger.error(f"Adjacent host scan failed: {e}")
-            return []
+        raise LegacyInternetEgressError('legacy internet recon is forbidden')
+
     
     def _analyze_ip_reputation(self, ip: str) -> Dict[str, Any]:
         """Analyze IP reputation using various sources"""
@@ -1908,64 +1521,8 @@ class Infiltrator:
     
     def _execute_infiltration(self, mirror_exploit: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
         """Execute the infiltration attempt with proper safety checks and legal compliance"""
-        try:
-            target_ip = context.get('source_ip', 'unknown')
-            exploit_type = mirror_exploit.get('exploit_type', 'unknown')
-            delivery_method = mirror_exploit.get('delivery_method', 'tcp')
-            
-            # Validate target and ensure legal compliance
-            validation_result = self._validate_infiltration_target(target_ip, context)
-            if not validation_result['valid']:
-                return {
-                    'success': False,
-                    'status': 'target_validation_failed',
-                    'reason': validation_result['reason'],
-                    'intelligence': {},
-                    'persistent_access': False
-                }
-            
-            # Pre-infiltration reconnaissance
-            recon_data = self._perform_target_reconnaissance(target_ip, exploit_type)
-            
-            # Execute the infiltration with safety checks
-            infiltration_result = self._execute_safe_infiltration(mirror_exploit, target_ip, recon_data)
-            
-            if infiltration_result['success']:
-                # Gather intelligence from successful infiltration
-                intelligence = self._gather_infiltration_intelligence(target_ip, infiltration_result)
-                
-                # Establish persistence if authorized and safe
-                persistence_result = self._establish_safe_persistence(target_ip, intelligence)
-                
-                return {
-                    'success': True,
-                    'status': 'infiltration_successful',
-                    'intelligence': intelligence,
-                    'persistent_access': persistence_result['established'],
-                    'reconnaissance_data': recon_data,
-                    'infiltration_method': exploit_type,
-                    'compromise_timestamp': time.time(),
-                    'access_level': intelligence.get('privilege_level', 'unknown')
-                }
-            else:
-                return {
-                    'success': False,
-                    'status': infiltration_result.get('status', 'infiltration_failed'),
-                    'reason': infiltration_result.get('reason', 'unknown_failure'),
-                    'intelligence': infiltration_result.get('partial_intelligence', {}),
-                    'persistent_access': False,
-                    'reconnaissance_data': recon_data
-                }
-                
-        except Exception as e:
-            logger.error(f"Infiltration execution failed: {e}")
-            return {
-                'success': False,
-                'status': 'execution_error',
-                'reason': str(e),
-                'intelligence': {},
-                'persistent_access': False
-            }
+        raise LegacyInternetEgressError('raw sockets against hosts are forbidden')
+
     
     # Helper methods for Infiltrator class
     
@@ -2324,88 +1881,13 @@ class Infiltrator:
     
     def _safe_port_scan(self, target_ip: str) -> List[int]:
         """Perform safe port scanning with limited scope"""
-        try:
-            import socket
-            import threading
-            
-            open_ports = []
-            common_ports = [22, 23, 25, 53, 80, 110, 143, 443, 993, 995, 8080, 8443]
-            
-            def check_port(ip, port):
-                try:
-                    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    sock.settimeout(3)
-                    result = sock.connect_ex((ip, port))
-                    if result == 0:
-                        open_ports.append(port)
-                    sock.close()
-                except:
-                    pass
-            
-            # Limited concurrent scanning
-            threads = []
-            for port in common_ports[:10]:  # Limit to 10 ports
-                thread = threading.Thread(target=check_port, args=(target_ip, port))
-                thread.daemon = True
-                thread.start()
-                threads.append(thread)
-            
-            # Wait for completion with timeout
-            for thread in threads:
-                thread.join(timeout=5)
-            
-            return sorted(open_ports)
-            
-        except Exception as e:
-            logger.error(f"Safe port scan failed: {e}")
-            return []
+        raise LegacyInternetEgressError('raw sockets against hosts are forbidden')
+
     
     def _identify_service(self, target_ip: str, port: int) -> Dict[str, str]:
         """Identify service running on specific port"""
-        try:
-            import socket
-            
-            service_info = {'service': 'unknown', 'version': 'unknown', 'banner': ''}
-            
-            try:
-                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                sock.settimeout(5)
-                sock.connect((target_ip, port))
-                
-                # Try to grab banner
-                try:
-                    banner = sock.recv(1024).decode('utf-8', errors='ignore').strip()
-                    service_info['banner'] = banner[:100]  # Limit banner size
-                    
-                    # Basic service identification
-                    banner_lower = banner.lower()
-                    if 'ssh' in banner_lower:
-                        service_info['service'] = 'ssh'
-                    elif 'http' in banner_lower or 'server:' in banner_lower:
-                        service_info['service'] = 'http'
-                    elif 'ftp' in banner_lower:
-                        service_info['service'] = 'ftp'
-                    elif 'smtp' in banner_lower:
-                        service_info['service'] = 'smtp'
-                    
-                except:
-                    pass
-                
-                sock.close()
-                
-            except:
-                # Fallback to common port mappings
-                port_services = {
-                    22: 'ssh', 80: 'http', 443: 'https', 25: 'smtp',
-                    110: 'pop3', 143: 'imap', 21: 'ftp', 23: 'telnet'
-                }
-                service_info['service'] = port_services.get(port, 'unknown')
-            
-            return service_info
-            
-        except Exception as e:
-            logger.error(f"Service identification failed for {target_ip}:{port}: {e}")
-            return {'service': 'unknown', 'version': 'unknown', 'banner': ''}
+        raise LegacyInternetEgressError('raw sockets against hosts are forbidden')
+
     
     def _passive_os_fingerprint(self, target_ip: str, recon_data: Dict[str, Any]) -> str:
         """Perform passive OS fingerprinting"""
@@ -2481,70 +1963,8 @@ class Infiltrator:
     
     def _execute_safe_infiltration(self, mirror_exploit: Dict[str, Any], target_ip: str, recon_data: Dict[str, Any]) -> Dict[str, Any]:
         """Execute infiltration with safety checks"""
-        try:
-            exploit_type = mirror_exploit.get('exploit_type', 'unknown')
-            payload = mirror_exploit.get('mirror_payload', '')
-            
-            # Simulate infiltration execution with realistic success rates
-            success_factors = []
-            
-            # Factor 1: Exploit type match with target vulnerabilities
-            target_vulns = recon_data.get('vulnerability_indicators', [])
-            if exploit_type == 'sql_injection' and any('sql' in vuln for vuln in target_vulns):
-                success_factors.append(0.7)
-            elif exploit_type == 'command_injection' and 'outdated_web_server' in target_vulns:
-                success_factors.append(0.6)
-            elif exploit_type != 'unknown':
-                success_factors.append(0.4)  # Base success rate for known exploits
-            
-            # Factor 2: Target system characteristics
-            open_ports = recon_data.get('open_ports', [])
-            if len(open_ports) > 3:
-                success_factors.append(0.3)  # More attack surface
-            
-            # Factor 3: Payload sophistication
-            sophistication = mirror_exploit.get('sophistication_level', 'low')
-            if sophistication == 'high':
-                success_factors.append(0.5)
-            elif sophistication == 'medium':
-                success_factors.append(0.3)
-            
-            # Calculate overall success probability
-            if success_factors:
-                success_prob = min(0.9, sum(success_factors) / len(success_factors))
-            else:
-                success_prob = 0.1  # Low default success rate
-            
-            # Simulate execution
-            import random
-            success = random.random() < success_prob
-            
-            if success:
-                return {
-                    'success': True,
-                    'status': 'infiltration_successful',
-                    'access_gained': True,
-                    'compromise_method': exploit_type,
-                    'execution_timestamp': time.time()
-                }
-            else:
-                return {
-                    'success': False,
-                    'status': 'infiltration_failed',
-                    'reason': 'target_hardening_detected',
-                    'partial_intelligence': {
-                        'defensive_measures': ['firewall_active', 'ids_present'],
-                        'attempted_exploit': exploit_type
-                    }
-                }
-                
-        except Exception as e:
-            logger.error(f"Safe infiltration execution failed: {e}")
-            return {
-                'success': False,
-                'status': 'execution_error',
-                'reason': str(e)
-            }
+        raise LegacyInternetEgressError('raw sockets against hosts are forbidden')
+
     
     def _gather_infiltration_intelligence(self, target_ip: str, infiltration_result: Dict[str, Any]) -> Dict[str, Any]:
         """Gather intelligence from successful infiltration"""
@@ -3776,6 +3196,8 @@ class NetworkJammer:
             else:
                 return self._execute_generic_jamming(target, context)
                 
+        except LegacyInternetEgressError:
+            raise
         except Exception as e:
             logger.error(f"Jamming execution failed for method {method}: {e}")
             return {
@@ -3787,89 +3209,13 @@ class NetworkJammer:
     
     def _execute_wifi_deauth(self, target: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """Execute WiFi deauthentication attack using network interface manipulation"""
-        try:
-            import subprocess
-            import platform
-            
-            # Identify wireless interface
-            wireless_interface = self._identify_wireless_interface()
-            if not wireless_interface:
-                return {'success': False, 'effectiveness': 0.0, 'disrupted': False, 'error': 'no_wireless_interface'}
-            
-            # Get target BSSID and client MAC
-            target_bssid = context.get('bssid', None)
-            client_mac = context.get('client_mac', 'FF:FF:FF:FF:FF:FF')  # Broadcast if not specified
-            
-            if not target_bssid:
-                # Perform WiFi scan to identify target
-                scan_result = self._perform_wifi_scan(wireless_interface)
-                target_bssid = scan_result.get('target_bssid')
-            
-            if not target_bssid:
-                return {'success': False, 'effectiveness': 0.0, 'disrupted': False, 'error': 'target_bssid_not_found'}
-            
-            # Execute deauth attack using appropriate tool
-            deauth_result = self._execute_deauth_packets(wireless_interface, target_bssid, client_mac)
-            
-            return {
-                'success': deauth_result['success'],
-                'effectiveness': 0.8 if deauth_result['success'] else 0.1,
-                'disrupted': deauth_result['success'],
-                'packets_sent': deauth_result.get('packets_sent', 0),
-                'target_bssid': target_bssid,
-                'method_details': 'wifi_deauthentication'
-            }
-            
-        except Exception as e:
-            logger.error(f"WiFi deauth execution failed: {e}")
-            return {'success': False, 'effectiveness': 0.0, 'disrupted': False, 'error': str(e)}
+        raise LegacyInternetEgressError('RF/host neutralization is forbidden; ROE L4 is a USMS receipt only')
+
     
     def _execute_dns_sinkhole(self, target: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """Execute DNS sinkhole to disrupt C2 communications"""
-        try:
-            # Identify malicious domains from context
-            malicious_domains = context.get('malicious_domains', [])
-            if not malicious_domains:
-                malicious_domains = self._extract_domains_from_context(context)
-            
-            sinkholed_domains = []
-            failed_sinkholes = []
-            
-            for domain in malicious_domains[:10]:  # Limit to 10 domains
-                try:
-                    sinkhole_result = self._create_dns_sinkhole_entry(domain)
-                    if sinkhole_result['success']:
-                        sinkholed_domains.append({
-                            'domain': domain,
-                            'sinkhole_ip': sinkhole_result['sinkhole_ip'],
-                            'timestamp': time.time()
-                        })
-                    else:
-                        failed_sinkholes.append({
-                            'domain': domain,
-                            'error': sinkhole_result['error']
-                        })
-                except Exception as e:
-                    failed_sinkholes.append({
-                        'domain': domain,
-                        'error': str(e)
-                    })
-            
-            success = len(sinkholed_domains) > 0
-            effectiveness = len(sinkholed_domains) / max(1, len(malicious_domains))
-            
-            return {
-                'success': success,
-                'effectiveness': effectiveness,
-                'disrupted': success,
-                'sinkholed_domains': sinkholed_domains,
-                'failed_sinkholes': failed_sinkholes,
-                'method_details': 'dns_sinkhole'
-            }
-            
-        except Exception as e:
-            logger.error(f"DNS sinkhole execution failed: {e}")
-            return {'success': False, 'effectiveness': 0.0, 'disrupted': False, 'error': str(e)}
+        raise LegacyInternetEgressError('RF/host neutralization is forbidden; ROE L4 is a USMS receipt only')
+
     
     def _execute_bandwidth_throttling(self, target: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """Execute bandwidth throttling to disrupt data exfiltration"""
@@ -3970,33 +3316,13 @@ class NetworkJammer:
     
     def _wifi_deauth_attack(self, target: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """Execute WiFi deauthentication attack"""
-        
-        # Simulated WiFi deauth
-        success = random.random() < 0.85
-        effectiveness = random.uniform(0.7, 0.95) if success else random.uniform(0.1, 0.3)
-        
-        return {
-            'success': success,
-            'effectiveness': effectiveness,
-            'disrupted': success,
-            'method': 'wifi_deauth',
-            'target': target
-        }
+        raise LegacyInternetEgressError('RF/host neutralization is forbidden; ROE L4 is a USMS receipt only')
+
     
     def _zigbee_interference(self, target: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """Execute Zigbee interference"""
-        
-        # Simulated Zigbee jamming
-        success = random.random() < 0.78
-        effectiveness = random.uniform(0.6, 0.9) if success else random.uniform(0.1, 0.4)
-        
-        return {
-            'success': success,
-            'effectiveness': effectiveness,
-            'disrupted': success,
-            'method': 'zigbee_interference',
-            'target': target
-        }
+        raise LegacyInternetEgressError('RF/host neutralization is forbidden; ROE L4 is a USMS receipt only')
+
     
     def _dns_sinkhole(self, target: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """Execute DNS sinkholing"""
@@ -4046,6 +3372,19 @@ class NetworkJammer:
             'connections_reset': context.get('connection_count', 1)
         }
 
+
+
+    def _execute_deauth_packets(self, interface: str, bssid: str, client_mac: str) -> Dict[str, Any]:
+        """Refuse WiFi deauth packet injection. ROE L4 is a USMS receipt only."""
+        raise LegacyInternetEgressError(
+            "RF/host neutralization is forbidden; ROE L4 is a USMS receipt only"
+        )
+
+    def _execute_zigbee_interference(self, target: str, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Refuse Zigbee interference. ROE L4 is a USMS receipt only."""
+        raise LegacyInternetEgressError(
+            "RF/host neutralization is forbidden; ROE L4 is a USMS receipt only"
+        )
 
 class ProcessTerminator:
     """Process termination capabilities"""

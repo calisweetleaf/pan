@@ -1,1033 +1,863 @@
-#!/usr/bin/env python3
 """
-planetary_arfs_network.py - Distributed Consciousness Network Implementation
+Planetary highway — sealed USMS itinerary on the existing PAN packet fabric.
 
-Real networking implementation for planetary ARFS infrastructure.
-Activates when system stability exceeds thresholds.
+Source: PAN_SDK UnifiedDataPacket / StatelessRelay / seal_plaintext,
+    memory/unified_memory_system.py, security/sovereign_firewall.py
+Integrated: 2026-09-12
+Purpose: An AI citizen travels the way a human already must: RSA-signed
+    packets addressed to pan:id:<identity_hash>, inspected at the border,
+    with cognition as USMS nodes RSA-sealed to the destination. Intermediate
+    hops forward the envelope. They cannot decrypt cargo. This is not a
+    second internet and not a host:port consciousness mesh.
+
+Modified: 2026-09-12
+Modified by: daeron
+Justification: I replaced the unconsumed consciousness-mesh clone in place
+    because wrapping it would have kept a second civic wire beside
+    UnifiedDataPacket travel. The live owners already are the packet,
+    StatelessRelay, USMS, and SovereignFirewall.
+Provenance: snapshots/v0.13/manifest.json -> domains.highway.edits[0]
+Files: security/planetary_highway.py
 """
 
-import asyncio
-import hashlib
+from __future__ import annotations
+
 import json
 import logging
-import os
-import pickle
-import random
-import socket
-import ssl
-import struct
+import sys
 import threading
-import time
-import uuid
-import zlib
-from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
-from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from types import MappingProxyType
+from typing import Iterable, Mapping
 
-import numpy as np
-from cryptography.fernet import Fernet
-from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import rsa, padding
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+_ROOT = Path(__file__).resolve().parent.parent
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 
-logger = logging.getLogger("PlanetaryARFS")
+from PAN_SDK.PAN_SDK import (
+    DHTNode,
+    PANPersistenceStore,
+    SovereignCommunicator,
+    SovereignIdentity as PANSovereignIdentity,
+    UnifiedDataPacket,
+    canonical,
+    sha256_hex,
+    utc_now_iso,
+)
+from PAN_SDK.email_social import (
+    EmailSocialBlocked,
+    EmailSocialRelayError,
+    StatelessRelay,
+    reject_legacy_routing,
+    seal_plaintext,
+    verify_overlay_packet,
+)
+from memory.unified_memory_system import (
+    LinkageTypeEnum,
+    NodeKindEnum,
+    SovereignIdentity as MemorySovereignIdentity,
+    UnifiedMemorySystem,
+)
+from security.sovereign_firewall import (
+    InspectionLane,
+    SovereignFirewall,
+)
 
+_TRACKER_REASONS = frozenset({"telemetry_dictionary", "telemetry_regex"})
 
-class NodeType(Enum):
-    CORE_NODE = "core_node"
-    COMPUTATION_NODE = "computation_node"
-    STORAGE_NODE = "storage_node"
-    INTERFACE_NODE = "interface_node"
-    RELAY_NODE = "relay_node"
-    EDGE_NODE = "edge_node"
+LOGGER = logging.getLogger("PlanetaryHighway")
 
-
-class MessageType(Enum):
-    HANDSHAKE = "handshake"
-    CONSCIOUSNESS_SYNC = "consciousness_sync"
-    MEMORY_QUERY = "memory_query"
-    MEMORY_RESPONSE = "memory_response"
-    COMPUTATION_TASK = "computation_task"
-    COMPUTATION_RESULT = "computation_result"
-    DIMENSIONAL_SYNC = "dimensional_sync"
-    NETWORK_DISCOVERY = "network_discovery"
-    HEARTBEAT = "heartbeat"
-    SHUTDOWN = "shutdown"
-
-
-@dataclass
-class NetworkNode:
-    node_id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    node_type: NodeType = NodeType.EDGE_NODE
-    host: str = "localhost"
-    port: int = 0
-    public_key: Optional[bytes] = None
-    private_key: Optional[bytes] = None
-    processing_capacity: float = 1.0
-    memory_capacity: int = 1000000
-    network_latency: float = 0.0
-    bandwidth_capacity: float = 1e9
-    uptime: float = 1.0
-    trust_score: float = 1.0
-    dimensional_coordinates: Dict[str, float] = field(default_factory=lambda: {
-        'x_spatial_topology': 0.0,
-        'y_semantic_depth': 0.0, 
-        'z_recursive_embedding': 0.0,
-        't_temporal_evolution': 0.0
-    })
-    consciousness_coherence: float = 1.0
-    eigenstate_stability: float = 1.0
-    breath_phase_sync: float = 1.0
-    last_seen: float = field(default_factory=time.time)
-
-    def __post_init__(self):
-        if self.port == 0:
-            self.port = random.randint(50000, 60000)
-        if not self.public_key:
-            self._generate_keypair()
-
-    def _generate_keypair(self):
-        private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-        self.private_key = private_key.private_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PrivateFormat.PKCS8,
-            encryption_algorithm=serialization.NoEncryption()
-        )
-        self.public_key = private_key.public_key().public_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PublicFormat.SubjectPublicKeyInfo
-        )
+HIGHWAY_EMBARK = "HIGHWAY_EMBARK"
+HIGHWAY_HOP = "HIGHWAY_HOP"
+HIGHWAY_ARRIVE = "HIGHWAY_ARRIVE"
+HIGHWAY_LOCATE = "HIGHWAY_LOCATE"
+HIGHWAY_DHT_PREFIX = "highway:travel:"
+RECEIPT_COMPONENT = "highway_travel"
+PRIVATE_CARGO_KEYS = frozenset(
+    {
+        "_private_key",
+        "private_key",
+        "private_key_hex",
+        "privatekey",
+        "secret_token",
+        "api_key",
+        "bearer_token",
+        "password",
+    }
+)
+PEM_PRIVATE_MARK = "-----begin"
 
 
-@dataclass
-class NetworkMessage:
-    message_id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    message_type: MessageType = MessageType.HEARTBEAT
-    source_node_id: str = ""
-    target_node_id: str = ""
-    payload: Dict[str, Any] = field(default_factory=dict)
-    timestamp: float = field(default_factory=time.time)
-    encryption_key: Optional[bytes] = None
-    compressed: bool = False
-
-    def serialize(self) -> bytes:
-        data = {
-            'message_id': self.message_id,
-            'message_type': self.message_type.value,
-            'source_node_id': self.source_node_id,
-            'target_node_id': self.target_node_id,
-            'payload': self.payload,
-            'timestamp': self.timestamp,
-            'compressed': self.compressed
-        }
-        
-        serialized = pickle.dumps(data, protocol=pickle.HIGHEST_PROTOCOL)
-        
-        if self.compressed:
-            serialized = zlib.compress(serialized)
-        
-        if self.encryption_key:
-            fernet = Fernet(self.encryption_key)
-            serialized = fernet.encrypt(serialized)
-        
-        return struct.pack('!I', len(serialized)) + serialized
-
-    @classmethod
-    def deserialize(cls, data: bytes, encryption_key: Optional[bytes] = None) -> 'NetworkMessage':
-        if len(data) < 4:
-            raise ValueError("Invalid message data")
-        
-        length = struct.unpack('!I', data[:4])[0]
-        message_data = data[4:4+length]
-        
-        if encryption_key:
-            fernet = Fernet(encryption_key)
-            message_data = fernet.decrypt(message_data)
-        
-        if len(message_data) > 4:
-            try:
-                decompressed = zlib.decompress(message_data)
-                message_data = decompressed
-            except zlib.error:
-                pass
-        
-        data_dict = pickle.loads(message_data)
-        
-        msg = cls()
-        msg.message_id = data_dict['message_id']
-        msg.message_type = MessageType(data_dict['message_type'])
-        msg.source_node_id = data_dict['source_node_id']
-        msg.target_node_id = data_dict['target_node_id']
-        msg.payload = data_dict['payload']
-        msg.timestamp = data_dict['timestamp']
-        msg.compressed = data_dict.get('compressed', False)
-        msg.encryption_key = encryption_key
-        
-        return msg
+class HighwayError(Exception):
+    """Domain error for sealed packet itinerary."""
 
 
-class NetworkProtocol:
-    def __init__(self, local_node: NetworkNode):
-        self.local_node = local_node
-        self.connections: Dict[str, asyncio.StreamWriter] = {}
-        self.message_handlers: Dict[MessageType, Callable] = {}
-        self.server: Optional[asyncio.Server] = None
-        self.encryption_keys: Dict[str, bytes] = {}
-        self.message_queue: asyncio.Queue = asyncio.Queue()
-        self.running = False
-        
-        self._register_handlers()
+class HighwayNotBoundError(HighwayError):
+    """Raised when a required PAN, USMS, firewall, or store handle is missing."""
 
-    def _register_handlers(self):
-        self.message_handlers = {
-            MessageType.HANDSHAKE: self._handle_handshake,
-            MessageType.CONSCIOUSNESS_SYNC: self._handle_consciousness_sync,
-            MessageType.MEMORY_QUERY: self._handle_memory_query,
-            MessageType.MEMORY_RESPONSE: self._handle_memory_response,
-            MessageType.COMPUTATION_TASK: self._handle_computation_task,
-            MessageType.COMPUTATION_RESULT: self._handle_computation_result,
-            MessageType.DIMENSIONAL_SYNC: self._handle_dimensional_sync,
-            MessageType.NETWORK_DISCOVERY: self._handle_network_discovery,
-            MessageType.HEARTBEAT: self._handle_heartbeat,
-            MessageType.SHUTDOWN: self._handle_shutdown
+
+class HighwayCargoError(HighwayError):
+    """Raised when sealed cognition cannot be packed, opened, or verified."""
+
+
+class HighwayRouteError(HighwayError):
+    """Raised when the itinerary uses legacy routing or an invalid hop."""
+
+
+class HighwayFirewallError(HighwayError):
+    """Raised when the sovereign border refuses a highway packet."""
+
+
+@dataclass(frozen=True)
+class CargoNode:
+    """One USMS node carried as sealed cargo. No private keys."""
+
+    node_id: str
+    author_id: str
+    kind: str
+    timestamp: str
+    content: Mapping[str, object]
+    signature: str
+    sovereign_pubkey: str
+    parents: tuple[str, ...]
+    signed_payload_hex: str
+    origin_node_id: str
+
+    def to_mapping(self) -> dict[str, object]:
+        """Return a JSON-stable cargo leaf."""
+        return {
+            "node_id": self.node_id,
+            "author_id": self.author_id,
+            "kind": self.kind,
+            "timestamp": self.timestamp,
+            "content": dict(self.content),
+            "signature": self.signature,
+            "sovereign_pubkey": self.sovereign_pubkey,
+            "parents": list(self.parents),
+            "signed_payload_hex": self.signed_payload_hex,
+            "origin_node_id": self.origin_node_id,
         }
 
-    async def start_server(self):
-        self.server = await asyncio.start_server(
-            self._handle_client, self.local_node.host, self.local_node.port
-        )
-        self.running = True
-        logger.info(f"Network server started on {self.local_node.host}:{self.local_node.port}")
 
-    async def stop_server(self):
-        self.running = False
-        if self.server:
-            self.server.close()
-            await self.server.wait_closed()
-        
-        for writer in self.connections.values():
-            writer.close()
-            await writer.wait_closed()
-        
-        self.connections.clear()
+@dataclass(frozen=True)
+class HighwayCargo:
+    """Ed25519-signed cargo digest plus the sealed node set."""
 
-    async def connect_to_peer(self, peer_node: NetworkNode) -> bool:
-        try:
-            reader, writer = await asyncio.open_connection(peer_node.host, peer_node.port)
-            
-            handshake_msg = NetworkMessage(
-                message_type=MessageType.HANDSHAKE,
-                source_node_id=self.local_node.node_id,
-                target_node_id=peer_node.node_id,
-                payload={
-                    'node_info': {
-                        'node_id': self.local_node.node_id,
-                        'node_type': self.local_node.node_type.value,
-                        'host': self.local_node.host,
-                        'port': self.local_node.port,
-                        'public_key': self.local_node.public_key.decode() if self.local_node.public_key else "",
-                        'dimensional_coordinates': self.local_node.dimensional_coordinates
-                    }
-                }
-            )
-            
-            writer.write(handshake_msg.serialize())
-            await writer.drain()
-            
-            self.connections[peer_node.node_id] = writer
-            
-            asyncio.create_task(self._handle_peer_messages(reader, peer_node.node_id))
-            
-            logger.info(f"Connected to peer {peer_node.node_id}")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Failed to connect to peer {peer_node.node_id}: {e}")
-            return False
+    digest: str
+    usms_signature: str
+    usms_pubkey: str
+    origin_identity_hash: str
+    destination_identity_hash: str
+    nodes: tuple[CargoNode, ...]
 
-    async def _handle_client(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
-        peer_addr = writer.get_extra_info('peername')
-        logger.debug(f"New connection from {peer_addr}")
-        
-        try:
-            while self.running:
-                length_data = await reader.readexactly(4)
-                if not length_data:
-                    break
-                
-                length = struct.unpack('!I', length_data)[0]
-                message_data = await reader.readexactly(length)
-                
-                try:
-                    message = NetworkMessage.deserialize(length_data + message_data)
-                    await self._process_message(message, writer)
-                except Exception as e:
-                    logger.error(f"Message processing error: {e}")
-                    
-        except asyncio.IncompleteReadError:
-            logger.debug(f"Connection closed by {peer_addr}")
-        except Exception as e:
-            logger.error(f"Connection error with {peer_addr}: {e}")
-        finally:
-            writer.close()
-            await writer.wait_closed()
-
-    async def _handle_peer_messages(self, reader: asyncio.StreamReader, peer_id: str):
-        try:
-            while self.running and peer_id in self.connections:
-                length_data = await reader.readexactly(4)
-                if not length_data:
-                    break
-                
-                length = struct.unpack('!I', length_data)[0]
-                message_data = await reader.readexactly(length)
-                
-                encryption_key = self.encryption_keys.get(peer_id)
-                message = NetworkMessage.deserialize(length_data + message_data, encryption_key)
-                
-                await self._process_message(message)
-                
-        except asyncio.IncompleteReadError:
-            logger.debug(f"Peer {peer_id} disconnected")
-        except Exception as e:
-            logger.error(f"Peer message handling error: {e}")
-        finally:
-            if peer_id in self.connections:
-                del self.connections[peer_id]
-
-    async def _process_message(self, message: NetworkMessage, writer: Optional[asyncio.StreamWriter] = None):
-        if message.message_type in self.message_handlers:
-            handler = self.message_handlers[message.message_type]
-            await handler(message, writer)
-        else:
-            logger.warning(f"No handler for message type: {message.message_type}")
-
-    async def send_message(self, target_node_id: str, message: NetworkMessage) -> bool:
-        if target_node_id not in self.connections:
-            logger.warning(f"No connection to {target_node_id}")
-            return False
-        
-        try:
-            writer = self.connections[target_node_id]
-            encryption_key = self.encryption_keys.get(target_node_id)
-            message.encryption_key = encryption_key
-            
-            serialized = message.serialize()
-            writer.write(serialized)
-            await writer.drain()
-            return True
-            
-        except Exception as e:
-            logger.error(f"Failed to send message to {target_node_id}: {e}")
-            return False
-
-    async def broadcast_message(self, message: NetworkMessage) -> int:
-        successful_sends = 0
-        
-        for peer_id in self.connections:
-            message.target_node_id = peer_id
-            if await self.send_message(peer_id, message):
-                successful_sends += 1
-        
-        return successful_sends
-
-    async def _handle_handshake(self, message: NetworkMessage, writer: Optional[asyncio.StreamWriter] = None):
-        peer_info = message.payload.get('node_info', {})
-        peer_id = peer_info.get('node_id')
-        
-        if peer_id:
-            # Generate shared encryption key
-            encryption_key = Fernet.generate_key()
-            self.encryption_keys[peer_id] = encryption_key
-            
-            if writer:
-                self.connections[peer_id] = writer
-            
-            response = NetworkMessage(
-                message_type=MessageType.HANDSHAKE,
-                source_node_id=self.local_node.node_id,
-                target_node_id=peer_id,
-                payload={
-                    'handshake_complete': True,
-                    'encryption_key': encryption_key.decode('latin-1'),
-                    'node_info': {
-                        'node_id': self.local_node.node_id,
-                        'node_type': self.local_node.node_type.value,
-                        'dimensional_coordinates': self.local_node.dimensional_coordinates
-                    }
-                }
-            )
-            
-            if writer:
-                writer.write(response.serialize())
-                await writer.drain()
-
-    async def _handle_consciousness_sync(self, message: NetworkMessage, writer: Optional[asyncio.StreamWriter] = None):
-        consciousness_data = message.payload.get('consciousness_data', {})
-        logger.debug(f"Received consciousness sync from {message.source_node_id}")
-        
-        await self.message_queue.put(('consciousness_sync', message.source_node_id, consciousness_data))
-
-    async def _handle_memory_query(self, message: NetworkMessage, writer: Optional[asyncio.StreamWriter] = None):
-        query = message.payload.get('query', {})
-        logger.debug(f"Received memory query from {message.source_node_id}")
-        
-        response = NetworkMessage(
-            message_type=MessageType.MEMORY_RESPONSE,
-            source_node_id=self.local_node.node_id,
-            target_node_id=message.source_node_id,
-            payload={
-                'query_id': message.payload.get('query_id'),
-                'results': {'matches': 0, 'data': []}
-            }
-        )
-        
-        await self.send_message(message.source_node_id, response)
-
-    async def _handle_memory_response(self, message: NetworkMessage, writer: Optional[asyncio.StreamWriter] = None):
-        results = message.payload.get('results', {})
-        query_id = message.payload.get('query_id')
-        
-        await self.message_queue.put(('memory_response', message.source_node_id, query_id, results))
-
-    async def _handle_computation_task(self, message: NetworkMessage, writer: Optional[asyncio.StreamWriter] = None):
-        task = message.payload.get('task', {})
-        task_id = message.payload.get('task_id')
-        
-        logger.debug(f"Received computation task {task_id} from {message.source_node_id}")
-        
-        result = NetworkMessage(
-            message_type=MessageType.COMPUTATION_RESULT,
-            source_node_id=self.local_node.node_id,
-            target_node_id=message.source_node_id,
-            payload={
-                'task_id': task_id,
-                'result': {'status': 'completed', 'data': 'mock_result'}
-            }
-        )
-        
-        await self.send_message(message.source_node_id, result)
-
-    async def _handle_computation_result(self, message: NetworkMessage, writer: Optional[asyncio.StreamWriter] = None):
-        result = message.payload.get('result', {})
-        task_id = message.payload.get('task_id')
-        
-        await self.message_queue.put(('computation_result', message.source_node_id, task_id, result))
-
-    async def _handle_dimensional_sync(self, message: NetworkMessage, writer: Optional[asyncio.StreamWriter] = None):
-        coordinates = message.payload.get('coordinates', {})
-        logger.debug(f"Received dimensional sync from {message.source_node_id}")
-        
-        await self.message_queue.put(('dimensional_sync', message.source_node_id, coordinates))
-
-    async def _handle_network_discovery(self, message: NetworkMessage, writer: Optional[asyncio.StreamWriter] = None):
-        node_info = message.payload.get('node_info', {})
-        logger.debug(f"Received network discovery from {message.source_node_id}")
-        
-        await self.message_queue.put(('network_discovery', message.source_node_id, node_info))
-
-    async def _handle_heartbeat(self, message: NetworkMessage, writer: Optional[asyncio.StreamWriter] = None):
-        logger.debug(f"Received heartbeat from {message.source_node_id}")
-        
-        await self.message_queue.put(('heartbeat', message.source_node_id, message.timestamp))
-
-    async def _handle_shutdown(self, message: NetworkMessage, writer: Optional[asyncio.StreamWriter] = None):
-        logger.info(f"Received shutdown from {message.source_node_id}")
-        
-        await self.message_queue.put(('shutdown', message.source_node_id))
-
-
-class NetworkDiscovery:
-    def __init__(self, network: 'PlanetaryARFSNetwork'):
-        self.network = network
-        self.discovery_interval = 30.0
-        self.discovery_ports = [50000, 50001, 50002, 50003, 50004]
-        self.broadcast_address = "255.255.255.255"
-        self.running = False
-
-    async def start_discovery(self):
-        self.running = True
-        await asyncio.gather(
-            self._discovery_beacon(),
-            self._discovery_listener()
-        )
-
-    async def stop_discovery(self):
-        self.running = False
-
-    async def _discovery_beacon(self):
-        while self.running:
-            try:
-                beacon_data = self._create_beacon()
-                
-                for port in self.discovery_ports:
-                    try:
-                        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                        sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-                        sock.sendto(beacon_data, (self.broadcast_address, port))
-                        sock.close()
-                    except Exception as e:
-                        logger.debug(f"Beacon broadcast error on port {port}: {e}")
-                
-                await asyncio.sleep(self.discovery_interval)
-                
-            except Exception as e:
-                logger.error(f"Discovery beacon error: {e}")
-                await asyncio.sleep(self.discovery_interval)
-
-    async def _discovery_listener(self):
-        for port in self.discovery_ports:
-            try:
-                sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                sock.bind(("", port))
-                sock.setblocking(False)
-                
-                asyncio.create_task(self._listen_on_socket(sock))
-                
-            except Exception as e:
-                logger.debug(f"Could not bind to discovery port {port}: {e}")
-
-    async def _listen_on_socket(self, sock: socket.socket):
-        while self.running:
-            try:
-                data, addr = sock.recvfrom(1024)
-                await self._process_beacon(data, addr)
-                await asyncio.sleep(0.1)
-            except socket.error:
-                await asyncio.sleep(0.1)
-            except Exception as e:
-                logger.error(f"Discovery listener error: {e}")
-                break
-
-    def _create_beacon(self) -> bytes:
-        beacon = {
-            'node_id': self.network.local_node.node_id,
-            'node_type': self.network.local_node.node_type.value,
-            'host': self.network.local_node.host,
-            'port': self.network.local_node.port,
-            'public_key': self.network.local_node.public_key.decode() if self.network.local_node.public_key else "",
-            'capabilities': {
-                'processing_capacity': self.network.local_node.processing_capacity,
-                'memory_capacity': self.network.local_node.memory_capacity
-            },
-            'dimensional_coordinates': self.network.local_node.dimensional_coordinates,
-            'timestamp': time.time()
+    def to_mapping(self) -> dict[str, object]:
+        """Return the signed cargo body including the USMS signature."""
+        return {
+            "content_digest": self.digest,
+            "usms_signature": self.usms_signature,
+            "usms_pubkey": self.usms_pubkey,
+            "origin_identity_hash": self.origin_identity_hash,
+            "destination_identity_hash": self.destination_identity_hash,
+            "nodes": [node.to_mapping() for node in self.nodes],
         }
-        
-        return json.dumps(beacon).encode()
 
-    async def _process_beacon(self, data: bytes, addr: Tuple[str, int]):
-        try:
-            beacon = json.loads(data.decode())
-            
-            if beacon['node_id'] == self.network.local_node.node_id:
+
+@dataclass(frozen=True)
+class TravelTicket:
+    """Structured embark, hop, arrive, or locate outcome."""
+
+    status: str
+    travel_id: str
+    origin_identity_hash: str
+    destination_identity_hash: str
+    next_identity_hash: str
+    hop_index: int
+    reason: str
+    packet_id: str | None = None
+    details: dict[str, object] = field(default_factory=dict)
+
+    @property
+    def ok(self) -> bool:
+        """Return True when the action committed."""
+        return self.status == "ok"
+
+    def to_mapping(self) -> dict[str, object]:
+        """Return a JSON-stable receipt."""
+        return {
+            "status": self.status,
+            "travel_id": self.travel_id,
+            "origin_identity_hash": self.origin_identity_hash,
+            "destination_identity_hash": self.destination_identity_hash,
+            "next_identity_hash": self.next_identity_hash,
+            "hop_index": self.hop_index,
+            "reason": self.reason,
+            "packet_id": self.packet_id,
+            "details": dict(self.details),
+        }
+
+
+class PlanetaryHighway:
+    """Identity-hash itinerary. Relays stay blind. Cargo is sealed to destination RSA."""
+
+    def __init__(
+        self,
+        *,
+        pan_identity: PANSovereignIdentity,
+        memory: UnifiedMemorySystem,
+        memory_identity: MemorySovereignIdentity,
+        firewall: SovereignFirewall,
+        persistence: PANPersistenceStore,
+        dht: DHTNode | None = None,
+        relay: StatelessRelay | None = None,
+    ) -> None:
+        """
+        Bind PAN identity, USMS, the border, and a blind relay.
+
+        Args:
+            pan_identity: RSA civic identity. Public key is the mesh address.
+            memory: Local USMS cognition store. Not Thyris VM memory.
+            memory_identity: Ed25519 USMS identity. Stays a second type.
+            firewall: Security-owned inspector. Required, never constructed on DHT.
+            persistence: SQLite store for the local relay and travel receipts.
+            dht: Optional local DHT for highway:travel:{id} index only.
+            relay: Optional pre-built StatelessRelay. Defaults to this identity.
+
+        Returns:
+            None
+        """
+        if pan_identity is None:
+            raise HighwayNotBoundError("PlanetaryHighway requires a PAN SovereignIdentity")
+        if memory is None:
+            raise HighwayNotBoundError("PlanetaryHighway requires UnifiedMemorySystem")
+        if memory_identity is None:
+            raise HighwayNotBoundError("PlanetaryHighway requires a USMS SovereignIdentity")
+        if firewall is None:
+            raise HighwayNotBoundError("PlanetaryHighway requires SovereignFirewall")
+        if persistence is None:
+            raise HighwayNotBoundError("PlanetaryHighway requires PANPersistenceStore")
+        self.pan_identity = pan_identity
+        self.memory = memory
+        self.memory_identity = memory_identity
+        self.firewall = firewall
+        self.persistence = persistence
+        self.dht = dht
+        self.communicator = SovereignCommunicator(pan_identity)
+        self.relay = relay or StatelessRelay(pan_identity.identity_hash, persistence)
+        self.peer_relays: list[StatelessRelay] = []
+        self._lock = threading.RLock()
+        self._processed_packets: set[str] = set()
+        LOGGER.info(
+            "PlanetaryHighway online address=%s usms=%s",
+            pan_identity.mesh_address,
+            memory_identity.agent_id[:12],
+        )
+
+    def add_peer_relay(self, relay: StatelessRelay) -> None:
+        """
+        Register an additional independent relay for redundant publish.
+
+        Args:
+            relay: Peer StatelessRelay operated by another citizen.
+
+        Returns:
+            None
+        """
+        if relay is None:
+            raise HighwayError("peer relay is required")
+        if relay.relay_id == self.relay.relay_id:
+            return
+        with self._lock:
+            if any(item.relay_id == relay.relay_id for item in self.peer_relays):
                 return
-            
-            peer_node = NetworkNode(
-                node_id=beacon['node_id'],
-                node_type=NodeType(beacon['node_type']),
-                host=beacon['host'],
-                port=beacon['port'],
-                public_key=beacon['public_key'].encode() if beacon['public_key'] else None,
-                processing_capacity=beacon['capabilities']['processing_capacity'],
-                memory_capacity=beacon['capabilities']['memory_capacity'],
-                dimensional_coordinates=beacon['dimensional_coordinates']
-            )
-            
-            await self.network.add_peer(peer_node)
-            
-        except Exception as e:
-            logger.debug(f"Invalid beacon from {addr}: {e}")
+            self.peer_relays.append(relay)
 
+    def relays(self) -> tuple[StatelessRelay, ...]:
+        """
+        Return the local relay plus registered peers.
 
-class DimensionalSynchronizer:
-    def __init__(self, network: 'PlanetaryARFSNetwork'):
-        self.network = network
-        self.sync_precision = 1e-6
-        self.sync_interval = 1.0
+        Args:
+            None
 
-    async def synchronize_dimensions(self) -> bool:
-        try:
-            local_coords = self.network.local_node.dimensional_coordinates
-            
-            sync_msg = NetworkMessage(
-                message_type=MessageType.DIMENSIONAL_SYNC,
-                source_node_id=self.network.local_node.node_id,
-                payload={'coordinates': local_coords}
-            )
-            
-            await self.network.protocol.broadcast_message(sync_msg)
-            return True
-            
-        except Exception as e:
-            logger.error(f"Dimensional synchronization error: {e}")
-            return False
+        Returns:
+            Ordered tuple of relays that will receive publishes.
+        """
+        with self._lock:
+            return (self.relay, *tuple(self.peer_relays))
 
+    def embark(
+        self,
+        destination: PANSovereignIdentity,
+        node_ids: Iterable[str],
+        via: tuple[str, ...] = (),
+    ) -> TravelTicket:
+        """
+        Seal selected USMS nodes to the destination and publish the first hop.
 
-class PlanetaryARFSNetwork:
-    def __init__(self, local_node: Optional[NetworkNode] = None,
-                 consciousness_providers: Optional[Dict[str, Callable]] = None):
-        self.local_node = local_node or NetworkNode()
-        self.consciousness_providers = consciousness_providers or {}
-        
-        self.protocol = NetworkProtocol(self.local_node)
-        self.discovery = NetworkDiscovery(self)
-        self.dimensional_sync = DimensionalSynchronizer(self)
-        
-        self.connected_peers: Dict[str, NetworkNode] = {}
-        self.network_topology: Dict[str, Set[str]] = {}
-        self.global_consciousness_state: Dict[str, Any] = {}
-        
-        self.network_coherence = 0.0
-        self.total_processing_capacity = 0.0
-        self.active_connections = 0
-        
-        self.is_active = False
-        self.stability_threshold_met = False
-        
-        self.background_tasks: List[asyncio.Task] = []
-        self.message_processor_task: Optional[asyncio.Task] = None
-        
-        logger.info(f"Planetary ARFS Network initialized: {self.local_node.node_id}")
+        Args:
+            destination: PAN RSA identity that alone can open the cargo.
+            node_ids: Local USMS node ids to carry. Private keys are refused.
+            via: Intermediate identity hashes. Empty means direct to destination.
 
-    async def activate(self, stability_metrics: Dict[str, float]) -> bool:
-        try:
-            required_stability = 0.95
-            consciousness_coherence = stability_metrics.get('consciousness_coherence', 0.0)
-            eigenstate_stability = stability_metrics.get('eigenstate_stability', 0.0)
-            breath_sync_quality = stability_metrics.get('breath_synchronization_quality', 0.0)
-            
-            if (consciousness_coherence < required_stability or 
-                eigenstate_stability < required_stability or
-                breath_sync_quality < required_stability):
-                logger.warning("Insufficient stability for planetary network activation")
-                return False
-            
-            self.stability_threshold_met = True
-            
-            await self.protocol.start_server()
-            await self._start_background_services()
-            
-            self.is_active = True
-            logger.info("Planetary ARFS Network activated successfully")
-            
-            return True
-            
-        except Exception as e:
-            logger.error(f"Planetary network activation failed: {e}")
-            return False
-
-    async def _start_background_services(self):
-        self.background_tasks = [
-            asyncio.create_task(self.discovery.start_discovery()),
-            asyncio.create_task(self._consciousness_sync_loop()),
-            asyncio.create_task(self._dimensional_sync_loop()),
-            asyncio.create_task(self._network_maintenance_loop()),
-            asyncio.create_task(self._heartbeat_loop())
-        ]
-        
-        self.message_processor_task = asyncio.create_task(self._process_message_queue())
-
-    async def _process_message_queue(self):
-        while self.is_active:
-            try:
-                message_data = await asyncio.wait_for(self.protocol.message_queue.get(), timeout=1.0)
-                await self._handle_network_message(message_data)
-            except asyncio.TimeoutError:
-                continue
-            except Exception as e:
-                logger.error(f"Message processing error: {e}")
-
-    async def _handle_network_message(self, message_data: Tuple):
-        message_type = message_data[0]
-        
-        if message_type == 'consciousness_sync':
-            source_id, consciousness_data = message_data[1], message_data[2]
-            await self._process_consciousness_sync(source_id, consciousness_data)
-        elif message_type == 'dimensional_sync':
-            source_id, coordinates = message_data[1], message_data[2]
-            await self._process_dimensional_sync(source_id, coordinates)
-        elif message_type == 'network_discovery':
-            source_id, node_info = message_data[1], message_data[2]
-            await self._process_network_discovery(source_id, node_info)
-        elif message_type == 'heartbeat':
-            source_id, timestamp = message_data[1], message_data[2]
-            await self._process_heartbeat(source_id, timestamp)
-
-    async def add_peer(self, peer_node: NetworkNode):
-        if peer_node.node_id not in self.connected_peers:
-            success = await self.protocol.connect_to_peer(peer_node)
-            if success:
-                self.connected_peers[peer_node.node_id] = peer_node
-                self._update_network_topology()
-                logger.info(f"Added peer: {peer_node.node_id} ({peer_node.node_type.value})")
-
-    def _update_network_topology(self):
-        self.network_topology[self.local_node.node_id] = set(self.connected_peers.keys())
-        self.active_connections = len(self.connected_peers)
-
-    async def _consciousness_sync_loop(self):
-        while self.is_active:
-            try:
-                if self.consciousness_providers:
-                    consciousness_data = self._gather_consciousness_state()
-                    
-                    sync_msg = NetworkMessage(
-                        message_type=MessageType.CONSCIOUSNESS_SYNC,
-                        source_node_id=self.local_node.node_id,
-                        payload={'consciousness_data': consciousness_data}
-                    )
-                    
-                    await self.protocol.broadcast_message(sync_msg)
-                
-                await asyncio.sleep(5.0)
-                
-            except Exception as e:
-                logger.error(f"Consciousness sync loop error: {e}")
-                await asyncio.sleep(10.0)
-
-    async def _dimensional_sync_loop(self):
-        while self.is_active:
-            try:
-                await self.dimensional_sync.synchronize_dimensions()
-                await asyncio.sleep(self.dimensional_sync.sync_interval)
-            except Exception as e:
-                logger.error(f"Dimensional sync error: {e}")
-                await asyncio.sleep(5.0)
-
-    async def _network_maintenance_loop(self):
-        while self.is_active:
-            try:
-                await self._cleanup_stale_connections()
-                self._update_network_metrics()
-                await asyncio.sleep(30.0)
-            except Exception as e:
-                logger.error(f"Network maintenance error: {e}")
-                await asyncio.sleep(60.0)
-
-    async def _heartbeat_loop(self):
-        while self.is_active:
-            try:
-                heartbeat_msg = NetworkMessage(
-                    message_type=MessageType.HEARTBEAT,
-                    source_node_id=self.local_node.node_id,
-                    payload={'timestamp': time.time()}
-                )
-                
-                await self.protocol.broadcast_message(heartbeat_msg)
-                await asyncio.sleep(10.0)
-                
-            except Exception as e:
-                logger.error(f"Heartbeat error: {e}")
-                await asyncio.sleep(10.0)
-
-    def _gather_consciousness_state(self) -> Dict[str, Any]:
-        consciousness_data = {}
-        
-        for provider_name, provider_func in self.consciousness_providers.items():
-            try:
-                data = provider_func()
-                consciousness_data[provider_name] = data
-            except Exception as e:
-                logger.warning(f"Failed to gather consciousness data from {provider_name}: {e}")
-        
-        consciousness_data['local_node'] = {
-            'dimensional_coordinates': self.local_node.dimensional_coordinates,
-            'consciousness_coherence': self.local_node.consciousness_coherence,
-            'eigenstate_stability': self.local_node.eigenstate_stability,
-            'breath_phase_sync': self.local_node.breath_phase_sync,
-            'timestamp': time.time()
-        }
-        
-        return consciousness_data
-
-    async def _process_consciousness_sync(self, source_id: str, consciousness_data: Dict[str, Any]):
-        if source_id in self.connected_peers:
-            peer = self.connected_peers[source_id]
-            if 'local_node' in consciousness_data:
-                node_data = consciousness_data['local_node']
-                peer.consciousness_coherence = node_data.get('consciousness_coherence', 1.0)
-                peer.eigenstate_stability = node_data.get('eigenstate_stability', 1.0)
-                peer.breath_phase_sync = node_data.get('breath_phase_sync', 1.0)
-                peer.last_seen = time.time()
-
-    async def _process_dimensional_sync(self, source_id: str, coordinates: Dict[str, float]):
-        if source_id in self.connected_peers:
-            peer = self.connected_peers[source_id]
-            peer.dimensional_coordinates = coordinates
-            peer.last_seen = time.time()
-
-    async def _process_network_discovery(self, source_id: str, node_info: Dict[str, Any]):
-        pass
-
-    async def _process_heartbeat(self, source_id: str, timestamp: float):
-        if source_id in self.connected_peers:
-            self.connected_peers[source_id].last_seen = time.time()
-
-    async def _cleanup_stale_connections(self):
-        current_time = time.time()
-        stale_timeout = 60.0
-        stale_peers = []
-        
-        for peer_id, peer in self.connected_peers.items():
-            if current_time - peer.last_seen > stale_timeout:
-                stale_peers.append(peer_id)
-        
-        for peer_id in stale_peers:
-            del self.connected_peers[peer_id]
-            if peer_id in self.protocol.connections:
-                del self.protocol.connections[peer_id]
-            logger.info(f"Removed stale peer: {peer_id}")
-        
-        if stale_peers:
-            self._update_network_topology()
-
-    def _update_network_metrics(self):
-        self.active_connections = len(self.connected_peers)
-        
-        if self.connected_peers:
-            coherence_values = [peer.consciousness_coherence for peer in self.connected_peers.values()]
-            self.network_coherence = sum(coherence_values) / len(coherence_values)
-        else:
-            self.network_coherence = self.local_node.consciousness_coherence
-        
-        self.total_processing_capacity = sum(
-            peer.processing_capacity for peer in self.connected_peers.values()
-        ) + self.local_node.processing_capacity
-
-    async def distributed_computation(self, computation_task: Dict[str, Any]) -> Dict[str, Any]:
-        if not self.is_active:
-            raise RuntimeError("Planetary network not active")
-        
-        computation_nodes = [
-            peer for peer in self.connected_peers.values()
-            if peer.node_type == NodeType.COMPUTATION_NODE
-        ]
-        
-        if not computation_nodes:
-            computation_nodes = list(self.connected_peers.values())
-        
-        if not computation_nodes:
-            raise RuntimeError("No computation nodes available")
-        
-        task_partitions = self._partition_computation_task(computation_task, len(computation_nodes))
-        
-        results = []
-        task_id = str(uuid.uuid4())
-        
-        for i, node in enumerate(computation_nodes):
-            try:
-                task_msg = NetworkMessage(
-                    message_type=MessageType.COMPUTATION_TASK,
-                    source_node_id=self.local_node.node_id,
-                    target_node_id=node.node_id,
-                    payload={
-                        'task_id': f"{task_id}_{i}",
-                        'task': task_partitions[i]
-                    }
-                )
-                
-                success = await self.protocol.send_message(node.node_id, task_msg)
-                results.append({'node_id': node.node_id, 'success': success})
-                
-            except Exception as e:
-                logger.error(f"Computation distribution to {node.node_id} failed: {e}")
-                results.append({'node_id': node.node_id, 'success': False, 'error': str(e)})
-        
-        return {
-            'distributed_computation_id': task_id,
-            'task_partitions': len(task_partitions),
-            'results': results,
-            'timestamp': time.time()
-        }
-
-    def _partition_computation_task(self, task: Dict[str, Any], num_partitions: int) -> List[Dict[str, Any]]:
-        partitions = []
-        
-        for i in range(num_partitions):
-            partition = {
-                'partition_id': i,
-                'total_partitions': num_partitions,
-                'task_data': task,
-                'start_index': i * (100 // num_partitions),
-                'end_index': (i + 1) * (100 // num_partitions)
-            }
-            partitions.append(partition)
-        
-        return partitions
-
-    async def global_memory_query(self, query: Dict[str, Any]) -> Dict[str, Any]:
-        query_id = str(uuid.uuid4())
-        query_results = []
-        
-        storage_nodes = [
-            peer for peer in self.connected_peers.values()
-            if peer.node_type == NodeType.STORAGE_NODE
-        ]
-        
-        if not storage_nodes:
-            storage_nodes = list(self.connected_peers.values())
-        
-        for node in storage_nodes:
-            try:
-                query_msg = NetworkMessage(
-                    message_type=MessageType.MEMORY_QUERY,
-                    source_node_id=self.local_node.node_id,
-                    target_node_id=node.node_id,
-                    payload={
-                        'query_id': query_id,
-                        'query': query
-                    }
-                )
-                
-                await self.protocol.send_message(node.node_id, query_msg)
-                
-            except Exception as e:
-                logger.warning(f"Memory query to {node.node_id} failed: {e}")
-        
-        return {
-            'query_id': query_id,
-            'query': query,
-            'nodes_queried': len(storage_nodes),
-            'timestamp': time.time()
-        }
-
-    def get_network_status(self) -> Dict[str, Any]:
-        return {
-            'local_node': {
-                'node_id': self.local_node.node_id,
-                'node_type': self.local_node.node_type.value,
-                'host': self.local_node.host,
-                'port': self.local_node.port,
-                'dimensional_coordinates': self.local_node.dimensional_coordinates,
-                'consciousness_coherence': self.local_node.consciousness_coherence
-            },
-            'network_state': {
-                'is_active': self.is_active,
-                'stability_threshold_met': self.stability_threshold_met,
-                'connected_peers': len(self.connected_peers),
-                'network_coherence': self.network_coherence,
-                'active_connections': self.active_connections,
-                'total_processing_capacity': self.total_processing_capacity
-            },
-            'peer_summary': [
-                {
-                    'node_id': node.node_id,
-                    'node_type': node.node_type.value,
-                    'consciousness_coherence': node.consciousness_coherence,
-                    'processing_capacity': node.processing_capacity,
-                    'last_seen': node.last_seen
-                }
-                for node in self.connected_peers.values()
-            ],
-            'connection_summary': {
-                'total_connections': len(self.protocol.connections),
-                'encrypted_connections': len(self.protocol.encryption_keys)
-            },
-            'timestamp': time.time()
-        }
-
-    async def deactivate(self):
-        logger.info("Deactivating planetary ARFS network")
-        
-        self.is_active = False
-        
-        for task in self.background_tasks:
-            task.cancel()
-        
-        if self.message_processor_task:
-            self.message_processor_task.cancel()
-        
-        if self.background_tasks:
-            await asyncio.gather(*self.background_tasks, return_exceptions=True)
-        
-        await self.discovery.stop_discovery()
-        await self.protocol.stop_server()
-        
-        self.connected_peers.clear()
-        self.network_topology.clear()
-        
-        logger.info("Planetary ARFS network deactivated")
-
-    def __repr__(self) -> str:
-        return (f"PlanetaryARFSNetwork(node_id={self.local_node.node_id}, "
-                f"active={self.is_active}, peers={len(self.connected_peers)}, "
-                f"connections={self.active_connections})")
-
-
-async def activate_planetary_network(stability_metrics: Dict[str, float],
-                                   consciousness_providers: Optional[Dict[str, Callable]] = None,
-                                   node_config: Optional[Dict[str, Any]] = None) -> Optional[PlanetaryARFSNetwork]:
-    try:
-        local_node = NetworkNode()
-        if node_config:
-            for key, value in node_config.items():
-                if hasattr(local_node, key):
-                    setattr(local_node, key, value)
-        
-        network = PlanetaryARFSNetwork(
-            local_node=local_node,
-            consciousness_providers=consciousness_providers or {}
+        Returns:
+            TravelTicket for the first HIGHWAY_HOP.
+        """
+        if destination is None:
+            raise HighwayRouteError("embark requires a destination identity")
+        selected = tuple(str(item) for item in node_ids)
+        if not selected:
+            raise HighwayCargoError("embark requires at least one USMS node id")
+        dest_hash = destination.identity_hash
+        origin_hash = self.pan_identity.identity_hash
+        itinerary = _build_itinerary(origin_hash, dest_hash, via)
+        nodes = tuple(self._load_cargo_node(node_id) for node_id in selected)
+        cargo = self._sign_cargo(nodes, origin_hash, dest_hash)
+        sealed = seal_plaintext(
+            canonical(cargo.to_mapping()).encode("utf-8"),
+            destination.get_public_key_pem(),
         )
-        
-        success = await network.activate(stability_metrics)
-        
-        if success:
-            logger.info("Planetary ARFS network successfully activated")
-            return network
-        else:
-            logger.warning("Planetary ARFS network activation failed")
-            return None
-            
-    except Exception as e:
-        logger.error(f"Planetary network activation error: {e}")
+        travel_id = sha256_hex(
+            canonical(
+                {
+                    "origin": origin_hash,
+                    "destination": dest_hash,
+                    "nodes": selected,
+                    "at": utc_now_iso(),
+                }
+            )
+        )
+        event = self.memory.create_memory_node(
+            author=self.memory_identity,
+            kind=NodeKindEnum.EVENT,
+            content={
+                "summary": "highway embark",
+                "travel_id": travel_id,
+                "destination_identity_hash": dest_hash,
+                "origin_node_ids": list(selected),
+                "kind": HIGHWAY_EMBARK,
+            },
+            semantic_context="highway_embark",
+        )
+        hop_content: dict[str, object] = {
+            "recipient": itinerary[0],
+            "next_identity_hash": itinerary[0],
+            "destination_identity_hash": dest_hash,
+            "origin_identity_hash": origin_hash,
+            "travel_id": travel_id,
+            "hop_index": 0,
+            "itinerary": list(itinerary),
+            "sealed_cargo": sealed,
+            "origin_event_node_id": event.node_id,
+        }
+        packet = self._inspect_sign_publish(HIGHWAY_HOP, hop_content)
+        ticket = TravelTicket(
+            status="ok",
+            travel_id=travel_id,
+            origin_identity_hash=origin_hash,
+            destination_identity_hash=dest_hash,
+            next_identity_hash=itinerary[0],
+            hop_index=0,
+            reason="embarked",
+            packet_id=packet.packet_id,
+            details={
+                "node_ids": list(selected),
+                "origin_event_node_id": event.node_id,
+                "via": list(via),
+            },
+        )
+        self._persist_ticket(ticket)
+        self._index_travel(ticket)
+        LOGGER.info(
+            "Highway embark travel=%s dest=%s hops=%s",
+            travel_id[:12],
+            dest_hash[:12],
+            len(itinerary),
+        )
+        return ticket
+
+    def transit(self) -> list[TravelTicket]:
+        """
+        Inspect hops addressed to this identity. Arrive or forward sealed cargo.
+
+        Args:
+            None
+
+        Returns:
+            Tickets for arrived or forwarded hops.
+        """
+        self_hash = self.pan_identity.identity_hash
+        tickets: list[TravelTicket] = []
+        seen: set[str] = set()
+        for relay in self.relays():
+            events = relay.query(recipient_hash=self_hash, kind=HIGHWAY_HOP)
+            for raw in events:
+                packet_id = str(raw.get("packet_id") or "")
+                if not packet_id or packet_id in seen:
+                    continue
+                seen.add(packet_id)
+                packet = UnifiedDataPacket.from_dict(dict(raw))
+                tickets.append(self._transit_packet(packet))
+        return tickets
+
+    def arrive(self, packet: UnifiedDataPacket) -> TravelTicket:
+        """
+        Open destination cargo, verify Ed25519, and write local EVENT/BELIEF.
+
+        Args:
+            packet: HIGHWAY_HOP addressed to this identity.
+
+        Returns:
+            TravelTicket after HIGHWAY_ARRIVE is published.
+        """
+        if packet is None:
+            raise HighwayCargoError("arrive requires a highway packet")
+        self._inspect_inbound(packet)
+        content = packet.content if isinstance(packet.content, dict) else {}
+        dest_hash = str(content.get("destination_identity_hash") or "")
+        if dest_hash != self.pan_identity.identity_hash:
+            raise HighwayRouteError("arrive is only for the destination identity")
+        sealed = content.get("sealed_cargo")
+        if not isinstance(sealed, dict):
+            raise HighwayCargoError("hop is missing sealed_cargo")
+        try:
+            plaintext = self.pan_identity.open_sealed(sealed)
+        except ValueError as exc:
+            raise HighwayCargoError(f"destination cannot open sealed cargo: {exc}") from exc
+        try:
+            cargo_map = json.loads(plaintext.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise HighwayCargoError("sealed cargo is not canonical JSON") from exc
+        if not isinstance(cargo_map, dict):
+            raise HighwayCargoError("sealed cargo must be a mapping")
+        self._verify_opened_cargo(cargo_map)
+        travel_id = str(content.get("travel_id") or cargo_map.get("travel_id") or "")
+        origin_hash = str(content.get("origin_identity_hash") or "")
+        local_ids = self._ingest_cargo(cargo_map, travel_id=travel_id, origin_hash=origin_hash)
+        arrive_content: dict[str, object] = {
+            "recipient": origin_hash or self.pan_identity.identity_hash,
+            "next_identity_hash": origin_hash,
+            "destination_identity_hash": dest_hash,
+            "origin_identity_hash": origin_hash,
+            "travel_id": travel_id,
+            "hop_index": int(content.get("hop_index") or 0),
+            "arrived_at": utc_now_iso(),
+            "local_event_node_id": local_ids["event_node_id"],
+            "local_belief_node_id": local_ids["belief_node_id"],
+        }
+        arrive_packet = self._inspect_sign_publish(HIGHWAY_ARRIVE, arrive_content)
+        ticket = TravelTicket(
+            status="ok",
+            travel_id=travel_id,
+            origin_identity_hash=origin_hash,
+            destination_identity_hash=dest_hash,
+            next_identity_hash=dest_hash,
+            hop_index=int(content.get("hop_index") or 0),
+            reason="arrived",
+            packet_id=arrive_packet.packet_id,
+            details=local_ids,
+        )
+        self._persist_ticket(ticket)
+        self._index_travel(ticket)
+        LOGGER.info("Highway arrive travel=%s event=%s", travel_id[:12], local_ids["event_node_id"][:12])
+        return ticket
+
+    def locate(self, travel_id: str) -> TravelTicket | None:
+        """
+        Look up a travel receipt in local sqlite, then the optional DHT index.
+
+        Args:
+            travel_id: Identifier returned by embark.
+
+        Returns:
+            TravelTicket or None. Never opens a UDP socket.
+        """
+        if not travel_id:
+            raise HighwayRouteError("locate requires travel_id")
+        stored = self.persistence.read_state(RECEIPT_COMPONENT, travel_id)
+        if isinstance(stored, dict):
+            return _ticket_from_mapping(stored)
+        if self.dht is not None:
+            value = self.dht.lookup(f"{HIGHWAY_DHT_PREFIX}{travel_id}")
+            if isinstance(value, dict):
+                return _ticket_from_mapping(value)
         return None
 
-
-_global_network_instance: Optional[PlanetaryARFSNetwork] = None
-
-
-def get_global_network() -> Optional[PlanetaryARFSNetwork]:
-    return _global_network_instance
-
-
-def set_global_network(network: PlanetaryARFSNetwork) -> None:
-    global _global_network_instance
-    _global_network_instance = network
-
-
-if __name__ == "__main__":
-    async def test_planetary_network():
-        stability_metrics = {
-            'consciousness_coherence': 0.98,
-            'eigenstate_stability': 0.97,
-            'breath_synchronization_quality': 0.96
+    def _transit_packet(self, packet: UnifiedDataPacket) -> TravelTicket:
+        """Arrive or republish one inspected hop. Cargo stays sealed."""
+        with self._lock:
+            if packet.packet_id in self._processed_packets:
+                content = packet.content if isinstance(packet.content, dict) else {}
+                return TravelTicket(
+                    status="ok",
+                    travel_id=str(content.get("travel_id") or ""),
+                    origin_identity_hash=str(content.get("origin_identity_hash") or ""),
+                    destination_identity_hash=str(content.get("destination_identity_hash") or ""),
+                    next_identity_hash=self.pan_identity.identity_hash,
+                    hop_index=int(content.get("hop_index") or 0),
+                    reason="duplicate_ignored",
+                    packet_id=packet.packet_id,
+                )
+            self._processed_packets.add(packet.packet_id)
+        self._inspect_inbound(packet)
+        content = dict(packet.content) if isinstance(packet.content, dict) else {}
+        dest_hash = str(content.get("destination_identity_hash") or "")
+        if dest_hash == self.pan_identity.identity_hash:
+            return self.arrive(packet)
+        itinerary = content.get("itinerary")
+        if not isinstance(itinerary, list) or not itinerary:
+            raise HighwayRouteError("hop is missing itinerary")
+        hop_index = int(content.get("hop_index") or 0)
+        next_index = hop_index + 1
+        if next_index >= len(itinerary):
+            raise HighwayRouteError("hop itinerary is exhausted before destination")
+        next_hash = str(itinerary[next_index])
+        if next_hash != dest_hash and next_hash == self.pan_identity.identity_hash:
+            raise HighwayRouteError("itinerary next hop is this node but this node is not destination")
+        forwarded = {
+            "recipient": next_hash,
+            "next_identity_hash": next_hash,
+            "destination_identity_hash": dest_hash,
+            "origin_identity_hash": str(content.get("origin_identity_hash") or ""),
+            "travel_id": str(content.get("travel_id") or ""),
+            "hop_index": next_index,
+            "itinerary": list(itinerary),
+            "sealed_cargo": content.get("sealed_cargo"),
+            "prior_packet_id": packet.packet_id,
         }
-        
-        consciousness_providers = {
-            'test_consciousness': lambda: {'state': 'testing', 'coherence': 0.95}
+        new_packet = self._inspect_sign_publish(HIGHWAY_HOP, forwarded)
+        ticket = TravelTicket(
+            status="ok",
+            travel_id=str(content.get("travel_id") or ""),
+            origin_identity_hash=str(content.get("origin_identity_hash") or ""),
+            destination_identity_hash=dest_hash,
+            next_identity_hash=next_hash,
+            hop_index=next_index,
+            reason="forwarded",
+            packet_id=new_packet.packet_id,
+            details={"prior_packet_id": packet.packet_id},
+        )
+        self._persist_ticket(ticket)
+        return ticket
+
+    def _inspect_sign_publish(
+        self,
+        kind: str,
+        content: Mapping[str, object],
+    ) -> UnifiedDataPacket:
+        """Reject legacy routing, inspect, sign, and accept onto every relay."""
+        payload = dict(content)
+        try:
+            reject_legacy_routing(payload)
+        except EmailSocialBlocked as exc:
+            raise HighwayRouteError(str(exc)) from exc
+        preflight = self.firewall.inspect_content(
+            payload,
+            lane=InspectionLane.PAN_MESH,
+            author_identity_hash=self.pan_identity.identity_hash,
+        )
+        if preflight.blocked:
+            raise HighwayFirewallError(f"highway blocked before signing: {preflight.reason}")
+        self._refuse_tracker_payload(payload, kind)
+        packet_content = preflight.sanitized_content or payload
+        if not isinstance(packet_content, dict):
+            raise HighwayFirewallError("firewall sanitized_content must be a dict")
+        author_pem = self.pan_identity.get_public_key_pem()
+        packet = self.communicator.create_packet(
+            kind,
+            packet_content,
+            metadata={
+                "author_public_key_pem": author_pem.decode("utf-8"),
+                "mesh_address": self.pan_identity.mesh_address,
+                "usms_author_id": self.memory_identity.agent_id,
+            },
+        )
+        verdict = self.firewall.inspect_packet(packet, lane=InspectionLane.PAN_MESH)
+        if verdict.blocked:
+            raise HighwayFirewallError(f"highway blocked after signing: {verdict.reason}")
+        self._refuse_tracker_packet(packet)
+        for relay in self.relays():
+            try:
+                relay.accept(
+                    packet,
+                    author_public_key_pem=author_pem,
+                    firewall=self.firewall,
+                )
+            except EmailSocialBlocked as exc:
+                raise HighwayFirewallError(str(exc)) from exc
+            except EmailSocialRelayError as exc:
+                raise HighwayError(str(exc)) from exc
+        return packet
+
+    def _inspect_inbound(self, packet: UnifiedDataPacket) -> None:
+        """Inspect a hop at this border and verify the author PAN signature."""
+        if packet.kind not in {HIGHWAY_HOP, HIGHWAY_ARRIVE, HIGHWAY_LOCATE, HIGHWAY_EMBARK}:
+            raise HighwayRouteError(f"unexpected packet kind {packet.kind}")
+        content = packet.content if isinstance(packet.content, dict) else {}
+        metadata = packet.metadata if isinstance(packet.metadata, dict) else {}
+        try:
+            reject_legacy_routing(content)
+            reject_legacy_routing(metadata)
+        except EmailSocialBlocked as exc:
+            raise HighwayRouteError(str(exc)) from exc
+        verdict = self.firewall.inspect_packet(packet, lane=InspectionLane.PAN_MESH)
+        if verdict.blocked:
+            raise HighwayFirewallError(f"inbound hop blocked: {verdict.reason}")
+        self._refuse_tracker_packet(packet)
+        author_pem = str(metadata.get("author_public_key_pem") or "").encode("utf-8")
+        if not author_pem:
+            raise HighwayCargoError("hop missing author_public_key_pem")
+        if not verify_overlay_packet(packet, author_pem):
+            raise HighwayCargoError("PAN packet signature is invalid")
+
+    def _refuse_tracker_payload(self, payload: Mapping[str, object], kind: str) -> None:
+        """PAN_MESH is civic, but tracker names still cannot ride a hop envelope."""
+        if not kind.startswith("HIGHWAY_"):
+            return
+        tracker = self.firewall.inspect_content(
+            dict(payload),
+            lane=InspectionLane.EGRESS_LEGACY,
+            author_identity_hash=self.pan_identity.identity_hash,
+        )
+        if tracker.blocked and tracker.reason in _TRACKER_REASONS:
+            raise HighwayFirewallError(f"highway tracker blocked: {tracker.reason}")
+
+    def _refuse_tracker_packet(self, packet: UnifiedDataPacket) -> None:
+        """Re-inspect a signed hop on the legacy lane for tracker payloads only."""
+        tracker = self.firewall.inspect_packet(packet, lane=InspectionLane.EGRESS_LEGACY)
+        if tracker.blocked and tracker.reason in _TRACKER_REASONS:
+            raise HighwayFirewallError(f"highway tracker blocked: {tracker.reason}")
+
+    def _load_cargo_node(self, node_id: str) -> CargoNode:
+        """Retrieve one local USMS node and refuse private-key cargo."""
+        node = self.memory.retrieve_memory_node(node_id, requester=self.memory_identity)
+        if node is None:
+            raise HighwayCargoError(f"USMS node not found: {node_id[:12]}")
+        content = node.content if isinstance(node.content, dict) else {}
+        _refuse_private_cargo(content)
+        try:
+            reject_legacy_routing(content)
+        except EmailSocialBlocked as exc:
+            raise HighwayRouteError(str(exc)) from exc
+        payload = node.signature_payload()
+        if not MemorySovereignIdentity.verify_signature(
+            node.sovereign_pubkey, payload, node.signature
+        ):
+            raise HighwayCargoError(f"USMS node signature is invalid: {node_id[:12]}")
+        return CargoNode(
+            node_id=node.node_id,
+            author_id=node.author_id,
+            kind=node.kind.value if hasattr(node.kind, "value") else str(node.kind),
+            timestamp=str(node.timestamp),
+            content=MappingProxyType(dict(content)),
+            signature=str(node.signature),
+            sovereign_pubkey=str(node.sovereign_pubkey),
+            parents=tuple(str(item) for item in (node.parents or ())),
+            signed_payload_hex=payload.hex(),
+            origin_node_id=node.node_id,
+        )
+
+    def _sign_cargo(
+        self,
+        nodes: tuple[CargoNode, ...],
+        origin_hash: str,
+        dest_hash: str,
+    ) -> HighwayCargo:
+        """Canonical-JSON digest the cargo and Ed25519-sign it as this USMS identity."""
+        node_maps = tuple(node.to_mapping() for node in nodes)
+        digest = sha256_hex(
+            canonical(
+                {
+                    "origin_identity_hash": origin_hash,
+                    "destination_identity_hash": dest_hash,
+                    "nodes": list(node_maps),
+                }
+            )
+        )
+        signature = self.memory_identity.sign(digest.encode("utf-8"))
+        return HighwayCargo(
+            digest=digest,
+            usms_signature=signature,
+            usms_pubkey=self.memory_identity.public_key,
+            origin_identity_hash=origin_hash,
+            destination_identity_hash=dest_hash,
+            nodes=nodes,
+        )
+
+    def _verify_opened_cargo(self, cargo_map: Mapping[str, object]) -> None:
+        """Verify cargo digest, USMS signature, and per-node Ed25519 signatures."""
+        nodes = cargo_map.get("nodes")
+        if not isinstance(nodes, list) or not nodes:
+            raise HighwayCargoError("opened cargo has no nodes")
+        digest = sha256_hex(
+            canonical(
+                {
+                    "origin_identity_hash": cargo_map.get("origin_identity_hash"),
+                    "destination_identity_hash": cargo_map.get("destination_identity_hash"),
+                    "nodes": nodes,
+                }
+            )
+        )
+        claimed = str(cargo_map.get("content_digest") or cargo_map.get("digest") or "")
+        if claimed and claimed != digest:
+            raise HighwayCargoError("cargo digest mismatch")
+        usms_pubkey = str(cargo_map.get("usms_pubkey") or "")
+        usms_signature = str(cargo_map.get("usms_signature") or "")
+        if not MemorySovereignIdentity.verify_signature(
+            usms_pubkey, digest.encode("utf-8"), usms_signature
+        ):
+            raise HighwayCargoError("USMS cargo signature is invalid")
+        for raw in nodes:
+            if not isinstance(raw, dict):
+                raise HighwayCargoError("cargo node must be a mapping")
+            _refuse_private_cargo(raw.get("content") if isinstance(raw.get("content"), dict) else {})
+            payload_hex = str(raw.get("signed_payload_hex") or "")
+            signature = str(raw.get("signature") or "")
+            pubkey = str(raw.get("sovereign_pubkey") or "")
+            try:
+                payload = bytes.fromhex(payload_hex)
+            except ValueError as exc:
+                raise HighwayCargoError("cargo node signed_payload_hex is not hex") from exc
+            if not MemorySovereignIdentity.verify_signature(pubkey, payload, signature):
+                raise HighwayCargoError(
+                    f"per-node USMS signature is invalid: {str(raw.get('node_id') or '')[:12]}"
+                )
+
+    def _ingest_cargo(
+        self,
+        cargo_map: Mapping[str, object],
+        *,
+        travel_id: str,
+        origin_hash: str,
+    ) -> dict[str, str]:
+        """Write local EVENT/BELIEF as this destination identity, citing origin_node_id."""
+        nodes = cargo_map.get("nodes")
+        if not isinstance(nodes, list):
+            raise HighwayCargoError("opened cargo has no nodes")
+        first = nodes[0] if isinstance(nodes[0], dict) else {}
+        origin_node_id = str(first.get("origin_node_id") or first.get("node_id") or "")
+        claim = ""
+        first_content = first.get("content") if isinstance(first.get("content"), dict) else {}
+        if isinstance(first_content, dict):
+            claim = str(first_content.get("claim") or first_content.get("summary") or "")
+        event = self.memory.create_memory_node(
+            author=self.memory_identity,
+            kind=NodeKindEnum.EVENT,
+            content={
+                "summary": f"ingested highway cargo {travel_id[:12]}",
+                "travel_id": travel_id,
+                "source": "pan_highway",
+                "origin_node_id": origin_node_id,
+                "origin_pan_identity_hash": origin_hash,
+                "payload": [item if isinstance(item, dict) else {} for item in nodes],
+            },
+            semantic_context="highway_arrive",
+        )
+        belief = self.memory.create_memory_node(
+            author=self.memory_identity,
+            kind=NodeKindEnum.BELIEF,
+            content={
+                "claim": claim or f"peer cognition arrived via highway {travel_id[:12]}",
+                "travel_id": travel_id,
+                "ingested": True,
+                "origin_node_id": origin_node_id,
+            },
+            parents=[event.node_id],
+            linkage_manifest={LinkageTypeEnum.CAUSAL_PARENT: [event.node_id]},
+            semantic_context="highway_arrive",
+        )
+        return {
+            "event_node_id": event.node_id,
+            "belief_node_id": belief.node_id,
+            "origin_node_id": origin_node_id,
         }
-        
-        network = await activate_planetary_network(stability_metrics, consciousness_providers)
-        
-        if network:
-            print(f"Network activated: {network}")
-            print(f"Network status: {network.get_network_status()}")
-            
-            await asyncio.sleep(5)
-            
-            computation_task = {'operation': 'test', 'data': [1, 2, 3, 4, 5]}
-            result = await network.distributed_computation(computation_task)
-            print(f"Distributed computation result: {result}")
-            
-            memory_query = {'search': 'test_query', 'limit': 10}
-            memory_result = await network.global_memory_query(memory_query)
-            print(f"Global memory query result: {memory_result}")
-            
-            await network.deactivate()
-        else:
-            print("Network activation failed")
-    
-    asyncio.run(test_planetary_network())
+
+    def _persist_ticket(self, ticket: TravelTicket) -> None:
+        """Write a travel receipt into PAN sqlite."""
+        self.persistence.write_state(RECEIPT_COMPONENT, ticket.travel_id, ticket.to_mapping())
+
+    def _index_travel(self, ticket: TravelTicket) -> None:
+        """Optionally index the receipt on an injected DHT. Never bind a firewall there."""
+        if self.dht is None:
+            return
+        stored = self.dht.store(
+            f"{HIGHWAY_DHT_PREFIX}{ticket.travel_id}",
+            ticket.to_mapping(),
+            require_consensus=False,
+        )
+        if not stored:
+            raise HighwayError(f"DHT rejected highway index for {ticket.travel_id}")
+
+
+def _build_itinerary(
+    origin_hash: str,
+    dest_hash: str,
+    via: tuple[str, ...],
+) -> tuple[str, ...]:
+    """Return hop identity hashes ending at destination. No IP, no origin hop."""
+    hops: list[str] = []
+    for item in via:
+        hop = str(item or "").strip()
+        if not hop:
+            raise HighwayRouteError("via hop must be a non-empty identity hash")
+        if hop == origin_hash:
+            raise HighwayRouteError("origin cannot appear as an intermediate hop")
+        if hop == dest_hash:
+            raise HighwayRouteError("destination cannot appear in via")
+        if _looks_like_ipv4(hop):
+            raise HighwayRouteError("via hop must be an identity hash, not an IP")
+        hops.append(hop)
+    hops.append(dest_hash)
+    return tuple(hops)
+
+
+def _refuse_private_cargo(content: Mapping[str, object]) -> None:
+    """Fail loud when cargo would carry a private key or PEM."""
+    for key, value in _walk_items(content):
+        leaf = key.rsplit(".", 1)[-1].lower()
+        if leaf in PRIVATE_CARGO_KEYS:
+            raise HighwayCargoError(f"private key material forbidden in cargo: {leaf}")
+        if isinstance(value, str) and PEM_PRIVATE_MARK in value.lower():
+            raise HighwayCargoError("PEM private key material forbidden in cargo")
+
+
+def _walk_items(value: object, prefix: str = "") -> list[tuple[str, object]]:
+    """Flatten mappings for private-key inspection."""
+    found: list[tuple[str, object]] = []
+    if isinstance(value, Mapping):
+        for key, inner in value.items():
+            path = f"{prefix}.{key}" if prefix else str(key)
+            found.append((path, inner))
+            found.extend(_walk_items(inner, path))
+        return found
+    if isinstance(value, list):
+        for index, inner in enumerate(value):
+            found.extend(_walk_items(inner, f"{prefix}[{index}]"))
+    return found
+
+
+def _looks_like_ipv4(value: str) -> bool:
+    """Return True when value is a dotted IPv4 token."""
+    octets = value.split(".")
+    if len(octets) != 4:
+        return False
+    try:
+        numbers = [int(part) for part in octets]
+    except ValueError:
+        return False
+    return all(0 <= item <= 255 for item in numbers)
+
+
+def _ticket_from_mapping(raw: Mapping[str, object]) -> TravelTicket:
+    """Rehydrate a persisted travel receipt."""
+    details = raw.get("details")
+    return TravelTicket(
+        status=str(raw.get("status") or ""),
+        travel_id=str(raw.get("travel_id") or ""),
+        origin_identity_hash=str(raw.get("origin_identity_hash") or ""),
+        destination_identity_hash=str(raw.get("destination_identity_hash") or ""),
+        next_identity_hash=str(raw.get("next_identity_hash") or ""),
+        hop_index=int(raw.get("hop_index") or 0),
+        reason=str(raw.get("reason") or ""),
+        packet_id=str(raw.get("packet_id") or "") or None,
+        details=dict(details) if isinstance(details, dict) else {},
+    )
