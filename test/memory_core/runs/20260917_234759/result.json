@@ -1,0 +1,45 @@
+{
+  "name": "thyris_memory",
+  "passed": true,
+  "status": "pass",
+  "pass_count": 3,
+  "fail_count": 0,
+  "skip_count": 0,
+  "elapsed_seconds": 0.04796457290649414,
+  "checks": [
+    {
+      "name": "owners_are_not_usms",
+      "status": "pass",
+      "detail": {
+        "memory_manager": "memory.memory_core",
+        "usms": "memory.unified_memory_system"
+      }
+    },
+    {
+      "name": "memory_store_retrieve",
+      "status": "pass",
+      "detail": {
+        "memory_id": "6f876ef1-b700-4773-aaba-4a876fde21d2",
+        "retrieved": 1,
+        "embedding": "LocalHashEmbeddingModel"
+      }
+    },
+    {
+      "name": "cache_set_get",
+      "status": "pass",
+      "detail": {
+        "cache_get": {
+          "vm": "android-13",
+          "ready": true
+        },
+        "metadata_db": "/tmp/thyris_cache_w_c6a0e9/runtime_cache/cache_metadata.db"
+      }
+    }
+  ],
+  "artifacts": {
+    "json": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/memory_core/runs/20260917_234759/result.json",
+    "md": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/memory_core/runs/20260917_234759/result.md",
+    "log": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/memory_core/runs/20260917_234759/result.log",
+    "run_dir": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/memory_core/runs/20260917_234759"
+  }
+}

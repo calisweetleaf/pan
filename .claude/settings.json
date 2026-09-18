@@ -1,0 +1,47 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".venv/bin/python3 .claude/hooks/session_start_gate_status.py",
+            "timeout": 10,
+            "statusMessage": "Reading last gate status..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".venv/bin/python3 .claude/hooks/py_compile_check.py",
+            "timeout": 20,
+            "statusMessage": "Compile-checking edited file..."
+          },
+          {
+            "type": "command",
+            "command": ".venv/bin/python3 .claude/hooks/highway_mesh_reminder.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p logs && .venv/bin/python3 test/run_pan_gate.py > \"logs/session_end_gate_$(date +%Y%m%d_%H%M%S).log\" 2>&1; true",
+            "async": true,
+            "timeout": 300,
+            "statusMessage": "Running PAN SDK gate at session end..."
+          }
+        ]
+      }
+    ]
+  }
+}
