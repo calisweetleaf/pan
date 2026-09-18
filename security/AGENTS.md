@@ -4,10 +4,13 @@
 **Parent packet:** ../AGENTS.md
 **Runtime truth:** ../STATE.md
 **ROE:** rules_of_engagement.md
-**Packet updated:** 2026-09-12
+**Bind dossier:** EREBUS_USMS_PAN_BIND.md (LIVE owners vs LINEAGE vs INTENT)
+**Packet updated:** 2026-09-18
 
 This folder is the security lane of the PAN monolith. It is not a standalone
-`somnus_erebus/` project and it is not an in-phone AI stack.
+`somnus_erebus/` project and it is not an in-phone AI stack. The bind dossier
+is the precise Erebus/USMS/PAN identity and packet map. Do not treat it as a
+replacement for PLAN.md or the research canon.
 
 ## Live consumed owners
 
@@ -68,8 +71,9 @@ Live security tree:
 security/
 ├── AGENTS.md
 ├── rules_of_engagement.md
+├── EREBUS_USMS_PAN_BIND.md        # LIVE vs LINEAGE vs INTENT bind map
 ├── sovereign_firewall.py          # consumed packet border
-├── planetary_immune_system.py     # consumed USMS+PAN bind
+├── planetary_immune_system.py     # consumed USMS+PAN bind (Erebus cognition)
 ├── planetary_highway.py           # consumed packet fabric
 ├── defensive_sovereignty.py       # lineage; WAN fail-loud
 ├── reactive_offense.py            # lineage; WAN fail-loud
@@ -106,4 +110,4 @@ POSIX spelling: `python3` in place of `python`.
 - Do not restore a host:port consciousness mesh, UDP broadcast, or serialized
   RAM dump as civic travel. Do not collapse PAN RSA and USMS Ed25519.
 - Do not reconnect SMTP, HTTP feeds, whois, or RF neutralization.
-- Read this packet and `rules_of_engagement.md` before modifying security/.
+- Read this packet, `rules_of_engagement.md`, and `EREBUS_USMS_PAN_BIND.md` before modifying security/.

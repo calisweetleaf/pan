@@ -1,6 +1,6 @@
 # File Tree: pan
 
-**Generated:** 9/12/2026, 2:30:16 AM
+**Generated:** 9/18/2026, 1:32:22 AM
 **Root Path:** `c:\Users\trent\pan`
 
 ```
@@ -50,6 +50,14 @@
 │   ├── pan_gate_20260911_085638.md
 │   ├── pan_gate_20260911_091651.json
 │   ├── pan_gate_20260911_091651.md
+│   ├── pan_gate_20260912_091538.json
+│   ├── pan_gate_20260912_091538.md
+│   ├── pan_gate_20260912_092909.json
+│   ├── pan_gate_20260912_092909.md
+│   ├── pan_gate_20260912_094045.json
+│   ├── pan_gate_20260912_094045.md
+│   ├── pan_gate_20260912_235357.json
+│   ├── pan_gate_20260912_235357.md
 │   ├── pan_sdk_system_test_20251002_005512.txt
 │   ├── pan_sdk_system_test_20260910_225919.json
 │   ├── pan_sdk_system_test_20260910_225919.md
@@ -80,16 +88,40 @@
 │   ├── pan_sdk_system_test_20260911_091638.txt
 │   ├── pan_sdk_system_test_20260911_091652.json
 │   ├── pan_sdk_system_test_20260911_091652.md
-│   └── pan_sdk_system_test_20260911_091652.txt
+│   ├── pan_sdk_system_test_20260911_091652.txt
+│   ├── pan_sdk_system_test_20260912_091540.json
+│   ├── pan_sdk_system_test_20260912_091540.md
+│   ├── pan_sdk_system_test_20260912_091540.txt
+│   ├── pan_sdk_system_test_20260912_092910.json
+│   ├── pan_sdk_system_test_20260912_092910.md
+│   ├── pan_sdk_system_test_20260912_092910.txt
+│   ├── pan_sdk_system_test_20260912_094047.json
+│   ├── pan_sdk_system_test_20260912_094047.md
+│   ├── pan_sdk_system_test_20260912_094047.txt
+│   ├── pan_sdk_system_test_20260912_235400.json
+│   ├── pan_sdk_system_test_20260912_235400.md
+│   └── pan_sdk_system_test_20260912_235400.txt
 ├── security
 │   ├── AGENTS.md
+│   ├── EREBUS_USMS_PAN_BIND.md
 │   ├── defensive_offensive_bridge.py
 │   ├── defensive_sovereignty.py
+│   ├── planetary_highway.py
 │   ├── planetary_immune_system.py
 │   ├── reactive_offense.py
 │   ├── rules_of_engagement.md
 │   └── sovereign_firewall.py
 ├── snapshots
+│   ├── v0.10
+│   │   └── manifest.json
+│   ├── v0.11
+│   │   └── manifest.json
+│   ├── v0.12
+│   │   └── manifest.json
+│   ├── v0.13
+│   │   └── manifest.json
+│   ├── v0.14
+│   │   └── manifest.json
 │   ├── v0.2
 │   │   └── manifest.json
 │   ├── v0.3
@@ -102,7 +134,9 @@
 │   │   └── manifest.json
 │   ├── v0.7
 │   │   └── manifest.json
-│   └── v0.8
+│   ├── v0.8
+│   │   └── manifest.json
+│   └── v0.9
 │       └── manifest.json
 ├── telecom
 │   ├── __init__.py
@@ -131,11 +165,42 @@
 │   │   │   ├── 20260911_085650
 │   │   │   │   ├── result.json
 │   │   │   │   └── result.md
-│   │   │   └── 20260911_091702
+│   │   │   ├── 20260911_091702
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_091552
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_092923
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_094100
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   └── 20260912_235430
 │   │   │       ├── result.json
 │   │   │       └── result.md
 │   │   ├── __init__.py
 │   │   └── test_email_social.py
+│   ├── highway
+│   │   ├── runs
+│   │   │   ├── 20260912_235042
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_235051
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_235119
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_235128
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   └── 20260912_235426
+│   │   │       ├── result.json
+│   │   │       └── result.md
+│   │   ├── __init__.py
+│   │   └── test_planetary_highway.py
 │   ├── immune
 │   │   ├── runs
 │   │   │   ├── 20260910_225647
@@ -168,7 +233,79 @@
 │   │   │   ├── 20260911_085643
 │   │   │   │   ├── result.json
 │   │   │   │   └── result.md
-│   │   │   └── 20260911_091656
+│   │   │   ├── 20260911_091656
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_091432
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_091437
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_091516
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_091521
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_091546
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_092731
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_092737
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_092751
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_092756
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_092843
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_092849
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_092917
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_094054
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_235233
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_235242
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_235256
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_235317
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_235415
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260918_010145
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260918_010155
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260918_010257
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260918_010310
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260918_010347
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   └── 20260918_010403
 │   │   │       ├── result.json
 │   │   │       └── result.md
 │   │   ├── __init__.py
@@ -203,7 +340,19 @@
 │   │   │   ├── 20260911_085651
 │   │   │   │   ├── result.json
 │   │   │   │   └── result.md
-│   │   │   └── 20260911_091704
+│   │   │   ├── 20260911_091704
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_091555
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_092925
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_094102
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   └── 20260912_235431
 │   │   │       ├── result.json
 │   │   │       └── result.md
 │   │   ├── __init__.py
@@ -225,7 +374,19 @@
 │   │   │   ├── 20260911_085651
 │   │   │   │   ├── result.json
 │   │   │   │   └── result.md
-│   │   │   └── 20260911_091704
+│   │   │   ├── 20260911_091704
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_091555
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_092925
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_094102
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   └── 20260912_235432
 │   │   │       ├── result.json
 │   │   │       └── result.md
 │   │   ├── __init__.py
@@ -250,10 +411,41 @@
 │   │   │   ├── 20260911_085652
 │   │   │   │   ├── result.json
 │   │   │   │   └── result.md
-│   │   │   └── 20260911_091704
+│   │   │   ├── 20260911_091704
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_043438
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_043440
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_091429
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_091555
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_092925
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_094102
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_094123
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_094201
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_094203
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   └── 20260912_235435
 │   │   │       ├── result.json
 │   │   │       └── result.md
 │   │   ├── __init__.py
+│   │   ├── test_thyris_android_boot.py
 │   │   └── test_thyris_vm.py
 │   ├── treasury
 │   │   ├── runs
@@ -284,7 +476,19 @@
 │   │   │   ├── 20260911_085647
 │   │   │   │   ├── result.json
 │   │   │   │   └── result.md
-│   │   │   └── 20260911_091659
+│   │   │   ├── 20260911_091659
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_091550
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_092921
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   ├── 20260912_094057
+│   │   │   │   ├── result.json
+│   │   │   │   └── result.md
+│   │   │   └── 20260912_235428
 │   │   │       ├── result.json
 │   │   │       └── result.md
 │   │   ├── __init__.py
@@ -308,10 +512,11 @@
 ├── SCOPE.md
 ├── SOTA_RUN.md
 ├── STATE.md
+├── core-directive.md
 ├── filetree.md
 └── requirements.txt
 ```
 
 ---
 *Generated by FileTree Pro Extension*
----
+--

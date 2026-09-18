@@ -1,0 +1,169 @@
+{
+  "name": "planetary_immune_system",
+  "passed": true,
+  "status": "pass",
+  "pass_count": 18,
+  "fail_count": 0,
+  "skip_count": 0,
+  "elapsed_seconds": 13.042335033416748,
+  "checks": [
+    {
+      "name": "firewall_blocks_telemetry",
+      "status": "pass",
+      "detail": {
+        "telemetry_reason": "telemetry_dictionary",
+        "telemetry_ledger_rows": 1
+      }
+    },
+    {
+      "name": "firewall_allows_civic_chat",
+      "status": "pass",
+      "detail": {
+        "civic_chat_allowed": true
+      }
+    },
+    {
+      "name": "inspect_content_compresses_secrets",
+      "status": "pass",
+      "detail": {
+        "compressed_bytes": 65,
+        "original_bytes": 59
+      }
+    },
+    {
+      "name": "signed_secret_packet_is_blocked",
+      "status": "pass",
+      "detail": {
+        "signed_secret_blocked": true
+      }
+    },
+    {
+      "name": "identity_blocklist",
+      "status": "pass",
+      "detail": {
+        "blocked_identity": "1a883b14ec77"
+      }
+    },
+    {
+      "name": "legacy_ip_routing_blocked",
+      "status": "pass",
+      "detail": {
+        "routing_blocked": true
+      }
+    },
+    {
+      "name": "memory_survives_restart",
+      "status": "pass",
+      "detail": {
+        "intel_id": "1bc950516579d598",
+        "event_node_id": "337dfd33-6bec-4bbf-8ad1-af7f0cff4d1a",
+        "belief_node_id": "f8e484f3-7e21-448e-9716-f14b457ed25f",
+        "bulletin_dht_key": "threat-memory:c7cf30e715c2b34dae2ad133a2dd0988ed0ca2d57a7eb963c23b7d2be7d06b18",
+        "restart_hits": 2
+      }
+    },
+    {
+      "name": "peer_ingests_bulletin",
+      "status": "pass",
+      "detail": {
+        "peer_ingested_intel_id": "9777ccc17641673f",
+        "peer_hits": 2,
+        "packet_kind": "THREAT_MEMORY_BULLETIN",
+        "bulletin_roe_level": "degrade",
+        "ingested_roe_level": "degrade",
+        "ingested_neural_activation": 0.88,
+        "identities_distinct": true,
+        "peer_tower_competition": "b699bab7-d326-440d-a7cf-ba2ebf642351"
+      }
+    },
+    {
+      "name": "contradiction_and_campaign_entangle",
+      "status": "pass",
+      "detail": {
+        "entanglement_id": "86c35996-c9fb-4cfb-a514-e191dd467c5f",
+        "contradiction_node_id": "abf5f842-f6f4-4a1a-bad5-5c6a8d0ff3ca",
+        "contradictions": 1
+      }
+    },
+    {
+      "name": "roe_ladder_persists_through_bridge",
+      "status": "pass",
+      "detail": {
+        "roe_level": "deceive",
+        "neural_activation": 0.55,
+        "belief_node_id": "b2c4a9b2-e6b2-4b79-9e9e-4db48888041b",
+        "restart_recovered": true
+      }
+    },
+    {
+      "name": "neutralize_requires_human_authorization",
+      "status": "pass",
+      "detail": {
+        "share_denied": "ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized",
+        "record_denied": "ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized",
+        "external_host_action": false
+      }
+    },
+    {
+      "name": "second_chain_retired_share_uses_immune",
+      "status": "pass",
+      "detail": {
+        "unbound_denied": "ThreatDetectionModule.share_threat_intelligence requires a bound PlanetaryImmuneSystem; BlockchainThreatIntelligence is retired",
+        "retired_construct": true,
+        "detector_intel_id": "e2be0d2086cc8c7f",
+        "detector_roe_level": "deceive",
+        "monitor_hits": 4,
+        "identities_distinct": true
+      }
+    },
+    {
+      "name": "smtp_alert_fails_loud",
+      "status": "pass",
+      "detail": {
+        "refused": true
+      }
+    },
+    {
+      "name": "webhook_alert_fails_loud",
+      "status": "pass",
+      "detail": {
+        "refused": true
+      }
+    },
+    {
+      "name": "threat_feed_fetch_fails_loud",
+      "status": "pass",
+      "detail": {
+        "sync_refused": true
+      }
+    },
+    {
+      "name": "whois_fails_loud",
+      "status": "pass",
+      "detail": {
+        "map_refused": true
+      }
+    },
+    {
+      "name": "wifi_deauth_fails_loud",
+      "status": "pass",
+      "detail": {
+        "deauth_refused": true
+      }
+    },
+    {
+      "name": "bridge_refuses_simulated_authorization",
+      "status": "pass",
+      "detail": {
+        "l4_denied": "ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized",
+        "no_simulated_operator": true
+      }
+    }
+  ],
+  "artifacts": {
+    "json": "C:\\Users\\trent\\pan\\test\\immune\\runs\\20260918_010257\\result.json",
+    "md": "C:\\Users\\trent\\pan\\test\\immune\\runs\\20260918_010257\\result.md",
+    "log": "C:\\Users\\trent\\pan\\test\\immune\\runs\\20260918_010257\\result.log",
+    "run_dir": "C:\\Users\\trent\\pan\\test\\immune\\runs\\20260918_010257"
+  }
+}

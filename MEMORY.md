@@ -3,6 +3,46 @@
 Append durable, evidence-backed findings here. Preserve corrections as new dated
 entries instead of erasing historical truth.
 
+## 2026-09-18 — Erebus towers attached to USMS at the immune owner
+
+**Keys:** ErebusTowerCompetition · list_erebus_towers · _neural_activation ·
+COHERENCE_BOUND · cosine field
+
+**Status:** LANDED at `security/planetary_immune_system.py`. Full project gate
+was not re-run this unit.
+
+### Durable findings
+
+- Lineage `ResourceCompetitor` / `neural_competition` in
+  `defensive_sovereignty.py` remains RAM. The consumed neural unit is now
+  four standing USMS META towers (`observe`/`deceive`/`degrade`/`neutralize`)
+  created at `PlanetaryImmuneSystem` bind, coherence-bound to the PAN/USMS
+  identity META.
+- Neighbor pull is cosine of MTL/USMS hash embeddings already stored on
+  `UnifiedMemoryNode.semantic_vector`, not mean-only confidence.
+  Proven: first share activation 0.90 (degrade), second same threat_type at
+  0.50 local confidence rose to 0.62 (deceive).
+- Competition META parents the BELIEF plus the four towers. Allocations
+  survive reopen via `immune_index` / `immune_towers`. Tower allocations are
+  local USMS cognition; they are not on the `THREAT_MEMORY_BULLETIN` body.
+- Fletcher's bulletin ROE/activation receipt was left in place. RSA PAN and
+  Ed25519 USMS stayed two types. L4 without a human still fails loud.
+- reference-code/`mtl.py` and `unified_dag_blockchain.py` were not imported
+  as a second runtime. The hash embedding was ported into the immune owner.
+
+### Evidence
+
+- `test/immune/runs/20260918_010347/`
+- `snapshots/v0.14/manifest.json`
+- `SOTA_RUN.md`
+
+### Boundary
+
+- Do not wrap defensive_sovereignty to fake a neural package.
+- Do not collapse PAN RSA and USMS Ed25519.
+- Do not put tower allocations on the public bulletin protocol without a
+  new evidence-backed decision.
+
 ## 2026-09-12 — I isolated WAN and landed packet-fabric highway
 
 **Keys:** PlanetaryHighway · LegacyInternetEgressError · HIGHWAY_HOP · sealed cargo

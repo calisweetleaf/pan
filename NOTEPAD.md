@@ -2,6 +2,15 @@
 
 Scratch only; current runtime truth belongs in STATE.md.
 
+## 2026-09-18 Erebus towers
+
+- Landed standing towers + cosine competition at planetary_immune_system.py.
+  Immune 20/20 `test/immune/runs/20260918_010347/`. Gate not re-run.
+- reference-code MTL/NMCA not imported. Hash embedding ported locally.
+- Next at this owner: none required. Next repo action remains ADB userspace.
+  Do not wrap defensive_sovereignty. Do not expand bulletin with tower
+  allocations without a new protocol decision.
+
 ## 2026-09-12 KVM inaccessible → TCG
 
 - `select_qemu_accelerator` now opens `/dev/kvm` before `-enable-kvm`.

@@ -1,6 +1,6 @@
 # PAN SDK — Current State
 
-**Updated:** 2026-09-12
+**Updated:** 2026-09-18
 **Canon lock:** PLAN.md and docs/research/Building a Sovereign Digital Nation.md
 remain the north-star direction. Do not replace their architecture with an
 invented alternative.
@@ -24,10 +24,11 @@ invented alternative.
 - Security owns the packet border: `security/sovereign_firewall.py`.
 - `security/planetary_immune_system.py` binds USMS (Ed25519 memory DAG) to PAN
   DHT/`UnifiedDataPacket` (RSA transport). High-confidence beliefs broadcast as
-  `THREAT_MEMORY_BULLETIN` packets. ROE OBSERVE/DECEIVE/DEGRADE persist as USMS
-  BELIEF content with neighbor-weighted DAG activation. NEUTRALIZE without
-  human authorization fails loud. That is Erebus/USMS cognition. It does not
-  use `core.prompt_bridge`.
+  `THREAT_MEMORY_BULLETIN` packets carrying ROE and neural_activation. Standing
+  Erebus towers persist as USMS META nodes coherence-bound to the identity pair.
+  Shares run cosine-weighted DAG activation and softmax tower competition.
+  NEUTRALIZE without human authorization fails loud. That is Erebus/USMS
+  cognition. It does not use `core.prompt_bridge`.
 - `security/defensive_offensive_bridge.py` imports the live
   `security.defensive_sovereignty` / `security.reactive_offense` owners and
   writes threat events through `PlanetaryImmuneSystem.share_intelligence`.
@@ -56,6 +57,14 @@ invented alternative.
 
 ## Verified baseline
 
+- **GREEN, 2026-09-18 (Erebus towers on USMS):** Windows Python 3.14 `.venv`.
+  `.\.venv\Scripts\python.exe test\immune\test_planetary_immune_system.py`
+  20/20 including `erebus_towers_bind_usms` and
+  `erebus_tower_competition_cosine_field` (first activation 0.90 degrade,
+  second cosine-pulled 0.62 deceive; L4 still fail-loud). Artifact:
+  `test/immune/runs/20260918_010347/`. Snapshot `snapshots/v0.14/manifest.json`.
+  Full `run_pan_gate.py` was not re-run this unit. `phone_ready` and
+  `adb_proven` stayed false. Identities stayed two types.
 - **GREEN, 2026-09-12 (highway + isolation):** Windows Python 3.14.4 `.venv`.
   `python test/highway/test_planetary_highway.py` 10/10
   (`test/highway/runs/20260912_235119/`).
@@ -166,12 +175,12 @@ in snapshots/v0.8. qemu-img disk-create and immune ROE DAG landed in
 snapshots/v0.9. Second-chain retirement landed in snapshots/v0.10.
 Android-x86 installer boot landed in snapshots/v0.11. KVM-inaccessible TCG
 fallback landed in snapshots/v0.12. Highway packet fabric and WAN isolation
-landed in snapshots/v0.13.
+landed in snapshots/v0.13. Erebus towers on USMS landed in snapshots/v0.14.
 
 ## Generated-map status
 
 `filetree.md` is operator-owned generated navigation. Continuity-doc turns
-must not hand-edit it. Snapshot `v0.13` is a new folder; regenerate filetree
+must not hand-edit it. Snapshot `v0.14` is a new folder; regenerate filetree
 through FileTree Pro.
 
 ## Next justified action

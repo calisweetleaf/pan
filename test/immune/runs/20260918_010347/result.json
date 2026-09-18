@@ -1,0 +1,207 @@
+{
+  "name": "planetary_immune_system",
+  "passed": true,
+  "status": "pass",
+  "pass_count": 20,
+  "fail_count": 0,
+  "skip_count": 0,
+  "elapsed_seconds": 15.465444087982178,
+  "checks": [
+    {
+      "name": "firewall_blocks_telemetry",
+      "status": "pass",
+      "detail": {
+        "telemetry_reason": "telemetry_dictionary",
+        "telemetry_ledger_rows": 1
+      }
+    },
+    {
+      "name": "firewall_allows_civic_chat",
+      "status": "pass",
+      "detail": {
+        "civic_chat_allowed": true
+      }
+    },
+    {
+      "name": "inspect_content_compresses_secrets",
+      "status": "pass",
+      "detail": {
+        "compressed_bytes": 65,
+        "original_bytes": 59
+      }
+    },
+    {
+      "name": "signed_secret_packet_is_blocked",
+      "status": "pass",
+      "detail": {
+        "signed_secret_blocked": true
+      }
+    },
+    {
+      "name": "identity_blocklist",
+      "status": "pass",
+      "detail": {
+        "blocked_identity": "b59916a7df88"
+      }
+    },
+    {
+      "name": "legacy_ip_routing_blocked",
+      "status": "pass",
+      "detail": {
+        "routing_blocked": true
+      }
+    },
+    {
+      "name": "memory_survives_restart",
+      "status": "pass",
+      "detail": {
+        "intel_id": "1bc950516579d598",
+        "event_node_id": "0241d9e7-c172-4a54-9578-939680ac1767",
+        "belief_node_id": "a8017fed-78b9-47e6-be24-545e7b352b75",
+        "bulletin_dht_key": "threat-memory:0c6370158a57be126f2024a47a2c65197cbd542f35bd771dc895ab920e35c5c3",
+        "restart_hits": 2
+      }
+    },
+    {
+      "name": "peer_ingests_bulletin",
+      "status": "pass",
+      "detail": {
+        "peer_ingested_intel_id": "9777ccc17641673f",
+        "peer_hits": 2,
+        "packet_kind": "THREAT_MEMORY_BULLETIN",
+        "bulletin_roe_level": "degrade",
+        "ingested_roe_level": "degrade",
+        "ingested_neural_activation": 0.88,
+        "identities_distinct": true,
+        "peer_tower_competition": "a94dbb17-cfef-4477-84ff-f37e07b33af0"
+      }
+    },
+    {
+      "name": "contradiction_and_campaign_entangle",
+      "status": "pass",
+      "detail": {
+        "entanglement_id": "98dbafe4-5df1-4e68-84f8-75abed9c7b84",
+        "contradiction_node_id": "f8ffd1dd-989b-4e4b-b0e3-ec719dff14c9",
+        "contradictions": 1
+      }
+    },
+    {
+      "name": "roe_ladder_persists_through_bridge",
+      "status": "pass",
+      "detail": {
+        "roe_level": "deceive",
+        "neural_activation": 0.55,
+        "belief_node_id": "83997186-3835-437c-bda8-b568a9ef7c30",
+        "restart_recovered": true
+      }
+    },
+    {
+      "name": "neutralize_requires_human_authorization",
+      "status": "pass",
+      "detail": {
+        "share_denied": "ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized",
+        "record_denied": "ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized",
+        "external_host_action": false
+      }
+    },
+    {
+      "name": "erebus_towers_bind_usms",
+      "status": "pass",
+      "detail": {
+        "tower_ids": {
+          "observe": "c002a023-d2cb-4a3e-876d-470f100d9bb2",
+          "deceive": "5126c4e9-cef1-4189-9c0d-1352a25d58f0",
+          "degrade": "ea14ca67-53f2-48b0-bcc1-85c962dd12e5",
+          "neutralize": "c439b1c6-832d-4b38-8b08-804437e4185f"
+        },
+        "identities_distinct": true,
+        "restart_tower_ids": {
+          "observe": "c002a023-d2cb-4a3e-876d-470f100d9bb2",
+          "deceive": "5126c4e9-cef1-4189-9c0d-1352a25d58f0",
+          "degrade": "ea14ca67-53f2-48b0-bcc1-85c962dd12e5",
+          "neutralize": "c439b1c6-832d-4b38-8b08-804437e4185f"
+        }
+      }
+    },
+    {
+      "name": "erebus_tower_competition_cosine_field",
+      "status": "pass",
+      "detail": {
+        "l4_denied": "ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized",
+        "first_activation": 0.9,
+        "second_activation": 0.6199999999999999,
+        "second_allocations": {
+          "observe": 0.15483658335373857,
+          "deceive": 0.3660689825287201,
+          "degrade": 0.2829469890802408,
+          "neutralize": 0.1961474450373005
+        },
+        "winning_tower": "deceive",
+        "competition_node_id": "b459e700-1373-468f-91f0-e72da03c1ee4",
+        "restart_recovered": true,
+        "identities_distinct": true
+      }
+    },
+    {
+      "name": "second_chain_retired_share_uses_immune",
+      "status": "pass",
+      "detail": {
+        "unbound_denied": "ThreatDetectionModule.share_threat_intelligence requires a bound PlanetaryImmuneSystem; BlockchainThreatIntelligence is retired",
+        "retired_construct": true,
+        "detector_intel_id": "e2be0d2086cc8c7f",
+        "detector_roe_level": "deceive",
+        "monitor_hits": 4,
+        "identities_distinct": true
+      }
+    },
+    {
+      "name": "smtp_alert_fails_loud",
+      "status": "pass",
+      "detail": {
+        "refused": true
+      }
+    },
+    {
+      "name": "webhook_alert_fails_loud",
+      "status": "pass",
+      "detail": {
+        "refused": true
+      }
+    },
+    {
+      "name": "threat_feed_fetch_fails_loud",
+      "status": "pass",
+      "detail": {
+        "sync_refused": true
+      }
+    },
+    {
+      "name": "whois_fails_loud",
+      "status": "pass",
+      "detail": {
+        "map_refused": true
+      }
+    },
+    {
+      "name": "wifi_deauth_fails_loud",
+      "status": "pass",
+      "detail": {
+        "deauth_refused": true
+      }
+    },
+    {
+      "name": "bridge_refuses_simulated_authorization",
+      "status": "pass",
+      "detail": {
+        "l4_denied": "ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized",
+        "no_simulated_operator": true
+      }
+    }
+  ],
+  "artifacts": {
+    "json": "C:\\Users\\trent\\pan\\test\\immune\\runs\\20260918_010347\\result.json",
+    "md": "C:\\Users\\trent\\pan\\test\\immune\\runs\\20260918_010347\\result.md",
+    "log": "C:\\Users\\trent\\pan\\test\\immune\\runs\\20260918_010347\\result.log",
+    "run_dir": "C:\\Users\\trent\\pan\\test\\immune\\runs\\20260918_010347"
+  }
+}

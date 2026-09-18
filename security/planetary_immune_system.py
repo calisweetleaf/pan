@@ -14,12 +14,36 @@ Justification: I extended the live immune owner so ROE OBSERVE/DECEIVE/DEGRADE
     becomes an external-host action. RSA PAN and Ed25519 USMS stay bound.
 Provenance: snapshots/v0.2/manifest.json -> domains.immune.edits[0]
 Files: security/planetary_immune_system.py
+
+Modified: 2026-09-18
+Modified by: fletcher (daeron)
+Justification: I put ROE ladder fields and neural_activation on the signed
+    THREAT_MEMORY_BULLETIN body so peer ingest reconstructs the same USMS
+    BELIEF cognition instead of dropping it at the RSA packet seam. Wrapping
+    a second Erebus or recomputing a parallel activation store would duplicate
+    the bind. Ingest remains a receipt: it does not execute NEUTRALIZE.
+Provenance: snapshots/v0.13/manifest.json -> domains.immune
+Files: security/planetary_immune_system.py
+
+Modified: 2026-09-18
+Modified by: cursor-grok (daeron)
+Justification: I attached Erebus cognitive towers to the live USMS DAG at this
+    owner because lineage ResourceCompetitor/neural_competition still allocated
+    in RAM. Wrapping defensive_sovereignty would duplicate signed EVENT/BELIEF
+    persistence. Towers are META nodes; competition uses MTL/NMCA semantic-vector
+    cosine already stored on UnifiedMemoryNode; allocations survive restart.
+    Bulletin ROE/activation stay on the packet seam Fletcher bound. RSA PAN and
+    Ed25519 USMS stay two identity types. L4 still fails loud.
+Provenance: snapshots/v0.14/manifest.json -> domains.immune.edits[0]
+Files: security/planetary_immune_system.py
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
+import math
 import sys
 import threading
 from dataclasses import dataclass, field
@@ -67,6 +91,16 @@ IDENTITY_DIRNAME = "identities"
 PAN_IDENTITY_FILE = "pan_identity.json"
 USMS_IDENTITY_FILE = "usms_identity.json"
 ROE_ORDER = ("observe", "deceive", "degrade", "neutralize")
+EREBUS_TOWER_IDS = ROE_ORDER
+TOWER_ALLOCATION_TEMPERATURE = 0.35
+TOWER_COSINE_FLOOR = 0.15
+TOWER_SEMANTIC_DIMS = 12
+TOWER_FITNESS_PEAKS = {
+    "observe": 0.20,
+    "deceive": 0.55,
+    "degrade": 0.85,
+    "neutralize": 1.00,
+}
 
 
 class ROELevel(str, Enum):
@@ -115,6 +149,9 @@ class IntelligenceRecord:
     roe_level: str = ROELevel.OBSERVE.value
     neural_activation: float = 0.0
     neutralize_denied: bool = False
+    tower_allocations: dict[str, float] = field(default_factory=dict)
+    winning_tower: str = ROELevel.OBSERVE.value
+    tower_competition_node_id: str | None = None
 
     def to_mapping(self) -> dict[str, object]:
         """Return the historical coordinator mapping consumed by the bridge."""
@@ -135,6 +172,30 @@ class IntelligenceRecord:
             "roe_level": self.roe_level,
             "neural_activation": self.neural_activation,
             "neutralize_denied": self.neutralize_denied,
+            "tower_allocations": dict(self.tower_allocations),
+            "winning_tower": self.winning_tower,
+            "tower_competition_node_id": self.tower_competition_node_id,
+        }
+
+
+@dataclass
+class ErebusTowerCompetition:
+    """USMS-backed allocation across standing Erebus cognitive towers."""
+
+    competition_node_id: str
+    allocations: dict[str, float]
+    winning_tower: str
+    neural_field: float
+    tower_node_ids: dict[str, str]
+
+    def to_mapping(self) -> dict[str, object]:
+        """Return a JSON-stable mapping of the competition."""
+        return {
+            "competition_node_id": self.competition_node_id,
+            "allocations": dict(self.allocations),
+            "winning_tower": self.winning_tower,
+            "neural_field": self.neural_field,
+            "tower_node_ids": dict(self.tower_node_ids),
         }
 
 
@@ -184,7 +245,9 @@ class PlanetaryImmuneSystem:
             "bulletins_broadcast": 0,
             "bulletins_ingested": 0,
             "contradictions": 0,
+            "tower_competitions": 0,
         }
+        self.erebus_tower_node_ids: dict[str, str] = {}
 
         self.pan_identity = pan_identity or self._load_or_create_pan_identity()
         self.memory_identity = memory_identity or self._load_or_create_memory_identity()
@@ -206,6 +269,7 @@ class PlanetaryImmuneSystem:
         )
         self.communicator = SovereignCommunicator(self.pan_identity)
         self._write_identity_binding()
+        self._ensure_erebus_towers()
         LOGGER.info(
             "PlanetaryImmuneSystem online for %s pan=%s usms=%s",
             node_name,
@@ -282,8 +346,11 @@ class PlanetaryImmuneSystem:
             similar = self._semantic_neighbors(threat_type)
             human_authorized = bool(payload.get("human_authorized", False))
             requested_roe = str(payload.get("roe_level") or "").strip().lower()
-            activation = self._neural_activation(confidence, similar)
+            activation = self._neural_activation(
+                confidence, similar, query_text=threat_type
+            )
             roe = self._resolve_roe_level(requested_roe, activation, human_authorized)
+            allocations, winning_tower = self._allocate_erebus_towers(activation)
             event_content: dict[str, object] = {
                 "summary": f"threat event {threat_type}",
                 "intel_id": intel_id,
@@ -329,6 +396,8 @@ class PlanetaryImmuneSystem:
                     "neural_activation": activation,
                     "human_authorized": human_authorized,
                     "neutralize_denied": False,
+                    "tower_allocations": dict(allocations),
+                    "winning_tower": winning_tower,
                 },
                 parents=[event_node.node_id],
                 linkage_manifest=belief_links,
@@ -339,6 +408,15 @@ class PlanetaryImmuneSystem:
                 self.memory_identity,
                 confidence,
                 rationale=claim,
+            )
+            competition = self._persist_tower_competition(
+                intel_id=intel_id,
+                threat_type=threat_type,
+                activation=activation,
+                belief_node_id=belief_node.node_id,
+                allocations=allocations,
+                winning_tower=winning_tower,
+                human_authorized=human_authorized,
             )
             entanglement_id = self._maybe_entangle(payload, event_node.node_id)
             bulletin_packet_id = None
@@ -371,6 +449,9 @@ class PlanetaryImmuneSystem:
                 roe_level=roe.value,
                 neural_activation=activation,
                 neutralize_denied=False,
+                tower_allocations=dict(competition.allocations),
+                winning_tower=competition.winning_tower,
+                tower_competition_node_id=competition.competition_node_id,
             )
             self.persistence.write_state("immune_index", intel_id, record.to_mapping())
             campaign = str(payload.get("campaign_id") or "")
@@ -478,13 +559,17 @@ class PlanetaryImmuneSystem:
         with self._lock:
             nodes = self.memory.search_nodes_by_content(
                 query,
-                limit=10,
+                limit=24,
                 requester=self.memory_identity,
             )
         ranked: list[dict[str, object]] = []
         index = self.persistence.load_component("immune_index")
-        for position, node in enumerate(nodes):
-            intel_id = str(node.content.get("intel_id") or node.node_id[:16])
+        for node in nodes:
+            if node.kind not in {NodeKindEnum.EVENT, NodeKindEnum.BELIEF}:
+                continue
+            intel_id = str(node.content.get("intel_id") or "")
+            if not intel_id:
+                continue
             stored = index.get(intel_id) if isinstance(index, dict) else None
             row: dict[str, object]
             if isinstance(stored, dict):
@@ -500,8 +585,10 @@ class PlanetaryImmuneSystem:
                     "actionable": bool(node.content.get("actionable", False)),
                     "event_node_id": node.node_id,
                 }
-            row["relevance_score"] = max(0.0, 1.0 - (position * 0.08))
+            row["relevance_score"] = max(0.0, 1.0 - (len(ranked) * 0.08))
             ranked.append(row)
+            if len(ranked) >= 10:
+                break
         return ranked
 
     def record_countermeasure_failure(
@@ -554,7 +641,8 @@ class PlanetaryImmuneSystem:
             packet_payload: `UnifiedDataPacket.to_dict()` from a peer DHT lookup.
 
         Returns:
-            Local IntelligenceRecord. Does not re-broadcast.
+            Local IntelligenceRecord. Does not re-broadcast. Reconstructs origin
+            ROE and neural_activation as a receipt; does not execute NEUTRALIZE.
         """
         if not isinstance(packet_payload, Mapping):
             raise BulletinVerificationError("bulletin payload must be a mapping")
@@ -582,6 +670,7 @@ class PlanetaryImmuneSystem:
         threat_type = str(content.get("threat_type") or "unknown")
         confidence = _bounded_confidence(content.get("confidence", 0.5))
         intel_id = str(content.get("intel_id") or sha256_hex(packet.packet_id)[:16])
+        cognition = _bulletin_cognition_fields(content)
         with self._lock:
             event_node = self.memory.create_memory_node(
                 author=self.memory_identity,
@@ -608,10 +697,30 @@ class PlanetaryImmuneSystem:
                     "threat_type": threat_type,
                     "confidence": confidence,
                     "ingested": True,
+                    "origin_pan_identity_hash": packet.author_identity_hash,
+                    "origin_usms_author_id": content.get("usms_author_id"),
+                    **cognition,
                 },
                 parents=[event_node.node_id],
                 linkage_manifest={LinkageTypeEnum.CAUSAL_PARENT: [event_node.node_id]},
                 semantic_context=threat_type,
+            )
+            self.memory.attest_belief(
+                belief_node.node_id,
+                self.memory_identity,
+                confidence,
+                rationale=str(content.get("claim") or f"ingested mesh belief {threat_type}"),
+            )
+            ingested_activation = float(cognition["neural_activation"])
+            allocations, winning_tower = self._allocate_erebus_towers(ingested_activation)
+            competition = self._persist_tower_competition(
+                intel_id=intel_id,
+                threat_type=threat_type,
+                activation=ingested_activation,
+                belief_node_id=belief_node.node_id,
+                allocations=allocations,
+                winning_tower=winning_tower,
+                human_authorized=False,
             )
             record = IntelligenceRecord(
                 intel_id=intel_id,
@@ -626,6 +735,11 @@ class PlanetaryImmuneSystem:
                 bulletin_packet_id=packet.packet_id,
                 bulletin_dht_key=None,
                 payload=dict(content),
+                roe_level=str(cognition["roe_level"]),
+                neural_activation=ingested_activation,
+                tower_allocations=dict(competition.allocations),
+                winning_tower=competition.winning_tower,
+                tower_competition_node_id=competition.competition_node_id,
             )
             self.persistence.write_state("immune_index", intel_id, record.to_mapping())
             self.metrics["bulletins_ingested"] += 1
@@ -659,6 +773,7 @@ class PlanetaryImmuneSystem:
         intel_id: str,
     ) -> tuple[str, str]:
         """Package a high-confidence belief as a firewall-inspected PAN packet."""
+        cognition = _bulletin_cognition_fields(belief_node.content)
         body: dict[str, object] = {
             "intel_id": intel_id,
             "origin_node_id": belief_node.node_id,
@@ -670,6 +785,7 @@ class PlanetaryImmuneSystem:
             "usms_author_id": self.memory_identity.agent_id,
             "usms_pubkey": self.memory_identity.public_key,
             "pan_identity_hash": self.pan_identity.identity_hash,
+            **cognition,
         }
         digest = sha256_hex(canonical(_bulletin_signed_body(body)))
         body["content_digest"] = digest
@@ -715,19 +831,185 @@ class PlanetaryImmuneSystem:
         LOGGER.info("Broadcast threat bulletin %s key=%s", packet.packet_id[:12], dht_key)
         return packet.packet_id, dht_key
 
+    def list_erebus_towers(self) -> dict[str, str]:
+        """
+        Return standing Erebus tower ids mapped to their USMS META node ids.
+
+        Args:
+            None
+
+        Returns:
+            Mapping of observe/deceive/degrade/neutralize to node_id.
+        """
+        with self._lock:
+            if set(self.erebus_tower_node_ids) != set(EREBUS_TOWER_IDS):
+                self._ensure_erebus_towers()
+            return dict(self.erebus_tower_node_ids)
+
     def _neural_activation(
         self,
         confidence: float,
         similar: list[UnifiedMemoryNode],
+        *,
+        query_text: str,
     ) -> float:
-        """MTL-style DAG activation: local confidence plus neighbor belief pull."""
-        neighbor_weight = 0.0
+        """MTL/NMCA DAG activation: local confidence plus cosine-weighted neighbor pull."""
+        query_vector = _mtl_semantic_vector(query_text)
+        pulls: list[float] = []
         for node in similar:
             node_conf = float(node.content.get("confidence") or 0.0)
-            neighbor_weight += node_conf
-        if similar:
-            neighbor_weight = neighbor_weight / len(similar)
+            cosine = _bounded_cosine(query_vector, list(node.semantic_vector or []))
+            if cosine < TOWER_COSINE_FLOOR:
+                continue
+            pulls.append(node_conf * cosine)
+        if not pulls:
+            return min(1.0, max(0.0, confidence))
+        neighbor_weight = sum(pulls) / len(pulls)
         return min(1.0, (confidence * 0.7) + (neighbor_weight * 0.3))
+
+    def _ensure_erebus_towers(self) -> dict[str, str]:
+        """Create or recover the four standing Erebus tower META nodes on USMS."""
+        stored = self.persistence.read_state("immune_meta", "erebus_towers")
+        if isinstance(stored, dict) and isinstance(stored.get("node_ids"), dict):
+            recovered: dict[str, str] = {}
+            complete = True
+            for tower_id in EREBUS_TOWER_IDS:
+                node_id = str(stored["node_ids"].get(tower_id) or "")
+                node = None
+                if node_id:
+                    node = self.memory.retrieve_memory_node(
+                        node_id, requester=self.memory_identity
+                    )
+                if node is None or node.kind != NodeKindEnum.META:
+                    complete = False
+                    break
+                recovered[tower_id] = node.node_id
+            if complete:
+                self.erebus_tower_node_ids = recovered
+                return recovered
+        binding = self.persistence.read_state("immune_meta", "identity_binding")
+        parent_ids: list[str] = []
+        if isinstance(binding, dict) and binding.get("node_id"):
+            parent_ids = [str(binding["node_id"])]
+        created: dict[str, str] = {}
+        equal_share = 1.0 / float(len(EREBUS_TOWER_IDS))
+        for tower_id in EREBUS_TOWER_IDS:
+            node = self.memory.create_memory_node(
+                author=self.memory_identity,
+                kind=NodeKindEnum.META,
+                content={
+                    "summary": f"erebus tower {tower_id}",
+                    "tower_id": tower_id,
+                    "tower_kind": "erebus_cognitive_tower",
+                    "allocation": equal_share,
+                    "roe_level": tower_id,
+                },
+                parents=parent_ids or None,
+                linkage_manifest=(
+                    {LinkageTypeEnum.COHERENCE_BOUND: list(parent_ids)}
+                    if parent_ids
+                    else None
+                ),
+                semantic_context=f"erebus tower {tower_id} defensive cognition",
+            )
+            created[tower_id] = node.node_id
+        self.persistence.write_state("immune_meta", "erebus_towers", {"node_ids": created})
+        self.persistence.write_state(
+            "immune_towers",
+            "latest",
+            {tower_id: equal_share for tower_id in EREBUS_TOWER_IDS},
+        )
+        self.erebus_tower_node_ids = created
+        LOGGER.info(
+            "Erebus towers bound for %s towers=%s",
+            self.node_name,
+            ",".join(created),
+        )
+        return created
+
+    def _allocate_erebus_towers(self, activation: float) -> tuple[dict[str, float], str]:
+        """Softmax-allocate attention across towers from DAG activation plus prior."""
+        prior_raw = self.persistence.read_state("immune_towers", "latest") or {}
+        prior: dict[str, float] = {}
+        if isinstance(prior_raw, dict):
+            for tower_id in EREBUS_TOWER_IDS:
+                try:
+                    prior[tower_id] = float(prior_raw.get(tower_id) or 0.25)
+                except (TypeError, ValueError):
+                    prior[tower_id] = 0.25
+        else:
+            prior = {tower_id: 0.25 for tower_id in EREBUS_TOWER_IDS}
+        fitness: dict[str, float] = {}
+        for tower_id in EREBUS_TOWER_IDS:
+            peak = TOWER_FITNESS_PEAKS[tower_id]
+            proximity = max(0.01, 1.0 - abs(activation - peak))
+            floor = 0.15 if tower_id == ROELevel.OBSERVE.value else 0.01
+            fitness[tower_id] = max(floor, (proximity * 0.8) + (prior.get(tower_id, 0.25) * 0.2))
+        allocations = _softmax_tower_allocations(fitness)
+        winning = max(
+            EREBUS_TOWER_IDS,
+            key=lambda tower_id: (allocations[tower_id], -ROE_ORDER.index(tower_id)),
+        )
+        return allocations, winning
+
+    def _persist_tower_competition(
+        self,
+        *,
+        intel_id: str,
+        threat_type: str,
+        activation: float,
+        belief_node_id: str,
+        allocations: dict[str, float],
+        winning_tower: str,
+        human_authorized: bool,
+    ) -> ErebusTowerCompetition:
+        """Write a competition META on USMS, coherence-bound to the BELIEF and towers."""
+        if set(self.erebus_tower_node_ids) != set(EREBUS_TOWER_IDS):
+            self._ensure_erebus_towers()
+        tower_ids = [self.erebus_tower_node_ids[tower_id] for tower_id in EREBUS_TOWER_IDS]
+        parents = [belief_node_id, *tower_ids]
+        neutralize_executable = (
+            winning_tower == ROELevel.NEUTRALIZE.value and human_authorized
+        )
+        node = self.memory.create_memory_node(
+            author=self.memory_identity,
+            kind=NodeKindEnum.META,
+            content={
+                "summary": f"erebus tower competition for {threat_type}",
+                "intel_id": intel_id,
+                "threat_type": threat_type,
+                "neural_field": activation,
+                "allocations": dict(allocations),
+                "winning_tower": winning_tower,
+                "human_authorized": human_authorized,
+                "neutralize_executable": neutralize_executable,
+                "tower_kind": "erebus_tower_competition",
+            },
+            parents=parents,
+            linkage_manifest={
+                LinkageTypeEnum.COHERENCE_BOUND: [belief_node_id],
+                LinkageTypeEnum.SYNTHESIS: list(tower_ids),
+            },
+            semantic_context=f"erebus tower competition {threat_type}",
+        )
+        self.persistence.write_state("immune_towers", "latest", dict(allocations))
+        self.persistence.write_state(
+            "immune_towers",
+            intel_id,
+            {
+                "competition_node_id": node.node_id,
+                "allocations": dict(allocations),
+                "winning_tower": winning_tower,
+            },
+        )
+        self.metrics["tower_competitions"] += 1
+        return ErebusTowerCompetition(
+            competition_node_id=node.node_id,
+            allocations=dict(allocations),
+            winning_tower=winning_tower,
+            neural_field=activation,
+            tower_node_ids=dict(self.erebus_tower_node_ids),
+        )
 
     def _resolve_roe_level(
         self,
@@ -841,6 +1123,13 @@ class PlanetaryImmuneSystem:
             roe_level=str(stored.get("roe_level") or ROELevel.OBSERVE.value),
             neural_activation=float(stored.get("neural_activation") or 0.0),
             neutralize_denied=bool(stored.get("neutralize_denied", False)),
+            tower_allocations=_tower_allocations_from_stored(stored.get("tower_allocations")),
+            winning_tower=str(stored.get("winning_tower") or ROELevel.OBSERVE.value),
+            tower_competition_node_id=(
+                str(stored["tower_competition_node_id"])
+                if stored.get("tower_competition_node_id")
+                else None
+            ),
         )
 
     def _write_identity_binding(self) -> None:
@@ -939,8 +1228,92 @@ class PlanetaryImmuneSystem:
         )
 
 
+def _mtl_semantic_vector(text: str, dims: int = TOWER_SEMANTIC_DIMS) -> list[float]:
+    """Port MTL/USMS hash embedding so immune cosine matches USMS node vectors.
+
+    This is the consumed neural unit, not a second runtime import of reference-code.
+    """
+    payload = str(text or "")
+    digest = hashlib.sha512(payload.encode("utf-8")).digest()
+    buf = (digest * ((dims * 8) // len(digest) + 1))[: dims * 8]
+    vector: list[float] = []
+    for index in range(0, len(buf), 8):
+        chunk = int.from_bytes(buf[index : index + 8], byteorder="big", signed=False)
+        vector.append((chunk / 2**63) - 1.0)
+    return vector
+
+
+def _bounded_cosine(vec_a: list[float], vec_b: list[float]) -> float:
+    """Return max(0, cosine) so anti-correlated neighbors do not invent pull."""
+    if not vec_a or not vec_b or len(vec_a) != len(vec_b):
+        return 0.0
+    dot = sum(left * right for left, right in zip(vec_a, vec_b))
+    norm_a = math.sqrt(sum(left * left for left in vec_a))
+    norm_b = math.sqrt(sum(right * right for right in vec_b))
+    if norm_a == 0.0 or norm_b == 0.0:
+        return 0.0
+    return max(0.0, min(1.0, dot / (norm_a * norm_b)))
+
+
+def _softmax_tower_allocations(fitness: Mapping[str, float]) -> dict[str, float]:
+    """Temperature-scaled softmax over tower fitness. Stdlib only."""
+    logits = [
+        float(fitness.get(tower_id) or 0.01) / TOWER_ALLOCATION_TEMPERATURE
+        for tower_id in EREBUS_TOWER_IDS
+    ]
+    peak = max(logits)
+    shifted = [value - peak for value in logits]
+    exponentials = [math.exp(value) for value in shifted]
+    total = sum(exponentials)
+    if total <= 0.0:
+        equal = 1.0 / float(len(EREBUS_TOWER_IDS))
+        return {tower_id: equal for tower_id in EREBUS_TOWER_IDS}
+    return {
+        tower_id: exponential / total
+        for tower_id, exponential in zip(EREBUS_TOWER_IDS, exponentials)
+    }
+
+
+def _tower_allocations_from_stored(value: object) -> dict[str, float]:
+    """Hydrate tower allocations from PAN persistence without inventing keys."""
+    if not isinstance(value, dict):
+        return {}
+    allocations: dict[str, float] = {}
+    for key, inner in value.items():
+        try:
+            allocations[str(key)] = float(inner)
+        except (TypeError, ValueError):
+            continue
+    return allocations
+
+
+def _bulletin_cognition_fields(content: Mapping[str, object]) -> dict[str, object]:
+    """Return signed ROE/activation fields carried on a threat bulletin.
+
+    Missing ROE defaults to observe. Invalid ROE fails loud. Ingest copies
+    these fields as a receipt and never executes NEUTRALIZE.
+    """
+    roe_level = str(content.get("roe_level") or ROELevel.OBSERVE.value).strip().lower()
+    if roe_level not in ROE_ORDER:
+        raise BulletinVerificationError(f"bulletin roe_level invalid: {roe_level}")
+    try:
+        neural_activation = _bounded_confidence(content.get("neural_activation", 0.0))
+    except ImmuneSystemError as exc:
+        raise BulletinVerificationError("bulletin neural_activation is invalid") from exc
+    return {
+        "roe_observe": bool(content.get("roe_observe", True)),
+        "roe_deceive": bool(content.get("roe_deceive", False)),
+        "roe_degrade": bool(content.get("roe_degrade", False)),
+        "roe_neutralize": bool(content.get("roe_neutralize", False)),
+        "roe_level": roe_level,
+        "neural_activation": neural_activation,
+        "human_authorized": bool(content.get("human_authorized", False)),
+    }
+
+
 def _bulletin_signed_body(content: Mapping[str, object]) -> dict[str, object]:
     """Return the USMS-signed bulletin fields without the signature itself."""
+    cognition = _bulletin_cognition_fields(content)
     return {
         "intel_id": content.get("intel_id"),
         "origin_node_id": content.get("origin_node_id"),
@@ -952,6 +1325,13 @@ def _bulletin_signed_body(content: Mapping[str, object]) -> dict[str, object]:
         "usms_author_id": content.get("usms_author_id"),
         "usms_pubkey": content.get("usms_pubkey"),
         "pan_identity_hash": content.get("pan_identity_hash"),
+        "roe_level": cognition["roe_level"],
+        "neural_activation": cognition["neural_activation"],
+        "roe_observe": cognition["roe_observe"],
+        "roe_deceive": cognition["roe_deceive"],
+        "roe_degrade": cognition["roe_degrade"],
+        "roe_neutralize": cognition["roe_neutralize"],
+        "human_authorized": cognition["human_authorized"],
     }
 
 

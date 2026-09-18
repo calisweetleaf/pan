@@ -1,32 +1,32 @@
-# SCOPE — OPEN 2026-09-12: security-highway-completion
+# SCOPE — CLOSED 2026-09-18: erebus-usms-tower-bind
 
-**Status:** CLOSED 2026-09-12. Isolation proven, highway rewritten as
-packet-fabric travel. Gate `results/pan_gate_20260912_235357.json` exit 0.
-Do not wrap. Do not open public-internet sockets.
+**Status:** CLOSED 2026-09-18. Erebus towers persist as USMS META nodes at
+`PlanetaryImmuneSystem`. Immune consumer 20/20,
+`test/immune/runs/20260918_010347/`. Do not wrap. Do not import
+reference-code as a second runtime. Do not create a neural/erebus/memory_system
+package.
 
 ## Engagement Mode
 
 - mode: EDIT
-- army: security-highway-completion
-- target_module: security/sovereign_firewall.py
+- army: erebus-usms-tower-bind
+- target_module: security/planetary_immune_system.py
 - target_module_provenance: snapshots/v0.2/manifest.json domains.immune
 - subsequent_targets:
-  - security/defensive_sovereignty.py
-  - security/reactive_offense.py
-  - security/defensive_offensive_bridge.py
-  - security/planetary_highway.py
-- justification: I am editing the live security owners because a second TCP
-  consciousness plane (the ARFS clone in planetary_highway.py) cannot be
-  wrapped into UnifiedDataPacket travel without duplicating relay, seal,
-  and firewall logic already owned by email_social and the immune bind.
-  WAN SMTP/urlopen/socket paths must fail loud in the owners that contain
-  them. Isolation is proven before the highway file is replaced.
+  - test/immune/test_planetary_immune_system.py
+- justification: I am editing the live immune owner because Erebus tower
+  neural competition still lives as RAM ResourceCompetitor state in
+  defensive_sovereignty.py (Somnus Erebus Tower lineage). Wrapping that
+  lineage would duplicate USMS EVENT/BELIEF persistence already owned here.
+  The missing consumed unit is attaching those towers to the signed
+  Ed25519 DAG via semantic-vector cosine already stored on UnifiedMemoryNode,
+  binding them to PAN RSA packets without collapsing identities.
 - author: daeron
-- date: 2026-09-12
+- date: 2026-09-18
 
 ## Unit order
 
-1. LegacyInternetEgressError + HIGHWAY_ PAN_MESH lane
-2. Lineage WAN fail-loud + bridge stop simulating L4
-3. Rewrite planetary_highway.py as PlanetaryHighway
-4. test/highway + immune egress checks + gate
+1. Standing Erebus tower META nodes on USMS at PlanetaryImmuneSystem bind
+2. Cosine-weighted DAG neural_activation (MTL/NMCA vectors, not mean-only)
+3. Tower competition persisted as USMS META + COHERENCE_BOUND to the BELIEF
+4. Direct immune consumer proves restart, cosine pull, L4 still fail-loud

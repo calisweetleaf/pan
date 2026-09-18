@@ -26,6 +26,7 @@ from PAN_SDK import SovereignCommunicator, SovereignIdentity, UnifiedDataPacket
 from memory.unified_memory_system import (
     LinkageTypeEnum,
     MemoryAccessError,
+    NodeKindEnum,
     SovereignIdentityError,
     UnifiedMemoryError,
 )
@@ -41,6 +42,7 @@ from security.defensive_sovereignty import (
 from security.reactive_offense import NetworkJammer, TracebackHunter
 from security.planetary_immune_system import (
     BulletinVerificationError,
+    EREBUS_TOWER_IDS,
     ImmuneSystemError,
     ImmuneSystemNotBoundError,
     PlanetaryImmuneSystem,
@@ -246,7 +248,7 @@ def check_memory_survives_restart(details: dict[str, object]) -> None:
 
 
 def check_peer_ingests_bulletin(details: dict[str, object]) -> None:
-    """A second node remembers a high-confidence bulletin pulled from the first DHT."""
+    """Peer ingest reconstructs origin ROE and neural_activation from the signed bulletin."""
     with tempfile.TemporaryDirectory(prefix="immune_mesh_", ignore_cleanup_errors=True) as tmpdir:
         alpha_root = Path(tmpdir) / "alpha"
         bravo_root = Path(tmpdir) / "bravo"
@@ -274,12 +276,72 @@ def check_peer_ingests_bulletin(details: dict[str, object]) -> None:
                 f"bravo ingested intel_id={ingested.intel_id} "
                 f"event={ingested.event_node_id[:12]}"
             )
+            packet_content = packet_dict.get("content")
+            if not isinstance(packet_content, dict):
+                raise CheckFailure("bulletin packet missing content mapping")
+            if record.belief_node_id is None:
+                raise CheckFailure("alpha share did not persist a BELIEF")
+            origin_belief = alpha.memory.retrieve_memory_node(
+                record.belief_node_id, requester=alpha.memory_identity
+            )
+            if origin_belief is None:
+                raise CheckFailure("alpha BELIEF missing after broadcast")
+            origin_roe = origin_belief.content.get("roe_level")
+            origin_activation = float(origin_belief.content.get("neural_activation") or 0.0)
+            bulletin_activation = float(packet_content.get("neural_activation") or -1.0)
+            print(
+                f"origin roe={origin_roe} activation={origin_activation} "
+                f"bulletin_roe={packet_content.get('roe_level')} "
+                f"ingested_roe={ingested.roe_level}"
+            )
+            if packet_content.get("roe_level") != origin_roe:
+                raise CheckFailure("bulletin dropped origin ROE")
+            if abs(bulletin_activation - origin_activation) > 1e-9:
+                raise CheckFailure("bulletin dropped neural_activation")
+            if packet_content.get("pan_identity_hash") == packet_content.get("usms_author_id"):
+                raise CheckFailure("bulletin collapsed PAN RSA hash into USMS author id")
+            if ingested.belief_node_id is None:
+                raise CheckFailure("bravo ingest did not persist a BELIEF")
+            ingested_belief = bravo.memory.retrieve_memory_node(
+                ingested.belief_node_id, requester=bravo.memory_identity
+            )
+            if ingested_belief is None:
+                raise CheckFailure("bravo BELIEF missing after ingest")
+            if ingested_belief.content.get("roe_level") != origin_roe:
+                raise CheckFailure("ingested BELIEF dropped origin ROE")
+            ingested_activation = float(ingested_belief.content.get("neural_activation") or -1.0)
+            if abs(ingested_activation - origin_activation) > 1e-9:
+                raise CheckFailure("ingested BELIEF dropped neural_activation")
+            if ingested.roe_level != origin_roe:
+                raise CheckFailure("ingested IntelligenceRecord dropped origin ROE")
+            if abs(ingested.neural_activation - origin_activation) > 1e-9:
+                raise CheckFailure("ingested IntelligenceRecord dropped neural_activation")
+            if ingested.bulletin_dht_key is not None:
+                raise CheckFailure("ingest re-broadcast a bulletin")
+            if ingested_belief.content.get("roe_neutralize") is True:
+                raise CheckFailure("peer ingest must not persist NEUTRALIZE from this share")
+            if packet_content.get("human_authorized") is not False:
+                raise CheckFailure("unauthorized deceive bulletin claimed human_authorized")
+            if ingested_belief.content.get("human_authorized") is not False:
+                raise CheckFailure("ingested BELIEF invented human authorization")
             hits = bravo.get_relevant_intelligence({"threat_type": "zero_day_loader"})
             if not hits:
                 raise CheckFailure("bravo semantic search missed ingested bulletin")
             details["peer_ingested_intel_id"] = ingested.intel_id
             details["peer_hits"] = len(hits)
             details["packet_kind"] = packet_dict.get("kind")
+            details["bulletin_roe_level"] = packet_content.get("roe_level")
+            details["ingested_roe_level"] = ingested.roe_level
+            details["ingested_neural_activation"] = ingested.neural_activation
+            details["identities_distinct"] = True
+            if ingested.tower_competition_node_id is None:
+                raise CheckFailure("bravo ingest did not attach local Erebus towers")
+            if "tower_allocations" in packet_content:
+                raise CheckFailure("bulletin protocol expanded with tower_allocations")
+            bravo_towers = bravo.list_erebus_towers()
+            if set(bravo_towers) != set(EREBUS_TOWER_IDS):
+                raise CheckFailure(f"bravo missing standing towers: {bravo_towers}")
+            details["peer_tower_competition"] = ingested.tower_competition_node_id
             if details["packet_kind"] != THREAT_BULLETIN_KIND:
                 raise CheckFailure(f"unexpected bulletin kind {details['packet_kind']}")
         finally:
@@ -478,6 +540,176 @@ def check_neutralize_requires_human_authorization(details: dict[str, object]) ->
         finally:
             if immune is not None:
                 immune.close()
+
+
+def check_erebus_towers_bind_usms(details: dict[str, object]) -> None:
+    """Standing Erebus towers are USMS META nodes bound to the PAN/USMS identity pair."""
+    with tempfile.TemporaryDirectory(prefix="immune_towers_", ignore_cleanup_errors=True) as tmpdir:
+        root = Path(tmpdir)
+        first = None
+        second = None
+        try:
+            first = PlanetaryImmuneSystem(root, node_name="immune-towers")
+            if first.pan_identity.identity_hash == first.memory_identity.agent_id:
+                raise CheckFailure("PAN RSA hash collapsed into USMS Ed25519 agent_id")
+            towers = first.list_erebus_towers()
+            print(f"standing towers={towers}")
+            if set(towers) != set(EREBUS_TOWER_IDS):
+                raise CheckFailure(f"expected four towers, got {sorted(towers)}")
+            binding = first.persistence.read_state("immune_meta", "identity_binding")
+            if not isinstance(binding, dict) or not binding.get("node_id"):
+                raise CheckFailure("identity binding META missing")
+            binding_id = str(binding["node_id"])
+            for tower_id, node_id in towers.items():
+                node = first.memory.retrieve_memory_node(
+                    node_id, requester=first.memory_identity
+                )
+                if node is None:
+                    raise CheckFailure(f"tower {tower_id} node missing")
+                if node.kind != NodeKindEnum.META:
+                    raise CheckFailure(f"tower {tower_id} is {node.kind}, not META")
+                if node.content.get("tower_kind") != "erebus_cognitive_tower":
+                    raise CheckFailure(f"tower {tower_id} missing tower_kind")
+                bound = node.linkage_manifest.get(LinkageTypeEnum.COHERENCE_BOUND, [])
+                if binding_id not in bound:
+                    raise CheckFailure(f"tower {tower_id} is not COHERENCE_BOUND to identity")
+                print(
+                    f"tower {tower_id} node={node_id[:12]} kind={node.kind.value} "
+                    f"bound={binding_id[:12]}"
+                )
+            details["tower_ids"] = dict(towers)
+            details["identities_distinct"] = True
+            first.close()
+            first = None
+            second = PlanetaryImmuneSystem(root, node_name="immune-towers")
+            recovered = second.list_erebus_towers()
+            if recovered != towers:
+                raise CheckFailure("tower node ids did not survive reopen")
+            details["restart_tower_ids"] = dict(recovered)
+        finally:
+            if first is not None:
+                first.close()
+            if second is not None:
+                second.close()
+
+
+def check_erebus_tower_competition_cosine_field(details: dict[str, object]) -> None:
+    """Neighbor cosine pull raises activation; competition META binds towers to the BELIEF."""
+    with tempfile.TemporaryDirectory(prefix="immune_field_", ignore_cleanup_errors=True) as tmpdir:
+        root = Path(tmpdir)
+        immune = None
+        reopened = None
+        try:
+            immune = PlanetaryImmuneSystem(root, node_name="immune-field")
+            first = immune.share_intelligence(
+                {
+                    "threat_type": "mesh_credential_replay",
+                    "confidence": 0.9,
+                    "actionable": True,
+                    "vector": "alpha",
+                    "summary": "high-confidence replay on the civic mesh",
+                },
+                source="defensive_sovereignty",
+            )
+            second = immune.share_intelligence(
+                {
+                    "threat_type": "mesh_credential_replay",
+                    "confidence": 0.5,
+                    "actionable": True,
+                    "vector": "bravo",
+                    "summary": "follow-on replay of the same campaign",
+                },
+                source="defensive_sovereignty",
+            )
+            print(
+                f"first activation={first.neural_activation:.4f} "
+                f"winning={first.winning_tower} "
+                f"second activation={second.neural_activation:.4f} "
+                f"winning={second.winning_tower}"
+            )
+            if second.neural_activation <= 0.55:
+                raise CheckFailure(
+                    f"cosine neighbor pull did not raise activation: {second.neural_activation}"
+                )
+            if second.neural_activation <= second.confidence:
+                raise CheckFailure("second activation did not exceed local confidence")
+            alloc_sum = sum(second.tower_allocations.values())
+            if abs(alloc_sum - 1.0) > 1e-6:
+                raise CheckFailure(f"tower allocations must sum to 1, got {alloc_sum}")
+            if second.winning_tower != "deceive":
+                raise CheckFailure(
+                    f"expected deceive winning tower, got {second.winning_tower}"
+                )
+            if second.tower_competition_node_id is None:
+                raise CheckFailure("competition META was not persisted")
+            competition = immune.memory.retrieve_memory_node(
+                second.tower_competition_node_id,
+                requester=immune.memory_identity,
+            )
+            if competition is None or competition.kind != NodeKindEnum.META:
+                raise CheckFailure("competition node missing or wrong kind")
+            if second.belief_node_id is None:
+                raise CheckFailure("second share missing belief")
+            bound = competition.linkage_manifest.get(LinkageTypeEnum.COHERENCE_BOUND, [])
+            if second.belief_node_id not in bound:
+                raise CheckFailure("competition is not COHERENCE_BOUND to the BELIEF")
+            tower_ids = set(immune.list_erebus_towers().values())
+            if not tower_ids.issubset(set(competition.parents)):
+                raise CheckFailure("competition parents omit standing towers")
+            if competition.content.get("neutralize_executable") is True:
+                raise CheckFailure("competition executed NEUTRALIZE without a human")
+            hits = immune.get_relevant_intelligence(
+                {"threat_type": "mesh_credential_replay"}
+            )
+            if not hits:
+                raise CheckFailure("cosine field share was not searchable")
+            for hit in hits:
+                if str(hit.get("winning_tower") or "") == "erebus_cognitive_tower":
+                    raise CheckFailure("tower META leaked into intelligence search")
+            try:
+                immune.share_intelligence(
+                    {
+                        "threat_type": "external_host_exploit",
+                        "confidence": 0.99,
+                        "roe_level": ROELevel.NEUTRALIZE.value,
+                        "human_authorized": False,
+                    },
+                    source="reactive_offense",
+                )
+            except ImmuneSystemError as exc:
+                print(f"L4 still denied after tower bind: {exc}")
+                details["l4_denied"] = str(exc)
+            else:
+                raise CheckFailure("tower bind allowed L4 without human authorization")
+            details["first_activation"] = first.neural_activation
+            details["second_activation"] = second.neural_activation
+            details["second_allocations"] = dict(second.tower_allocations)
+            details["winning_tower"] = second.winning_tower
+            details["competition_node_id"] = second.tower_competition_node_id
+            intel_id = second.intel_id
+            immune.close()
+            immune = None
+            reopened = PlanetaryImmuneSystem(root, node_name="immune-field")
+            recovered = reopened.get_relevant_intelligence(
+                {"threat_type": "mesh_credential_replay"}
+            )
+            recovered_ids = {str(item.get("intel_id")) for item in recovered}
+            if intel_id not in recovered_ids:
+                raise CheckFailure("tower competition intel did not survive reopen")
+            recovered_row = next(
+                item for item in recovered if str(item.get("intel_id")) == intel_id
+            )
+            if not recovered_row.get("tower_allocations"):
+                raise CheckFailure("tower allocations missing after reopen")
+            details["restart_recovered"] = True
+            details["identities_distinct"] = (
+                reopened.pan_identity.identity_hash != reopened.memory_identity.agent_id
+            )
+        finally:
+            if immune is not None:
+                immune.close()
+            if reopened is not None:
+                reopened.close()
 
 
 def check_second_chain_retired_share_uses_immune(details: dict[str, object]) -> None:
@@ -739,6 +971,8 @@ CHECKS: tuple[tuple[str, CheckFn], ...] = (
     ("contradiction_and_campaign_entangle", check_contradiction_and_campaign_entangle),
     ("roe_ladder_persists_through_bridge", check_roe_ladder_persists_through_bridge),
     ("neutralize_requires_human_authorization", check_neutralize_requires_human_authorization),
+    ("erebus_towers_bind_usms", check_erebus_towers_bind_usms),
+    ("erebus_tower_competition_cosine_field", check_erebus_tower_competition_cosine_field),
     ("second_chain_retired_share_uses_immune", check_second_chain_retired_share_uses_immune),
     ("smtp_alert_fails_loud", check_smtp_alert_fails_loud),
     ("webhook_alert_fails_loud", check_webhook_alert_fails_loud),
@@ -847,6 +1081,9 @@ def write_artifacts(payload: dict[str, object], timestamp: str, log_text: str) -
         "become `THREAT_MEMORY_BULLETIN` packets that a peer can ingest after restart.",
         "I required ROE DECEIVE/DEGRADE to persist as USMS BELIEF content via the",
         "defensive-offensive bridge, and ROE Level 4 to fail without human authorization.",
+        "I required standing Erebus towers as USMS META nodes, cosine-weighted DAG",
+        "activation, and competition META that survives reopen without collapsing",
+        "PAN RSA and USMS Ed25519 identities.",
         "",
         "## Checks",
         "",

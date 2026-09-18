@@ -16,6 +16,25 @@ source inspection or STATE.md.
 - NOTEPAD.md — current scratch, non-canonical.
 - security/AGENTS.md + security/rules_of_engagement.md — security lane.
 
+## 2026-09-18 — Erebus towers bound to USMS
+
+**Keys:** PlanetaryImmuneSystem · ErebusTowerCompetition · list_erebus_towers ·
+COHERENCE_BOUND · cosine neural_activation
+
+**Status:** VERIFIED (immune consumer 20/20). Full gate not re-run.
+
+I attached standing Erebus towers as USMS META nodes at
+`security/planetary_immune_system.py`. Competition uses semantic-vector
+cosine already on `UnifiedMemoryNode`. Bulletin ROE/activation stay on
+Fletcher's packet seam. Identities stayed two types.
+
+- **Authority:** test/immune/runs/20260918_010347/result.json;
+  snapshots/v0.14/manifest.json; SOTA_RUN.md.
+- **Boundary:** Do not import reference-code. Do not create a neural package.
+  Do not expand master_db §6.2. Do not dummy `_run_inference` or prompt_bridge.
+- **Then inspect:** security/planetary_immune_system.py,
+  test/immune/test_planetary_immune_system.py.
+
 ## 2026-09-12 — highway packet fabric; lineage WAN isolated
 
 **Keys:** PlanetaryHighway · HIGHWAY_HOP · LegacyInternetEgressError ·

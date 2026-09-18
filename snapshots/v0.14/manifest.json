@@ -1,0 +1,26 @@
+{
+  "version": "0.14",
+  "date": "2026-09-18",
+  "author": "daeron",
+  "summary": "Attach Erebus cognitive towers to USMS at PlanetaryImmuneSystem. Cosine-weighted DAG activation. Competition META coherence-bound to BELIEF. RSA and Ed25519 stay two types. L4 still fail-loud.",
+  "domains": {
+    "immune": {
+      "module": "security/planetary_immune_system.py",
+      "wrapper": null,
+      "tool_count": 1,
+      "provenance": "memory/unified_memory_system.py + PAN_SDK DHT/UnifiedDataPacket + security ROE lane. Tower neural competition ported from lineage ResourceCompetitor semantics, not imported as a second runtime.",
+      "edits": [
+        {
+          "date": "2026-09-18",
+          "author": "daeron",
+          "summary": "Standing Erebus tower META nodes, MTL/NMCA cosine neighbor pull, USMS-backed tower competition. Bulletin ROE/activation seam left on Fletcher's packet bind. No parallel neural package.",
+          "files": [
+            "security/planetary_immune_system.py",
+            "test/immune/test_planetary_immune_system.py"
+          ],
+          "justification_ref": "SCOPE.md"
+        }
+      ]
+    }
+  }
+}
