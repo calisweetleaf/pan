@@ -1,0 +1,157 @@
+{
+  "name": "thyris_android_boot",
+  "passed": false,
+  "status": "fail",
+  "pass_count": 6,
+  "fail_count": 2,
+  "skip_count": 0,
+  "elapsed_seconds": 6.050551176071167,
+  "checks": [
+    {
+      "name": "qemu_system_resolves",
+      "status": "pass",
+      "detail": {
+        "qemu_system": "C:\\Program Files\\qemu\\qemu-system-x86_64.exe",
+        "accelerator": [
+          "-accel",
+          "tcg"
+        ]
+      }
+    },
+    {
+      "name": "android_iso_authentic",
+      "status": "pass",
+      "detail": {
+        "iso_path": "C:\\Users\\trent\\pan\\android_images\\android-x86_64-9.0-r2.iso",
+        "iso_bytes": 965738496,
+        "sha1": "1cc85b5ed7c830ff71aecf8405c7281a9c995aa0"
+      }
+    },
+    {
+      "name": "nographic_argv",
+      "status": "pass",
+      "detail": {
+        "argv": [
+          "C:\\Program Files\\qemu\\qemu-system-x86_64.exe",
+          "-accel",
+          "tcg",
+          "-cpu",
+          "qemu64",
+          "-name",
+          "thyris-argv-probe",
+          "-m",
+          "2048",
+          "-smp",
+          "2",
+          "-drive",
+          "file=C:\\Users\\trent\\pan\\disk.qcow2,format=qcow2,if=ide,index=0,media=disk",
+          "-drive",
+          "file=C:\\Users\\trent\\pan\\android.iso,format=raw,if=ide,index=1,media=cdrom,readonly=on",
+          "-boot",
+          "order=d",
+          "-no-reboot",
+          "-nographic",
+          "-netdev",
+          "user,id=net0",
+          "-device",
+          "e1000,netdev=net0"
+        ]
+      }
+    },
+    {
+      "name": "adb_resolves",
+      "status": "pass",
+      "detail": {
+        "adb": "C:\\Users\\trent\\Downloads\\scrcpy-win64-v4.1\\scrcpy-win64-v4.1\\adb.exe"
+      }
+    },
+    {
+      "name": "extract_live_boot_files",
+      "status": "pass",
+      "detail": {
+        "kernel_bytes": 7511040,
+        "initrd_bytes": 1358743,
+        "iso_path": "C:\\Users\\trent\\pan\\android_images\\android-x86_64-9.0-r2.iso"
+      }
+    },
+    {
+      "name": "live_argv_forwards_adb",
+      "status": "fail",
+      "error": "CheckFailure: live argv is missing isolinux.cfg DEBUG=2 SRC= DATA= append",
+      "detail": {
+        "argv": [
+          "C:\\Program Files\\qemu\\qemu-system-x86_64.exe",
+          "-accel",
+          "tcg",
+          "-cpu",
+          "qemu64",
+          "-name",
+          "thyris-live-argv",
+          "-m",
+          "2048",
+          "-smp",
+          "2",
+          "-drive",
+          "file=C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_liveargv_4sxxq2zg\\disk.qcow2,format=qcow2,if=ide,index=0,media=disk",
+          "-drive",
+          "file=C:\\Users\\trent\\pan\\android_images\\android-x86_64-9.0-r2.iso,format=raw,if=ide,index=1,media=cdrom,readonly=on",
+          "-kernel",
+          "C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_liveargv_4sxxq2zg\\boot\\kernel",
+          "-initrd",
+          "C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_liveargv_4sxxq2zg\\boot\\initrd.img",
+          "-append",
+          "root=/dev/ram0 DEBUG=2 SRC= DATA= console=ttyS0,115200 androidboot.console=ttyS0",
+          "-no-reboot",
+          "-nographic",
+          "-netdev",
+          "user,id=net0,hostfwd=tcp::15555-:5555",
+          "-device",
+          "e1000,netdev=net0"
+        ]
+      }
+    },
+    {
+      "name": "android_installer_boot",
+      "status": "pass",
+      "detail": {
+        "pid": 28176,
+        "markers": [
+          "SeaBIOS",
+          "Booting from DVD",
+          "ISOLINUX",
+          "isolinux"
+        ],
+        "iso_bootloader_markers": [
+          "ISOLINUX",
+          "isolinux"
+        ],
+        "iso_bytes": 965738496,
+        "accelerator": [
+          "-accel",
+          "tcg"
+        ],
+        "console_excerpt": "\u001bc\u001b[?7l\u001b[2J\u001b[0mSeaBIOS (version rel-1.17.0-0-gb52ca86e094d-prebuilt.qemu.org)\n\n\niPXE (http://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+7EFD1F90+7EF31F90 CA00\nPress Ctrl-B to configure iPXE (PCI 00:03.0)...\n                                                                               \n\n\nBooting from DVD/CD...\n\nISOLINUX 6.03 2014-10-06 ETCD Copyright (C) 1994-2014 H. Peter Anvin et al\n\u001b[01;01H",
+        "phone_ready": false,
+        "adb_proven": false,
+        "qemu_system": "C:\\Program Files\\qemu\\qemu-system-x86_64.exe",
+        "disk_owner": "telecom.vm_image_manager.ISOConverter._create_disk"
+      }
+    },
+    {
+      "name": "android_adb_userspace",
+      "status": "fail",
+      "error": "CheckFailure: Android live boot failed before ADB: live ADB argv is missing isolinux.cfg DEBUG=2 SRC= append",
+      "detail": {}
+    }
+  ],
+  "phone_ready": false,
+  "adb_proven": false,
+  "claim": "Installer ISOLINUX remains a non-READY proof. ADB userspace was not proven; phone_ready stays false.",
+  "error": "2 thyris android boot checks failed",
+  "artifacts": {
+    "json": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260918_023707\\result.json",
+    "md": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260918_023707\\result.md",
+    "log": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260918_023707\\result.log",
+    "run_dir": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260918_023707"
+  }
+}

@@ -47,12 +47,38 @@ Justification: I bound Android ISO resolution and qemu-system-x86_64 start onto
     snapshots/v0.10 is the immune second-chain retirement (32ea3a9), not this unit.
 Provenance: snapshots/v0.11/manifest.json -> domains.thyris.edits[0]
 Files: telecom/phone_orchestrator.py
+
+Modified: 2026-09-18
+Modified by: cursor-grok (daeron)
+Justification: I bound live kernel/initrd boot and real adb connect/shell onto
+    this orchestrator because PhoneVMState.READY was already gated on ADB, but
+    the guest never left vesamenu.c32 and _wait_for_ip_and_adb trusted a
+    fabricated 192.168.122.x. Wrapping a second boot owner would duplicate
+    build_android_qemu_argv and ISOConverter._create_disk. Kernel and initrd
+    come from the same official android-x86 9.0-r2 ISO already proven for
+    ISOLINUX; that is not a new image and not a READY claim from installer text.
+Provenance: snapshots/v0.15/manifest.json -> domains.thyris.edits[0]
+Files: telecom/phone_orchestrator.py
+
+Modified: 2026-09-18
+Modified by: cursor-grok (daeron)
+Justification: Fletcher's READY audit showed serial setprop into a kernel log
+    cannot enable TCP adbd, leftover adb.exe made connect look live while the
+    guest stayed offline, and create_phone_vm still launched VNC without
+    -serial. I switched the live append to isolinux.cfg label debug
+    (DEBUG=2 SRC= DATA=), kill leftover qemu/adb before retry, refuse device
+    offline, and made _start_android_vm use the same nographic live argv as
+    the helper so PhoneVMState.READY is set only after adb shell
+    thyris_adb_health. snapshots/v0.15 is not promoted until that proof lands.
+Provenance: SCOPE.md engagement thyris-adb-userspace-ready
+Files: telecom/phone_orchestrator.py
 """
 
 from __future__ import annotations
 
 import logging
 import asyncio
+import socket
 import subprocess
 import shutil
 from typing import Dict, List, Any, Optional, Tuple
@@ -63,6 +89,7 @@ from enum import Enum
 from datetime import datetime, timezone
 import json
 import hashlib
+import gzip
 import secrets  # For secure random passwords
 import psutil  # For PID/process management (from your VM supervisor)
 import os
@@ -126,10 +153,38 @@ ISO_BOOTLOADER_MARKERS: tuple[str, ...] = (
     "Android-x86",
     "android-x86",
 )
+ANDROID_LIVE_KERNEL = "kernel"
+ANDROID_LIVE_INITRD = "initrd.img"
+# isolinux.cfg label debug. SRC= keeps system.sfs on the same CDROM.
+ANDROID_ISOLINUX_DEBUG_APPEND = "root=/dev/ram0 DEBUG=2 SRC= DATA="
+# console= is the -nographic capture channel; it is not an ADB enable switch.
+ANDROID_LIVE_CMDLINE = (
+    ANDROID_ISOLINUX_DEBUG_APPEND
+    + " console=ttyS0,115200 androidboot.console=ttyS0"
+)
+ISOLINUX_DEBUG_SHELL_PROMPTS: tuple[str, ...] = (
+    "Type 'exit' to continue booting",
+    "Type 'exit' to enter Android",
+)
+USERSPACE_EVIDENCE_MARKERS: tuple[str, ...] = (
+    "Detecting Android-x86",
+    "Running Android-x86",
+    "android-x86:",
+    "init: ",
+    "adbd",
+    "healthd",
+)
+ADB_HEALTH_TOKEN = "thyris_adb_health"
+ISO9660_SECTOR = 2048
+QEMU_USERNET_GUEST_IP = "10.0.2.15"
 
 
 class ThyrisBootError(RuntimeError):
     """QEMU started but produced no real Android ISO / firmware boot evidence."""
+
+
+class ThyrisAdbError(RuntimeError):
+    """Guest process ran but ADB userspace was not proven."""
 
 
 def sha1_file(path: Path) -> str:
@@ -188,6 +243,305 @@ def resolve_qemu_system() -> Path:
     )
 
 
+def resolve_adb() -> Path:
+    """Resolve the host adb binary. ADB userspace proof cannot proceed without it.
+
+    Returns:
+        Absolute path to adb.
+
+    Raises:
+        FileNotFoundError: adb is not on PATH.
+    """
+    names = ("adb", "adb.exe")
+    for name in names:
+        found = shutil.which(name)
+        if found:
+            return Path(found).resolve()
+    raise FileNotFoundError(
+        "adb is not on PATH; PhoneVMState.READY requires a real Android Debug Bridge"
+    )
+
+
+def allocate_local_tcp_port() -> int:
+    """Bind 127.0.0.1:0 and return an unused host port for ADB forward."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.bind(("127.0.0.1", 0))
+        port = sock.getsockname()[1]
+    if not isinstance(port, int) or port <= 0:
+        raise ThyrisAdbError("could not allocate a local TCP port for ADB")
+    return port
+
+
+def terminate_stale_thyris_qemu(*, keep_pid: Optional[int] = None) -> List[int]:
+    """Kill leftover qemu-system-x86_64 guests from prior Thyris ADB attempts.
+
+    Args:
+        keep_pid: Live guest to preserve, if any.
+
+    Returns:
+        PIDs that were sent SIGKILL / process kill.
+    """
+    killed: List[int] = []
+    for proc in psutil.process_iter(["pid", "name", "cmdline"]):
+        try:
+            pid = int(proc.info["pid"])
+            if keep_pid is not None and pid == keep_pid:
+                continue
+            name = str(proc.info.get("name") or "").lower()
+            cmdline = proc.info.get("cmdline") or []
+            joined = " ".join(str(part) for part in cmdline).lower()
+            is_qemu = "qemu-system-x86_64" in name or "qemu-system-x86_64" in joined
+            if not is_qemu:
+                continue
+            thyris_guest = (
+                "thyris" in joined
+                or "android-x86" in joined
+                or "android_images" in joined
+            )
+            if not thyris_guest:
+                continue
+            proc.kill()
+            killed.append(pid)
+        except (psutil.Error, ProcessLookupError, TypeError, ValueError, OSError):
+            continue
+    return killed
+
+
+def _adb_output_is_offline(text: str) -> bool:
+    """True when adb reported a transport that is not a live userspace device."""
+    lower = text.lower()
+    return "offline" in lower or "unauthorized" in lower
+
+
+async def continue_isolinux_debug_shells(
+    process: asyncio.subprocess.Process,
+    console_text: str,
+    exits_sent: int,
+) -> int:
+    """Send the isolinux DEBUG=2 'exit' continue, not setprop spam.
+
+    Args:
+        process: Live qemu with serial on stdin.
+        console_text: Current -nographic stdout.
+        exits_sent: How many exit lines already written.
+
+    Returns:
+        Updated exits_sent count (at most one per official prompt, max 2).
+    """
+    if process.stdin is None or exits_sent >= 2:
+        return exits_sent
+    needed = sum(1 for prompt in ISOLINUX_DEBUG_SHELL_PROMPTS if prompt in console_text)
+    if needed > 2:
+        needed = 2
+    while exits_sent < needed:
+        process.stdin.write(b"exit\n")
+        await process.stdin.drain()
+        exits_sent += 1
+        logger.info("sent isolinux DEBUG=2 exit %s/%s", exits_sent, needed)
+    return exits_sent
+
+
+def _iso9660_normalize_name(raw: bytes) -> str:
+    """Strip ISO9660 version suffix from a directory-record name."""
+    label = raw.split(b";", 1)[0].decode("ascii", "replace").strip().lower()
+    return label.rstrip(".")
+
+
+def extract_iso9660_root_file(iso_path: Path, filename: str, destination: Path) -> Path:
+    """Copy one root-directory file off an ISO 9660 image using stdlib only.
+
+    Args:
+        iso_path: Official Android-x86 ISO.
+        filename: Root file name such as kernel or initrd.img.
+        destination: Output path. Parent directory must exist.
+
+    Returns:
+        The destination path after a complete write.
+
+    Raises:
+        FileNotFoundError: ISO is missing.
+        ThyrisBootError: The ISO is not ISO9660 or the named file is absent.
+        OSError: The destination cannot be written.
+    """
+    iso = Path(iso_path)
+    if not iso.is_file():
+        raise FileNotFoundError(f"Android ISO missing: {iso}")
+    wanted = filename.strip().lower()
+    if not wanted:
+        raise ThyrisBootError("ISO extract filename is empty")
+    dest = Path(destination)
+    with iso.open("rb") as handle:
+        handle.seek(16 * ISO9660_SECTOR)
+        pvd = handle.read(ISO9660_SECTOR)
+        if len(pvd) != ISO9660_SECTOR or pvd[0] != 1 or pvd[1:6] != b"CD001":
+            raise ThyrisBootError(f"{iso.name} is not an ISO 9660 primary volume")
+        rec_len = pvd[156]
+        if rec_len < 34:
+            raise ThyrisBootError(f"{iso.name} primary volume has no root directory")
+        rec = pvd[156:156 + rec_len]
+        extent = int.from_bytes(rec[2:6], "little")
+        size = int.from_bytes(rec[10:14], "little")
+        if extent < 1 or size < 1:
+            raise ThyrisBootError(f"{iso.name} root directory extent is invalid")
+        handle.seek(extent * ISO9660_SECTOR)
+        data = handle.read(size)
+        if len(data) != size:
+            raise ThyrisBootError(f"{iso.name} root directory is truncated")
+        offset = 0
+        found_extent = 0
+        found_size = 0
+        while offset < len(data):
+            length = data[offset]
+            if length == 0:
+                offset = ((offset // ISO9660_SECTOR) + 1) * ISO9660_SECTOR
+                continue
+            if offset + length > len(data) or length < 33:
+                raise ThyrisBootError(f"{iso.name} root directory record is truncated")
+            flags = data[offset + 25]
+            name_len = data[offset + 32]
+            name = data[offset + 33:offset + 33 + name_len]
+            if not (flags & 2):
+                label = _iso9660_normalize_name(name)
+                if label == wanted:
+                    found_extent = int.from_bytes(data[offset + 2:offset + 6], "little")
+                    found_size = int.from_bytes(data[offset + 10:offset + 14], "little")
+                    break
+            offset += length
+        if found_extent < 1 or found_size < 1:
+            raise ThyrisBootError(f"{iso.name} root directory has no file {filename!r}")
+        handle.seek(found_extent * ISO9660_SECTOR)
+        payload = handle.read(found_size)
+        if len(payload) != found_size:
+            raise ThyrisBootError(
+                f"{iso.name} file {filename!r} truncated at {len(payload)} of {found_size} bytes"
+            )
+    dest.write_bytes(payload)
+    return dest
+
+
+def extract_android_live_boot_files(iso_path: Path, destination_dir: Path) -> Tuple[Path, Path]:
+    """Extract live-boot kernel and initrd from the official Android-x86 ISO.
+
+    Args:
+        iso_path: android-x86_64-9.0-r2.iso (or THYRIS_ANDROID_ISO).
+        destination_dir: Directory that will hold kernel and initrd.img.
+
+    Returns:
+        (kernel_path, initrd_path)
+
+    Raises:
+        ThyrisBootError: Extracted files are too small to be the live boot pair.
+    """
+    dest_dir = Path(destination_dir)
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    kernel = extract_iso9660_root_file(iso_path, ANDROID_LIVE_KERNEL, dest_dir / ANDROID_LIVE_KERNEL)
+    initrd = extract_iso9660_root_file(iso_path, ANDROID_LIVE_INITRD, dest_dir / ANDROID_LIVE_INITRD)
+    if kernel.stat().st_size < 1_000_000:
+        raise ThyrisBootError(f"extracted kernel is too small: {kernel.stat().st_size} bytes")
+    if initrd.stat().st_size < 100_000:
+        raise ThyrisBootError(f"extracted initrd is too small: {initrd.stat().st_size} bytes")
+    inject_adb_tcp_into_live_initrd(initrd)
+    return kernel, initrd
+
+
+ADB_TCP_DEFAULT_PROP_LINES = (
+    'echo "service.adb.tcp.port=5555" >> default.prop\n'
+    'echo "persist.adb.tcp.port=5555" >> default.prop\n'
+)
+INITRD_SETUPWIZARD_PROP = (
+    '[ "$SETUPWIZARD" = "0" ] && echo "ro.setupwizard.mode=DISABLED" >> default.prop\n'
+)
+
+
+def _replace_cpio_newc_file(blob: bytes, filename: str, new_payload: bytes) -> bytes:
+    """Replace one regular file inside an uncompressed newc cpio archive."""
+    offset = 0
+    pieces: List[bytes] = []
+    replaced = False
+    while offset + 110 <= len(blob):
+        magic = blob[offset : offset + 6]
+        if magic not in (b"070701", b"070702"):
+            raise ThyrisBootError(f"live initrd cpio magic {magic!r} is not newc")
+        namesize = int(blob[offset + 94 : offset + 102], 16)
+        filesize = int(blob[offset + 54 : offset + 62], 16)
+        header_and_name = 110 + namesize
+        name_pad = (4 - (header_and_name % 4)) % 4
+        data_start = offset + header_and_name + name_pad
+        name = blob[offset + 110 : offset + 110 + namesize - 1].decode("utf-8", "replace")
+        data_pad = (4 - (filesize % 4)) % 4
+        next_offset = data_start + filesize + data_pad
+        if name == "TRAILER!!!":
+            pieces.append(blob[offset:])
+            break
+        if name == filename or name.endswith("/" + filename):
+            header = bytearray(blob[offset : offset + 110])
+            header[54:62] = f"{len(new_payload):08x}".encode("ascii")
+            name_bytes = blob[offset + 110 : offset + 110 + namesize]
+            entry = bytes(header) + name_bytes + (b"\x00" * name_pad) + new_payload
+            entry += b"\x00" * ((4 - (len(new_payload) % 4)) % 4)
+            pieces.append(entry)
+            replaced = True
+        else:
+            pieces.append(blob[offset:next_offset])
+        offset = next_offset
+    else:
+        raise ThyrisBootError("live initrd cpio is truncated before TRAILER")
+    if not replaced:
+        raise ThyrisBootError(f"live initrd cpio has no file {filename!r}")
+    return b"".join(pieces)
+
+
+def inject_adb_tcp_into_live_initrd(initrd_path: Path) -> None:
+    """Write ADB TCP properties beside the ISO init's SETUPWIZARD default.prop line.
+
+    Serial setprop into a kernel log cannot enable adbd. The live init already
+    appends to default.prop before switch_root; this adds the TCP port the
+    hostfwd targets. The ISO file on disk is not modified.
+    """
+    initrd = Path(initrd_path)
+    raw = initrd.read_bytes()
+    if raw[:2] != b"\x1f\x8b":
+        raise ThyrisBootError(f"live initrd is not gzip: {initrd}")
+    blob = gzip.decompress(raw)
+    init_bytes = _extract_cpio_newc_file(blob, "init")
+    init_text = init_bytes.decode("latin-1")
+    if INITRD_SETUPWIZARD_PROP not in init_text:
+        raise ThyrisBootError("live initrd init is missing the SETUPWIZARD default.prop write")
+    if "service.adb.tcp.port=5555" not in init_text:
+        init_text = init_text.replace(
+            INITRD_SETUPWIZARD_PROP,
+            INITRD_SETUPWIZARD_PROP + ADB_TCP_DEFAULT_PROP_LINES,
+            1,
+        )
+        blob = _replace_cpio_newc_file(blob, "init", init_text.encode("latin-1"))
+    with initrd.open("wb") as handle:
+        with gzip.GzipFile(filename="", mode="wb", fileobj=handle, mtime=0) as gz:
+            gz.write(blob)
+    logger.info("injected ADB TCP default.prop writes into live initrd %s", initrd)
+
+
+def _extract_cpio_newc_file(blob: bytes, filename: str) -> bytes:
+    """Return one file payload from an uncompressed newc cpio archive."""
+    offset = 0
+    while offset + 110 <= len(blob):
+        magic = blob[offset : offset + 6]
+        if magic not in (b"070701", b"070702"):
+            raise ThyrisBootError(f"live initrd cpio magic {magic!r} is not newc")
+        namesize = int(blob[offset + 94 : offset + 102], 16)
+        filesize = int(blob[offset + 54 : offset + 62], 16)
+        header_and_name = 110 + namesize
+        name_pad = (4 - (header_and_name % 4)) % 4
+        data_start = offset + header_and_name + name_pad
+        name = blob[offset + 110 : offset + 110 + namesize - 1].decode("utf-8", "replace")
+        if name == "TRAILER!!!":
+            break
+        if name == filename or name.endswith("/" + filename):
+            return blob[data_start : data_start + filesize]
+        data_pad = (4 - (filesize % 4)) % 4
+        offset = data_start + filesize + data_pad
+    raise ThyrisBootError(f"live initrd cpio has no file {filename!r}")
+
+
 def select_qemu_accelerator() -> Tuple[str, ...]:
     """Choose a real QEMU accelerator. Never pass -enable-kvm on Windows.
 
@@ -221,12 +575,18 @@ def build_android_qemu_argv(
     nographic: bool = True,
     vnc_display: Optional[int] = None,
     adb_port: Optional[int] = None,
+    kernel_path: Optional[Path] = None,
+    initrd_path: Optional[Path] = None,
+    kernel_append: Optional[str] = None,
 ) -> List[str]:
-    """Build qemu-system-x86_64 argv for an Android-x86 installer ISO.
+    """Build qemu-system-x86_64 argv for Android-x86.
 
-    nographic=True is the consumed boot-proof path: SeaBIOS/ISOLINUX land on
-    the process stdout. Windows `file:C:` serial does not capture SeaBIOS.
+    Installer-boot (no kernel_path): SeaBIOS/ISOLINUX on -nographic stdout.
+    Live userspace (kernel_path+initrd_path): skip vesamenu.c32 using files
+    extracted from the same ISO. The ISO stays attached so SRC= finds system.sfs.
     """
+    if (kernel_path is None) != (initrd_path is None):
+        raise ThyrisBootError("live boot requires both kernel_path and initrd_path")
     cmd: List[str] = [
         str(qemu_system),
         *select_qemu_accelerator(),
@@ -242,10 +602,28 @@ def build_android_qemu_argv(
         f"file={disk_path.resolve()},format=qcow2,if=ide,index=0,media=disk",
         "-drive",
         f"file={iso_path.resolve()},format=raw,if=ide,index=1,media=cdrom,readonly=on",
-        "-boot",
-        "order=d",
-        "-no-reboot",
     ]
+    if kernel_path is not None and initrd_path is not None:
+        if not kernel_path.is_file():
+            raise ThyrisBootError(f"live kernel missing: {kernel_path}")
+        if not initrd_path.is_file():
+            raise ThyrisBootError(f"live initrd missing: {initrd_path}")
+        append = kernel_append if kernel_append is not None else ANDROID_LIVE_CMDLINE
+        if not append.strip():
+            raise ThyrisBootError("live kernel_append is empty")
+        cmd.extend(
+            [
+                "-kernel",
+                str(kernel_path.resolve()),
+                "-initrd",
+                str(initrd_path.resolve()),
+                "-append",
+                append,
+            ]
+        )
+    else:
+        cmd.extend(["-boot", "order=d"])
+    cmd.append("-no-reboot")
     if nographic:
         cmd.append("-nographic")
     else:
@@ -253,6 +631,8 @@ def build_android_qemu_argv(
         if vnc_display is not None:
             cmd.extend(["-vnc", f":{vnc_display}"])
     if adb_port is not None:
+        if isinstance(adb_port, bool) or not isinstance(adb_port, int) or adb_port <= 0:
+            raise ThyrisAdbError("adb_port must be a positive integer")
         cmd.extend(
             [
                 "-netdev",
@@ -264,6 +644,293 @@ def build_android_qemu_argv(
     else:
         cmd.extend(["-netdev", "user,id=net0", "-device", "e1000,netdev=net0"])
     return cmd
+
+
+async def adb_shell_health(adb: Path, adb_port: int) -> Tuple[bool, str]:
+    """adb connect then shell echo. Fabricated libvirt IPs are not proof.
+
+    Device offline / unauthorized is a failed probe, even if connect printed
+    'already connected'. Detecting Android-x86 console text is not READY.
+    """
+    serial = f"127.0.0.1:{adb_port}"
+    await adb_disconnect(adb, adb_port)
+    try:
+        connect = await asyncio.create_subprocess_exec(
+            str(adb),
+            "connect",
+            serial,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        connect_out, connect_err = await asyncio.wait_for(connect.communicate(), timeout=15)
+    except asyncio.TimeoutError:
+        return False, "adb connect timed out"
+    except OSError as exc:
+        return False, f"adb connect failed to exec: {exc}"
+    connect_text = (connect_out + connect_err).decode("utf-8", errors="replace").strip()
+    if _adb_output_is_offline(connect_text):
+        return False, f"adb connect refused (offline): {connect_text!r}"
+    try:
+        devices = await asyncio.create_subprocess_exec(
+            str(adb),
+            "devices",
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        devices_out, devices_err = await asyncio.wait_for(devices.communicate(), timeout=15)
+    except asyncio.TimeoutError:
+        return False, f"adb devices timed out after connect={connect_text!r}"
+    except OSError as exc:
+        return False, f"adb devices failed to exec: {exc}"
+    devices_text = (devices_out + devices_err).decode("utf-8", errors="replace").strip()
+    if _adb_output_is_offline(devices_text) or _adb_output_is_offline(connect_text):
+        return False, (
+            f"adb devices listed offline/unauthorized. "
+            f"connect={connect_text!r} devices={devices_text!r}"
+        )
+    try:
+        shell = await asyncio.create_subprocess_exec(
+            str(adb),
+            "-s",
+            serial,
+            "shell",
+            "echo",
+            ADB_HEALTH_TOKEN,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        shell_out, shell_err = await asyncio.wait_for(shell.communicate(), timeout=15)
+    except asyncio.TimeoutError:
+        return False, f"adb shell timed out after connect={connect_text!r}"
+    except OSError as exc:
+        return False, f"adb shell failed to exec: {exc}"
+    err_text = (shell_out + shell_err).decode("utf-8", errors="replace").strip()
+    if _adb_output_is_offline(err_text) or _adb_output_is_offline(devices_text):
+        return False, (
+            f"adb shell refused device offline. connect={connect_text!r} "
+            f"devices={devices_text!r} shell={err_text!r} rc={shell.returncode}"
+        )
+    if shell.returncode == 0 and ADB_HEALTH_TOKEN.encode("ascii") in shell_out:
+        return True, connect_text or "adb shell echoed thyris_adb_health"
+    return False, (
+        f"connect={connect_text!r} devices={devices_text!r} "
+        f"shell={err_text!r} rc={shell.returncode}"
+    )
+
+
+async def adb_getprop(adb: Path, adb_port: int, key: str) -> str:
+    """Read one Android property after userspace ADB is proven."""
+    serial = f"127.0.0.1:{adb_port}"
+    proc = await asyncio.create_subprocess_exec(
+        str(adb),
+        "-s",
+        serial,
+        "shell",
+        "getprop",
+        key,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+    stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=15)
+    if proc.returncode != 0:
+        err = (stdout + stderr).decode("utf-8", errors="replace").strip()
+        raise ThyrisAdbError(f"getprop {key} failed: {err}")
+    return stdout.decode("utf-8", errors="replace").strip()
+
+
+async def adb_disconnect(adb: Path, adb_port: int) -> None:
+    """Drop the host adb TCP session for this port."""
+    serial = f"127.0.0.1:{adb_port}"
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            str(adb),
+            "disconnect",
+            serial,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        await asyncio.wait_for(proc.communicate(), timeout=10)
+    except (OSError, asyncio.TimeoutError) as exc:
+        logger.debug("adb disconnect %s: %s", serial, exc)
+
+
+async def adb_kill_server(adb: Path) -> str:
+    """Stop the host adb server so a dead guest cannot leave a stale transport."""
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            str(adb),
+            "kill-server",
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=15)
+    except asyncio.TimeoutError:
+        return "adb kill-server timed out"
+    except OSError as exc:
+        return f"adb kill-server failed to exec: {exc}"
+    text = (stdout + stderr).decode("utf-8", errors="replace").strip()
+    return text or f"adb kill-server rc={proc.returncode}"
+
+
+async def run_android_adb_userspace_boot(
+    disk_path: Path,
+    iso_path: Path,
+    console_path: Path,
+    *,
+    memory_mb: int = 2048,
+    vcpus: int = 2,
+    timeout_seconds: float = 720.0,
+    adb_port: Optional[int] = None,
+    qemu_stderr_path: Optional[Path] = None,
+    live_boot_dir: Optional[Path] = None,
+) -> Dict[str, Any]:
+    """Boot the official Android-x86 live kernel and demand a real adb shell.
+
+    This is the PhoneVMState.READY owner. ISOLINUX installer text and
+    Detecting Android-x86 markers are not sufficient. Disk create stays
+    ISOConverter._create_disk. Kernel and initrd come from the same ISO.
+    Live append is isolinux.cfg label debug (DEBUG=2 SRC= DATA=).
+    """
+    qemu_system = resolve_qemu_system()
+    adb = resolve_adb()
+    disk = Path(disk_path)
+    iso = Path(iso_path)
+    console = Path(console_path)
+    if not disk.is_file():
+        raise FileNotFoundError(f"qcow2 missing: {disk}")
+    if not iso.is_file():
+        raise FileNotFoundError(f"Android ISO missing: {iso}")
+    if timeout_seconds <= 0:
+        raise ThyrisAdbError("timeout_seconds must be > 0")
+    killed_qemu = terminate_stale_thyris_qemu()
+    kill_server_before = await adb_kill_server(adb)
+    logger.info(
+        "cleared leftover Thyris qemu pids=%s adb_kill_server=%s",
+        killed_qemu,
+        kill_server_before,
+    )
+    console.parent.mkdir(parents=True, exist_ok=True)
+    stderr_file = Path(qemu_stderr_path) if qemu_stderr_path is not None else console.with_suffix(".qemu.stderr.log")
+    boot_dir = Path(live_boot_dir) if live_boot_dir is not None else console.parent / "liveboot"
+    kernel_path, initrd_path = extract_android_live_boot_files(iso, boot_dir)
+    host_adb_port = adb_port if adb_port is not None else allocate_local_tcp_port()
+    argv = build_android_qemu_argv(
+        qemu_system=qemu_system,
+        disk_path=disk,
+        iso_path=iso,
+        name=f"thyris-android-adb-{uuid4().hex[:8]}",
+        memory_mb=memory_mb,
+        vcpus=vcpus,
+        nographic=True,
+        adb_port=host_adb_port,
+        kernel_path=kernel_path,
+        initrd_path=initrd_path,
+        kernel_append=ANDROID_LIVE_CMDLINE,
+    )
+    if "-nographic" not in argv:
+        raise ThyrisBootError("live ADB argv is missing -nographic; refusing a VNC-only guest")
+    if ANDROID_LIVE_CMDLINE not in argv:
+        raise ThyrisBootError("live ADB argv is missing isolinux.cfg DEBUG=2 SRC= append")
+    logger.info("Android ADB userspace argv: %s", " ".join(str(item) for item in argv))
+    stdout_handle = console.open("wb")
+    stderr_handle = stderr_file.open("wb")
+    process: Optional[asyncio.subprocess.Process] = None
+    serial = f"127.0.0.1:{host_adb_port}"
+
+    def _read_logs() -> tuple[str, str]:
+        stdout_handle.flush()
+        stderr_handle.flush()
+        console_text = console.read_text(encoding="utf-8", errors="replace") if console.exists() else ""
+        stderr_text = stderr_file.read_text(encoding="utf-8", errors="replace") if stderr_file.exists() else ""
+        return console_text, stderr_text
+
+    try:
+        process = await asyncio.create_subprocess_exec(
+            *argv,
+            stdin=asyncio.subprocess.PIPE,
+            stdout=stdout_handle,
+            stderr=stderr_handle,
+        )
+        if process.pid is None:
+            raise ThyrisBootError("qemu-system-x86_64 started without a pid")
+        deadline = time.monotonic() + timeout_seconds
+        console_text = ""
+        userspace_markers: List[str] = []
+        adb_detail = "adb not yet probed"
+        debug_exits = 0
+        while time.monotonic() < deadline:
+            if process.returncode is not None:
+                console_text, stderr_text = _read_logs()
+                raise ThyrisBootError(
+                    f"QEMU exited rc={process.returncode} before ADB userspace proof. "
+                    f"stderr={stderr_text[-4000:]!r} console={console_text[-4000:]!r}"
+                )
+            console_text, _stderr_unused = _read_logs()
+            userspace_markers = [
+                marker
+                for marker in USERSPACE_EVIDENCE_MARKERS
+                if marker.lower() in console_text.lower()
+            ]
+            try:
+                debug_exits = await continue_isolinux_debug_shells(
+                    process, console_text, debug_exits
+                )
+            except (BrokenPipeError, ConnectionResetError, OSError) as exc:
+                logger.debug("isolinux DEBUG=2 exit write failed: %s", exc)
+            ok, adb_detail = await adb_shell_health(adb, host_adb_port)
+            if ok:
+                release = await adb_getprop(adb, host_adb_port, "ro.build.version.release")
+                return {
+                    "status": "adb_userspace",
+                    "pid": process.pid,
+                    "qemu_system": str(qemu_system),
+                    "adb": str(adb),
+                    "accelerator": list(select_qemu_accelerator()),
+                    "disk_path": str(disk),
+                    "iso_path": str(iso),
+                    "iso_bytes": iso.stat().st_size,
+                    "kernel_path": str(kernel_path),
+                    "kernel_bytes": kernel_path.stat().st_size,
+                    "initrd_path": str(initrd_path),
+                    "initrd_bytes": initrd_path.stat().st_size,
+                    "console_path": str(console),
+                    "userspace_markers": userspace_markers,
+                    "console_excerpt": console_text[-4000:],
+                    "argv": argv,
+                    "adb_port": host_adb_port,
+                    "adb_serial": serial,
+                    "adb_detail": adb_detail,
+                    "android_release": release,
+                    "internal_ip": QEMU_USERNET_GUEST_IP,
+                    "debug_exits_sent": debug_exits,
+                    "stale_qemu_killed": killed_qemu,
+                    "adb_kill_server": kill_server_before,
+                    "kernel_append": ANDROID_LIVE_CMDLINE,
+                    "vm_state": PhoneVMState.READY.value,
+                    "phone_ready": True,
+                    "adb_proven": True,
+                }
+            await asyncio.sleep(10)
+        console_text, stderr_text = _read_logs()
+        raise ThyrisAdbError(
+            f"No adb shell within {timeout_seconds}s on {serial}. "
+            f"Detecting Android-x86 / init markers are not READY. "
+            f"detail={adb_detail!r} markers={userspace_markers!r} "
+            f"debug_exits={debug_exits} stale_qemu={killed_qemu!r} "
+            f"stderr={stderr_text[-2000:]!r} console={console_text[-4000:]!r}"
+        )
+    finally:
+        if process is not None and process.returncode is None:
+            process.terminate()
+            try:
+                await asyncio.wait_for(process.wait(), timeout=10)
+            except asyncio.TimeoutError:
+                process.kill()
+                await process.wait()
+        stdout_handle.close()
+        stderr_handle.close()
+        await adb_disconnect(adb, host_adb_port)
+        await adb_kill_server(adb)
 
 
 # ==================== Phone VM Models ====================
@@ -324,6 +991,8 @@ class AndroidPhoneVM:
     # Storage paths
     vm_disk_path: str = ""
     android_iso_path: str = ""
+    serial_log_path: str = ""
+    qemu_stderr_path: str = ""
     
     # Network configuration
     internal_ip: Optional[str] = None
@@ -373,6 +1042,30 @@ class AndroidPhoneVM:
         if self.vnc_port <= 0 or self.adb_port <= 0:
             return False, "Invalid ports"
         return True, None
+
+
+def apply_adb_ready(phone_vm: AndroidPhoneVM, internal_ip: str) -> AndroidPhoneVM:
+    """Flip PhoneVMState.READY only after the same usernet ADB proof.
+
+    Args:
+        phone_vm: Provisioned or resumed phone object still in BOOTING.
+        internal_ip: Must be the qemu user-net guest IP, not a libvirt fiction.
+
+    Returns:
+        The same phone_vm with vm_state READY.
+
+    Raises:
+        ThyrisAdbError: The IP is not the qemu user-net address.
+    """
+    if internal_ip != QEMU_USERNET_GUEST_IP:
+        raise ThyrisAdbError(
+            f"refusing PhoneVMState.READY with IP {internal_ip!r}; "
+            f"expected qemu user-net {QEMU_USERNET_GUEST_IP}"
+        )
+    phone_vm.internal_ip = internal_ip
+    phone_vm.vm_state = PhoneVMState.READY
+    phone_vm.last_active = datetime.now(timezone.utc)
+    return phone_vm
 
 
 # ==================== Phone Orchestrator ====================
@@ -489,6 +1182,7 @@ class ThyrisPhoneOrchestrator:
         self.active_phones: Dict[UUID, AndroidPhoneVM] = {}
         self.phone_config_path = self.vm_storage_path / "phone_configs"
         self.phone_config_path.mkdir(parents=True, exist_ok=True)
+        self._qemu_stdio_handles: Dict[UUID, Tuple[object, object]] = {}
         
         # Port allocation tracking (with auto-release on errors)
         self.allocated_vnc_ports: set = set()
@@ -511,7 +1205,23 @@ class ThyrisPhoneOrchestrator:
 
     # ------------------ Host tool checks ------------------
     def _check_host_tool(self, tool_name: str) -> bool:
-        """Return True if tool is available on PATH, otherwise False."""
+        """Return True if the named telecom host tool is actually resolvable."""
+        if tool_name in {"qemu-system-x86_64", "qemu-img"}:
+            ensure_windows_qemu_on_path()
+        if tool_name == "qemu-system-x86_64":
+            try:
+                resolve_qemu_system()
+                return True
+            except FileNotFoundError:
+                logger.warning("Required host tool not found: qemu-system-x86_64")
+                return False
+        if tool_name == "adb":
+            try:
+                resolve_adb()
+                return True
+            except FileNotFoundError:
+                logger.warning("Required host tool not found: adb")
+                return False
         tool = shutil.which(tool_name)
         if tool:
             return True
@@ -842,7 +1552,7 @@ class ThyrisPhoneOrchestrator:
             self._save_phone_config(phone_vm)
 
             # Poll for IP and ADB readiness (retries)
-            phone_vm.internal_ip = await self._wait_for_ip_and_adb(vm_id, adb_port, correlation_id)
+            phone_vm.internal_ip = await self._wait_for_ip_and_adb(phone_vm, correlation_id)
             if not phone_vm.internal_ip:
                 error_msg = "ADB/IP health check failed; refusing PhoneVMState.READY without adb proof"
                 add_step("boot_wait", "failed", error=error_msg)
@@ -877,8 +1587,7 @@ class ThyrisPhoneOrchestrator:
 
             # 10. Mark ready only after ADB proof
             add_step("finalization", "started")
-            phone_vm.vm_state = PhoneVMState.READY
-            phone_vm.last_active = datetime.now(timezone.utc)
+            apply_adb_ready(phone_vm, phone_vm.internal_ip)
 
             # Final PAN/memory sync (e.g., push initial contacts/calls)
             await self._sync_pan_to_vm(phone_vm, personal_data_store)
@@ -941,7 +1650,7 @@ class ThyrisPhoneOrchestrator:
                 }
             }
 
-        except (QemuImgError, ThyrisBootError, FileNotFoundError):
+        except (QemuImgError, ThyrisBootError, ThyrisAdbError, FileNotFoundError):
             self.metrics['provision_failure']['count'] += 1
             logger.error(f"[{correlation_id}] Failed to provision phone VM", exc_info=True)
             if 'phone_vm' in locals():
@@ -971,7 +1680,7 @@ class ThyrisPhoneOrchestrator:
         include_play_services: bool,
         correlation_id: str
     ) -> bool:
-        """Start the Android VM using async QEMU. Fail loud after retries."""
+        """Start the Android VM using the same live nographic argv as the ADB helper."""
         profile = phone_vm.profile
         logger.info(f"[{correlation_id}] Starting Android VM with profile: {profile.profile_name}")
         qemu_system = resolve_qemu_system()
@@ -981,11 +1690,39 @@ class ThyrisPhoneOrchestrator:
             raise FileNotFoundError(f"Android ISO missing: {iso_path}")
         if not disk_path.is_file():
             raise QemuImgError(f"Phone disk missing: {disk_path}")
+        boot_dir = disk_path.parent / f"liveboot-{phone_vm.vm_id}"
+        kernel_path, initrd_path = extract_android_live_boot_files(iso_path, boot_dir)
+        logger.info(
+            "[%s] live boot kernel=%s bytes=%s initrd=%s bytes=%s",
+            correlation_id,
+            kernel_path,
+            kernel_path.stat().st_size,
+            initrd_path,
+            initrd_path.stat().st_size,
+        )
         last_error = "QEMU did not start"
         _ = include_play_services
+        killed_qemu = terminate_stale_thyris_qemu()
+        try:
+            adb = resolve_adb()
+            kill_server = await adb_kill_server(adb)
+        except FileNotFoundError as exc:
+            raise ThyrisAdbError(str(exc)) from exc
+        logger.info(
+            "[%s] cleared leftover qemu pids=%s adb_kill_server=%s",
+            correlation_id,
+            killed_qemu,
+            kill_server,
+        )
+        serial_log = disk_path.with_suffix(".serial.log")
+        stderr_log = disk_path.with_suffix(".qemu.stderr.log")
+        phone_vm.serial_log_path = str(serial_log)
+        phone_vm.qemu_stderr_path = str(stderr_log)
 
         for attempt in range(self.max_retries):
             logger.info(f"[{correlation_id}] QEMU start attempt {attempt + 1}/{self.max_retries}")
+            stdout_handle = serial_log.open("wb")
+            stderr_handle = stderr_log.open("wb")
             try:
                 qemu_cmd = build_android_qemu_argv(
                     qemu_system=qemu_system,
@@ -994,30 +1731,43 @@ class ThyrisPhoneOrchestrator:
                     name=f"thyris-phone-{phone_vm.vm_id}",
                     memory_mb=profile.memory_gb * 1024,
                     vcpus=profile.vcpus,
-                    nographic=False,
-                    vnc_display=phone_vm.vnc_port - 5900,
+                    nographic=True,
                     adb_port=phone_vm.adb_port,
+                    kernel_path=kernel_path,
+                    initrd_path=initrd_path,
+                    kernel_append=ANDROID_LIVE_CMDLINE,
                 )
+                if "-nographic" not in qemu_cmd:
+                    raise ThyrisBootError("create_phone_vm argv is missing -nographic")
+                if ANDROID_LIVE_CMDLINE not in qemu_cmd:
+                    raise ThyrisBootError("create_phone_vm argv is missing isolinux DEBUG=2 SRC= append")
                 logger.debug(f"[{correlation_id}] QEMU command: {' '.join(qemu_cmd)}")
                 phone_vm.process = await asyncio.create_subprocess_exec(
                     *qemu_cmd,
-                    stdout=asyncio.subprocess.PIPE,
-                    stderr=asyncio.subprocess.PIPE
+                    stdin=asyncio.subprocess.PIPE,
+                    stdout=stdout_handle,
+                    stderr=stderr_handle,
                 )
                 phone_vm.process_pid = phone_vm.process.pid
+                self._qemu_stdio_handles[phone_vm.vm_id] = (stdout_handle, stderr_handle)
                 logger.info(f"[{correlation_id}] QEMU process started with PID: {phone_vm.process_pid}")
                 await asyncio.sleep(10)
                 if phone_vm.process.returncode is None:
                     logger.info(f"[{correlation_id}] QEMU still running (PID: {phone_vm.process_pid})")
                     return True
-                stdout, stderr = await phone_vm.process.communicate()
-                last_error = stderr.decode(errors="replace") or stdout.decode(errors="replace")
+                last_error = stderr_log.read_text(encoding="utf-8", errors="replace")[-4000:]
                 logger.warning(f"[{correlation_id}] QEMU exited early: {last_error}")
                 await self._kill_process(phone_vm)
-            except (ThyrisBootError, FileNotFoundError, QemuImgError):
+            except (ThyrisBootError, ThyrisAdbError, FileNotFoundError, QemuImgError):
+                stdout_handle.close()
+                stderr_handle.close()
+                self._qemu_stdio_handles.pop(phone_vm.vm_id, None)
                 raise
             except (OSError, RuntimeError, ValueError) as e:
                 last_error = str(e)
+                stdout_handle.close()
+                stderr_handle.close()
+                self._qemu_stdio_handles.pop(phone_vm.vm_id, None)
                 logger.warning(f"[{correlation_id}] QEMU start attempt {attempt+1} failed: {e}")
                 if phone_vm.process:
                     await self._kill_process(phone_vm)
@@ -1160,33 +1910,72 @@ class ThyrisPhoneOrchestrator:
             stdout_handle.close()
             stderr_handle.close()
 
-    async def _wait_for_ip_and_adb(self, vm_id: UUID, adb_port: int, correlation_id: str) -> Optional[str]:
-        """Wait for VM IP and ADB readiness (retries, health check via ADB shell)."""
-        logger.info(f"[{correlation_id}] Waiting for VM IP and ADB readiness (max 5 minutes)...")
+    async def boot_android_adb_userspace(
+        self,
+        disk_path: Path,
+        iso_path: Path,
+        console_path: Path,
+        *,
+        memory_mb: int = 2048,
+        vcpus: int = 2,
+        timeout_seconds: float = 720.0,
+        adb_port: Optional[int] = None,
+        qemu_stderr_path: Optional[Path] = None,
+        live_boot_dir: Optional[Path] = None,
+    ) -> Dict[str, Any]:
+        """Phone owner entry. Delegates to run_android_adb_userspace_boot."""
+        return await run_android_adb_userspace_boot(
+            disk_path,
+            iso_path,
+            console_path,
+            memory_mb=memory_mb,
+            vcpus=vcpus,
+            timeout_seconds=timeout_seconds,
+            adb_port=adb_port,
+            qemu_stderr_path=qemu_stderr_path,
+            live_boot_dir=live_boot_dir,
+        )
 
-        for attempt in range(30):  # 5 min max
-            logger.debug(f"[{correlation_id}] IP/ADB check attempt {attempt + 1}/30")
-
-            ip = self.network_manager.get_vm_ip(vm_id)
-            if ip:
-                logger.debug(f"[{correlation_id}] Found IP: {ip}, checking ADB...")
-                # Health check: ADB shell echo
-                proc = await asyncio.create_subprocess_exec(
-                    "adb", "-s", f"localhost:{adb_port}", "shell", "echo", "health_check",
-                    stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-                )
-                stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=10)
-                if proc.returncode == 0 and b"health_check" in stdout:
-                    logger.info(f"[{correlation_id}] VM ready at IP {ip} (ADB confirmed)")
-                    return ip
-                else:
-                    logger.debug(f"[{correlation_id}] IP {ip} found but ADB not ready: {stderr.decode()}")
-            else:
-                logger.debug(f"[{correlation_id}] No IP assigned yet")
-
+    async def _wait_for_ip_and_adb(
+        self,
+        phone_vm: AndroidPhoneVM,
+        correlation_id: str,
+        timeout_seconds: float = 900.0,
+    ) -> Optional[str]:
+        """Wait for real adb shell on the qemu user-net forward. Fake IPs are not READY."""
+        adb_port = phone_vm.adb_port
+        logger.info("[%s] Waiting for ADB userspace on 127.0.0.1:%s", correlation_id, adb_port)
+        try:
+            adb = resolve_adb()
+        except FileNotFoundError as exc:
+            logger.error("[%s] %s", correlation_id, exc)
+            return None
+        deadline = time.monotonic() + timeout_seconds
+        debug_exits = 0
+        attempt = 0
+        serial_path = Path(phone_vm.serial_log_path) if phone_vm.serial_log_path else None
+        while time.monotonic() < deadline:
+            attempt += 1
+            if phone_vm.process is not None and phone_vm.process.returncode is not None:
+                logger.error("[%s] QEMU exited rc=%s before ADB proof", correlation_id, phone_vm.process.returncode)
+                return None
+            console_text = ""
+            if serial_path is not None and serial_path.is_file():
+                console_text = serial_path.read_text(encoding="utf-8", errors="replace")
+            if phone_vm.process is not None:
+                try:
+                    debug_exits = await continue_isolinux_debug_shells(
+                        phone_vm.process, console_text, debug_exits
+                    )
+                except (BrokenPipeError, ConnectionResetError, OSError) as exc:
+                    logger.debug("[%s] DEBUG=2 exit write failed: %s", correlation_id, exc)
+            ok, detail = await adb_shell_health(adb, adb_port)
+            logger.info("[%s] ADB attempt %s: %s", correlation_id, attempt, detail)
+            if ok:
+                logger.info("[%s] ADB userspace proven at %s", correlation_id, QEMU_USERNET_GUEST_IP)
+                return QEMU_USERNET_GUEST_IP
             await asyncio.sleep(10)
-
-        logger.warning(f"[{correlation_id}] VM IP/ADB not ready after 5min")
+        logger.warning("[%s] ADB userspace not proven after %.0fs", correlation_id, timeout_seconds)
         return None
 
     async def _sync_pan_to_vm(self, phone_vm: AndroidPhoneVM, personal_data_store: PANPersonalDataStore):
@@ -1223,6 +2012,7 @@ class ThyrisPhoneOrchestrator:
 
     async def _kill_process(self, phone_vm: AndroidPhoneVM):
         """Gracefully kill VM process (SIGTERM → SIGKILL)."""
+        handles = self._qemu_stdio_handles.pop(phone_vm.vm_id, None)
         if phone_vm.process:
             try:
                 phone_vm.process.terminate()  # SIGTERM
@@ -1234,6 +2024,17 @@ class ThyrisPhoneOrchestrator:
                 phone_vm.process = None
                 phone_vm.process_pid = None
                 self._release_ports(phone_vm)
+        if handles is not None:
+            stdout_handle, stderr_handle = handles
+            stdout_handle.close()
+            stderr_handle.close()
+        try:
+            adb = resolve_adb()
+        except FileNotFoundError:
+            return
+        if phone_vm.adb_port > 0:
+            await adb_disconnect(adb, phone_vm.adb_port)
+        await adb_kill_server(adb)
 
     async def install_apk(
         self,
@@ -1424,7 +2225,7 @@ class ThyrisPhoneOrchestrator:
             # Re-prove ADB before READY — SIGCONT alone is not userspace proof
             phone_vm.vm_state = PhoneVMState.BOOTING
             self._save_phone_config(phone_vm)
-            internal_ip = await self._wait_for_ip_and_adb(vm_id, phone_vm.adb_port, correlation_id=str(vm_id)[:8])
+            internal_ip = await self._wait_for_ip_and_adb(phone_vm, correlation_id=str(vm_id)[:8])
             if not internal_ip:
                 phone_vm.vm_state = PhoneVMState.ERROR
                 self._save_phone_config(phone_vm)
@@ -1432,9 +2233,7 @@ class ThyrisPhoneOrchestrator:
                 if phone_vm.process:
                     await self._kill_process(phone_vm)
                 return False
-            phone_vm.internal_ip = internal_ip
-            phone_vm.vm_state = PhoneVMState.READY
-            phone_vm.last_active = datetime.now(timezone.utc)
+            apply_adb_ready(phone_vm, internal_ip)
             self._save_phone_config(phone_vm)
 
             # Re-sync PAN data after resume only once ADB is proven

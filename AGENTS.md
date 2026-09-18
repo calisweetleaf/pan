@@ -62,8 +62,8 @@ Do not import a foreign directory layout such as tools/native/ into PAN just to 
 
 | Surface | Owner / role |
 |---|---|
-| PAN_SDK/PAN_SDK.py | PAN monolith: identity, ledger, citizens, economy, governance, policy, persistence. `SovereignInferenceEngine._run_inference` is the PANLIN01 integer decoder |
-| PAN_SDK/treasury.py | Fed FSM: PoI mint, quorum execute, contract rejection |
+| PAN_SDK/PAN_SDK.py | PAN monolith: identity, ledger, citizens, economy, governance, policy, persistence. `SovereignInferenceEngine._run_inference` is the PANLIN01 integer decoder. Civic wire: `docs/CIVIC_INFERENCE_POI.md` |
+| PAN_SDK/treasury.py | Fed FSM: PoI mint, quorum execute, contract rejection. Same civic-wire doc |
 | PAN_SDK/email_social.py | Nostr-inspired sealed mail / social relays over UnifiedDataPacket |
 | PAN_SDK/master_db.py | Offline-first CRDT pool on PANPersistenceStore |
 | PAN_SDK/personal_data.py | local personal-data surface |
@@ -131,7 +131,7 @@ installer boot is already landed (ISOLINUX on `-nographic` stdout).
 Do not open a second `qemu-img create` owner. Do not reopen the second threat
 chain.
 
-Do not pull or invent `core.prompt_bridge`. Do not dummy `_run_inference`. Do not claim READY phones from ISOLINUX installer evidence. Do not open a second civic wire or reconnect the public internet. `schemas.session` / `memory.memory_integration` is leftover AIPC session-memory and is not a Thyris blocker.
+Do not pull or invent `core.prompt_bridge`. Do not dummy `_run_inference` (that owner is landed; see `docs/CIVIC_INFERENCE_POI.md`). Do not claim READY phones from ISOLINUX installer evidence. Do not open a second civic wire or reconnect the public internet. `schemas.session` / `memory.memory_integration` is leftover AIPC session-memory and is not a Thyris blocker.
 
 ## Security and operational boundaries
 
@@ -162,4 +162,4 @@ Before ending a substantive implementation turn:
 2. State exactly what passed, failed, and was not run.
 3. Update only the persistent surfaces whose semantic truth changed.
 4. Preserve original evidence and unrelated working-tree changes.
-5. Leave one imperative next action if a real blocker remains. The current next action is qemu+image or `_run_inference`, never `prompt_bridge`.
+5. Leave one imperative next action if a real blocker remains. Civic inference is landed (`docs/CIVIC_INFERENCE_POI.md`). Remaining host-tool frontier is ADB / `PhoneVMState.READY`. Never `prompt_bridge`.

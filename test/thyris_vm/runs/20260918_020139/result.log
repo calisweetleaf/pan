@@ -1,0 +1,109 @@
+thyris android boot consumer start 20260918_020139
+
+========================================================================
+THYRIS ANDROID GUEST BOOT CONSUMER
+========================================================================
+qemu-system-x86_64=C:\Program Files\qemu\qemu-system-x86_64.exe
+accelerator=['-accel', 'tcg']
+PASS qemu_system_resolves
+iso=C:\Users\trent\pan\android_images\android-x86_64-9.0-r2.iso
+bytes=965738496
+sha1=1cc85b5ed7c830ff71aecf8405c7281a9c995aa0
+expected=1cc85b5ed7c830ff71aecf8405c7281a9c995aa0
+PASS android_iso_authentic
+argv=C:\Program Files\qemu\qemu-system-x86_64.exe -accel tcg -cpu qemu64 -name thyris-argv-probe -m 2048 -smp 2 -drive file=C:\Users\trent\pan\disk.qcow2,format=qcow2,if=ide,index=0,media=disk -drive file=C:\Users\trent\pan\android.iso,format=raw,if=ide,index=1,media=cdrom,readonly=on -boot order=d -no-reboot -nographic -netdev user,id=net0 -device e1000,netdev=net0
+PASS nographic_argv
+adb=C:\Users\trent\Downloads\scrcpy-win64-v4.1\scrcpy-win64-v4.1\adb.exe
+PASS adb_resolves
+kernel=C:\Users\trent\AppData\Local\Temp\thyris_liveboot_58jmfwax\kernel bytes=7511040
+initrd=C:\Users\trent\AppData\Local\Temp\thyris_liveboot_58jmfwax\initrd.img bytes=1358743
+PASS extract_live_boot_files
+live_argv=C:\Program Files\qemu\qemu-system-x86_64.exe -accel tcg -cpu qemu64 -name thyris-live-argv -m 2048 -smp 2 -drive file=C:\Users\trent\AppData\Local\Temp\thyris_liveargv_oy1p0lza\disk.qcow2,format=qcow2,if=ide,index=0,media=disk -drive file=C:\Users\trent\pan\android_images\android-x86_64-9.0-r2.iso,format=raw,if=ide,index=1,media=cdrom,readonly=on -kernel C:\Users\trent\AppData\Local\Temp\thyris_liveargv_oy1p0lza\boot\kernel -initrd C:\Users\trent\AppData\Local\Temp\thyris_liveargv_oy1p0lza\boot\initrd.img -append root=/dev/ram0 SRC= DATA= SETUPWIZARD=0 androidboot.selinux=permissive console=ttyS0,115200 androidboot.console=ttyS0 -no-reboot -nographic -netdev user,id=net0,hostfwd=tcp::15555-:5555 -device e1000,netdev=net0
+PASS live_argv_forwards_adb
+disk=C:\Users\trent\AppData\Local\Temp\thyris_boot_6lsyjrtf\phone-boot.qcow2 iso=C:\Users\trent\pan\android_images\android-x86_64-9.0-r2.iso
+starting qemu-system-x86_64 -nographic Android-x86 installer...
+{
+  "status": "boot_evidence",
+  "pid": 29804,
+  "qemu_system": "C:\\Program Files\\qemu\\qemu-system-x86_64.exe",
+  "accelerator": [
+    "-accel",
+    "tcg"
+  ],
+  "disk_path": "C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_boot_6lsyjrtf\\phone-boot.qcow2",
+  "iso_path": "C:\\Users\\trent\\pan\\android_images\\android-x86_64-9.0-r2.iso",
+  "iso_bytes": 965738496,
+  "console_path": "C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_boot_6lsyjrtf\\console.log",
+  "markers": [
+    "SeaBIOS",
+    "Booting from DVD",
+    "ISOLINUX",
+    "isolinux"
+  ],
+  "iso_bootloader_markers": [
+    "ISOLINUX",
+    "isolinux"
+  ],
+  "console_excerpt": "\u001bc\u001b[?7l\u001b[2J\u001b[0mSeaBIOS (version rel-1.17.0-0-gb52ca86e094d-prebuilt.qemu.org)\n\n\niPXE (http://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+7EFD1F90+7EF31F90 CA00\nPress Ctrl-B to configure iPXE (PCI 00:03.0)...\n                                                                               \n\n\nBooting from DVD/CD...\n\nISOLINUX 6.03 2014-10-06 ETCD Copyright (C) 1994-2014 H. P\u001b[10;58H\u001b[10;59Heter Anvin et al\n\u001b[01;01H",
+  "phone_ready": false,
+  "adb_proven": false
+}
+argv=C:\Program Files\qemu\qemu-system-x86_64.exe -accel tcg -cpu qemu64 -name thyris-android-boot-f4b8552a -m 2048 -smp 2 -drive file=C:\Users\trent\AppData\Local\Temp\thyris_boot_6lsyjrtf\phone-boot.qcow2,format=qcow2,if=ide,index=0,media=disk -drive file=C:\Users\trent\pan\android_images\android-x86_64-9.0-r2.iso,format=raw,if=ide,index=1,media=cdrom,readonly=on -boot order=d -no-reboot -nographic -netdev user,id=net0 -device e1000,netdev=net0
+PASS android_installer_boot
+FAIL android_adb_userspace: PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_adb_tknlfptc\\phones\\pan_phone_registry\\pan_state.db'
+Traceback (most recent call last):
+  File "C:\Users\trent\pan\test\thyris_vm\test_thyris_android_boot.py", line 276, in check_android_adb_userspace
+    orch = ThyrisPhoneOrchestrator(
+        vm_storage_path=str(work / "phones"),
+        android_images_path=str(iso.parent),
+    )
+  File "C:\Users\trent\pan\telecom\phone_orchestrator.py", line 682, in __init__
+    self.cache = SomnusCache(cache_config, memory_manager=self.memory_manager)
+                 ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\pan\memory\system_cache.py", line 556, in __init__
+    self.async_loop_manager.run_coroutine(self._load_from_memory_manager())
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\pan\memory\system_cache.py", line 78, in run_coroutine
+    raise RuntimeError("AsyncIO event loop is not running.")
+RuntimeError: AsyncIO event loop is not running.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\shutil.py", line 701, in _rmtree_unsafe
+    os.unlink(fullname)
+    ~~~~~~~~~^^^^^^^^^^
+PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_adb_tknlfptc\\phones\\pan_phone_registry\\pan_state.db'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\trent\pan\test\thyris_vm\test_thyris_android_boot.py", line 358, in run
+    fn(detail)
+    ~~^^^^^^^^
+  File "C:\Users\trent\pan\test\thyris_vm\test_thyris_android_boot.py", line 274, in check_android_adb_userspace
+    with tempfile.TemporaryDirectory(prefix="thyris_adb_") as tmpdir:
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\tempfile.py", line 971, in __exit__
+    self.cleanup()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\tempfile.py", line 975, in cleanup
+    self._rmtree(self.name, ignore_errors=self._ignore_cleanup_errors)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\tempfile.py", line 955, in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\shutil.py", line 852, in rmtree
+    _rmtree_impl(path, dir_fd, onexc)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\shutil.py", line 705, in _rmtree_unsafe
+    onexc(os.unlink, fullname, err)
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\trent\AppData\Local\Python\pythoncore-3.14-64\Lib\tempfile.py", line 930, in onexc
+    _os.unlink(path)
+    ~~~~~~~~~~^^^^^^
+PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_adb_tknlfptc\\phones\\pan_phone_registry\\pan_state.db'
+C:\Users\trent\pan\test\thyris_vm\test_thyris_android_boot.py:385: RuntimeWarning: coroutine 'SomnusCache._load_from_memory_manager' was never awaited
+  failed_count += 1
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+thyris android boot consumer status=fail

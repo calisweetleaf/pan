@@ -1,29 +1,32 @@
-# SOTA_RUN — erebus towers bound to USMS
+# SOTA_RUN — Thyris ADB userspace READY (not proven)
 
 **Date:** 2026-09-18
-**Mode:** EDIT (see SCOPE.md campaign erebus-usms-tower-bind)
-**Claim:** Standing Erebus cognitive towers persist as USMS META nodes
-coherence-bound to the PAN/USMS identity pair. Threat shares run
-cosine-weighted DAG activation and softmax tower competition. Allocations
-survive reopen. Bulletin packets still carry Fletcher's ROE/activation
-receipt and do not grow a tower protocol. L4 without a human fails loud.
-PAN RSA and USMS Ed25519 stay two identity types.
+**Mode:** EDIT (see SCOPE.md army thyris-adb-userspace-ready)
+**Claim:** Not claimed. `phone_ready` and `adb_proven` stay false.
+`snapshots/v0.15` is not promoted. STATE.md was not rewritten.
+
+Live kernel/initrd from official android-x86 9.0-r2, isolinux.cfg `DEBUG=2 SRC= DATA=`,
+leftover qemu/adb killed, `PhoneVMState.READY` only after `adb shell echo
+thyris_adb_health`. Consumer failed loud: connect failed / devices offline
+after 900s. Guest did reach Android `init` / `healthd` on TCG. That is not READY.
 
 ## Commands
 
 ```bash
-.\.venv\Scripts\python.exe -m py_compile security\planetary_immune_system.py test\immune\test_planetary_immune_system.py
-.\.venv\Scripts\python.exe test\immune\test_planetary_immune_system.py
+.\.venv\Scripts\python.exe -m py_compile telecom\phone_orchestrator.py test\thyris_vm\test_thyris_android_boot.py
+.\.venv\Scripts\python.exe test\thyris_vm\test_thyris_android_boot.py
 ```
 
-- Immune consumer: **PASS**, 20/20 including `erebus_towers_bind_usms` and
-  `erebus_tower_competition_cosine_field`, run `20260918_010347`
-- Project gate: **not run** this unit (immune consumer is the owning boundary)
-- Python: Windows 3.14 `.venv`
+- Boot consumer: **FAIL**, 7 passed / 1 failed (`android_adb_userspace`)
+- Run: `test/thyris_vm/runs/20260918_025416/`
+- Python: Windows 3.14 `.venv`, QEMU 11.1.0 TCG
+- Leftover adb PID 26304 killed before retry; no leftover qemu-system-x86_64
 - `phone_ready`: false
 - `adb_proven`: false
+- Project gate: **not run** this unit
 
 ## Artifacts
 
-- Immune: `test/immune/runs/20260918_010347/`
-- Snapshot: `snapshots/v0.14/manifest.json`
+- `test/thyris_vm/runs/20260918_025416/result.json`
+- `test/thyris_vm/runs/20260918_025416/result.md`
+- `test/thyris_vm/runs/20260918_025416/result.log`

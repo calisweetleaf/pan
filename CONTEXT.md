@@ -11,10 +11,27 @@ source inspection or STATE.md.
 - STATE.md — current verified runtime state and active blockers.
 - AGENTS.md — repository entry and execution routing.
 - ANTITHESIS.md — rejected transitions and anti-drift boundaries.
+- docs/CIVIC_INFERENCE_POI.md — live PANLIN01 civic decoder and treasury Proof-of-Inference.
 - filetree.md — generated navigation map.
 - MEMORY.md — durable, chronological findings.
 - NOTEPAD.md — current scratch, non-canonical.
 - security/AGENTS.md + security/rules_of_engagement.md — security lane.
+
+## 2026-09-18 — Civic inference dossier (PANLIN01 / PoI)
+
+**Keys:** SovereignInferenceEngine · `_run_inference` · ProofOfInference ·
+PANLIN01 · docs/CIVIC_INFERENCE_POI.md
+
+**Status:** DOCUMENTATION of landed v0.8 owner. Production Python unchanged.
+Gate not re-run this unit.
+
+Live civic inference is the integer decoder plus treasury re-execution, not
+a chatbot and not Erebus. Cited artifacts remain
+`results/pan_gate_20260912_235357.json` and
+`test/inference/runs/20260911_085511/`.
+
+- **Then inspect:** docs/CIVIC_INFERENCE_POI.md, PAN_SDK/PAN_SDK.py,
+  PAN_SDK/treasury.py.
 
 ## 2026-09-18 — Erebus towers bound to USMS
 

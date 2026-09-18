@@ -3,6 +3,33 @@
 Append durable, evidence-backed findings here. Preserve corrections as new dated
 entries instead of erasing historical truth.
 
+## 2026-09-18 — Civic inference wire documented (PANLIN01 / PoI)
+
+**Keys:** SovereignInferenceEngine · `_run_inference` · ProofOfInference ·
+PANLIN01 · `docs/CIVIC_INFERENCE_POI.md`
+
+**Status:** DOCUMENTATION of the landed v0.8 owner. No production Python
+change. Full gate was not re-run this unit.
+
+### Durable findings
+
+- Live civic inference is the in-process PANLIN01 integer decoder, consumed
+  by treasury PoI re-execution. It is not a chatbot and not Erebus cognition.
+- Last cited proven artifacts remain `results/pan_gate_20260912_235357.json`
+  (treasury 7/7) and `test/inference/runs/20260911_085511/`. 2026-09-16/17
+  working-tree runs were not promoted as provenance.
+- `PAN_SDK/API.server.py` `_run_inference_async` stays unconsumed lineage.
+  `prompt_bridge` stays rejected. qemu/Android READY stays a later host-tool
+  frontier.
+
+### Retrieval anchors
+
+- docs/CIVIC_INFERENCE_POI.md
+- PAN_SDK/PAN_SDK.py
+- PAN_SDK/treasury.py
+- snapshots/v0.8/manifest.json
+- security/EREBUS_USMS_PAN_BIND.md (one-line pointer only)
+
 ## 2026-09-18 — Erebus towers attached to USMS at the immune owner
 
 **Keys:** ErebusTowerCompetition · list_erebus_towers · _neural_activation ·

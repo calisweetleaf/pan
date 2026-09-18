@@ -2,7 +2,24 @@
 
 Scratch only; current runtime truth belongs in STATE.md.
 
+## 2026-09-18 Thyris ADB READY (still false)
+
+- Fletcher pass: isolinux `DEBUG=2 SRC=`, kill leftover adb/qemu, refuse
+  offline, unify `_start_android_vm` to nographic helper argv,
+  `apply_adb_ready` only after shell health. No prompt_bridge, no dummy
+  inference, no second qemu-img, no AUTO_INSTALL, no STATE.md rewrite,
+  no v0.15 promotion.
+- Killed leftover adb.exe PID 26304 before retry.
+- Consumer `20260918_025416` 7/8. `android_adb_userspace` fail-loud:
+  `failed to connect` / `127.0.0.1:PORT offline` at 900s. Markers
+  Detecting Android-x86 + init + healthd. Guest reached Android HALs on TCG.
+  That is not PhoneVMState.READY.
+- Next at phone owner: get adbd listening on TCP 5555 on this same live
+  guest (WHPX is listed by qemu-system and a probe started on this host;
+  TCG 900s is not enough for a READY shell). Do not dummy READY.
+
 ## 2026-09-18 Erebus towers
+
 
 - Landed standing towers + cosine competition at planetary_immune_system.py.
   Immune 20/20 `test/immune/runs/20260918_010347/`. Gate not re-run.

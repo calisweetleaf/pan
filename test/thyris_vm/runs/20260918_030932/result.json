@@ -1,0 +1,156 @@
+{
+  "name": "thyris_android_boot",
+  "passed": false,
+  "status": "fail",
+  "pass_count": 7,
+  "fail_count": 1,
+  "skip_count": 0,
+  "elapsed_seconds": 915.5189459323883,
+  "checks": [
+    {
+      "name": "qemu_system_resolves",
+      "status": "pass",
+      "detail": {
+        "qemu_system": "C:\\Program Files\\qemu\\qemu-system-x86_64.exe",
+        "accelerator": [
+          "-accel",
+          "tcg"
+        ]
+      }
+    },
+    {
+      "name": "android_iso_authentic",
+      "status": "pass",
+      "detail": {
+        "iso_path": "C:\\Users\\trent\\pan\\android_images\\android-x86_64-9.0-r2.iso",
+        "iso_bytes": 965738496,
+        "sha1": "1cc85b5ed7c830ff71aecf8405c7281a9c995aa0"
+      }
+    },
+    {
+      "name": "nographic_argv",
+      "status": "pass",
+      "detail": {
+        "argv": [
+          "C:\\Program Files\\qemu\\qemu-system-x86_64.exe",
+          "-accel",
+          "tcg",
+          "-cpu",
+          "qemu64",
+          "-name",
+          "thyris-argv-probe",
+          "-m",
+          "2048",
+          "-smp",
+          "2",
+          "-drive",
+          "file=C:\\Users\\trent\\pan\\disk.qcow2,format=qcow2,if=ide,index=0,media=disk",
+          "-drive",
+          "file=C:\\Users\\trent\\pan\\android.iso,format=raw,if=ide,index=1,media=cdrom,readonly=on",
+          "-boot",
+          "order=d",
+          "-no-reboot",
+          "-nographic",
+          "-netdev",
+          "user,id=net0",
+          "-device",
+          "e1000,netdev=net0"
+        ]
+      }
+    },
+    {
+      "name": "adb_resolves",
+      "status": "pass",
+      "detail": {
+        "adb": "C:\\Users\\trent\\Downloads\\scrcpy-win64-v4.1\\scrcpy-win64-v4.1\\adb.exe"
+      }
+    },
+    {
+      "name": "extract_live_boot_files",
+      "status": "pass",
+      "detail": {
+        "kernel_bytes": 7511040,
+        "initrd_bytes": 1353795,
+        "iso_path": "C:\\Users\\trent\\pan\\android_images\\android-x86_64-9.0-r2.iso"
+      }
+    },
+    {
+      "name": "live_argv_forwards_adb",
+      "status": "pass",
+      "detail": {
+        "argv": [
+          "C:\\Program Files\\qemu\\qemu-system-x86_64.exe",
+          "-accel",
+          "tcg",
+          "-cpu",
+          "qemu64",
+          "-name",
+          "thyris-live-argv",
+          "-m",
+          "2048",
+          "-smp",
+          "2",
+          "-drive",
+          "file=C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_liveargv_lsd1cx8m\\disk.qcow2,format=qcow2,if=ide,index=0,media=disk",
+          "-drive",
+          "file=C:\\Users\\trent\\pan\\android_images\\android-x86_64-9.0-r2.iso,format=raw,if=ide,index=1,media=cdrom,readonly=on",
+          "-kernel",
+          "C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_liveargv_lsd1cx8m\\boot\\kernel",
+          "-initrd",
+          "C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_liveargv_lsd1cx8m\\boot\\initrd.img",
+          "-append",
+          "root=/dev/ram0 DEBUG=2 SRC= DATA= console=ttyS0,115200 androidboot.console=ttyS0",
+          "-no-reboot",
+          "-nographic",
+          "-netdev",
+          "user,id=net0,hostfwd=tcp::15555-:5555",
+          "-device",
+          "e1000,netdev=net0"
+        ]
+      }
+    },
+    {
+      "name": "android_installer_boot",
+      "status": "pass",
+      "detail": {
+        "pid": 25988,
+        "markers": [
+          "SeaBIOS",
+          "Booting from DVD",
+          "ISOLINUX",
+          "isolinux"
+        ],
+        "iso_bootloader_markers": [
+          "ISOLINUX",
+          "isolinux"
+        ],
+        "iso_bytes": 965738496,
+        "accelerator": [
+          "-accel",
+          "tcg"
+        ],
+        "console_excerpt": "\u001bc\u001b[?7l\u001b[2J\u001b[0mSeaBIOS (version rel-1.17.0-0-gb52ca86e094d-prebuilt.qemu.org)\n\n\niPXE (http://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+7EFD1F90+7EF31F90 CA00\nPress Ctrl-B to configure iPXE (PCI 00:03.0)...\n                                                                               \n\n\nBooting from DVD/CD...\n\nISOLINUX 6.03 2014-10-06 ETCD Copyright (C) 1994-2014 H. Peter Anvin et al\n\u001b[01;01H",
+        "phone_ready": false,
+        "adb_proven": false,
+        "qemu_system": "C:\\Program Files\\qemu\\qemu-system-x86_64.exe",
+        "disk_owner": "telecom.vm_image_manager.ISOConverter._create_disk"
+      }
+    },
+    {
+      "name": "android_adb_userspace",
+      "status": "fail",
+      "error": "CheckFailure: Android ADB userspace failed loud: No adb shell within 900.0s on 127.0.0.1:64547. Detecting Android-x86 / init markers are not READY. detail=\"adb devices listed offline/unauthorized. connect='failed to connect to 127.0.0.1:64547' devices='List of devices attached\\\\r\\\\n127.0.0.1:64547\\\\toffline'\" markers=['Detecting Android-x86', 'init: ', 'healthd'] debug_exits=2 stale_qemu=[] stderr='' console=' path=\"/vendor\" dev=\"tmpfs\" ino=6431 scontext=u:r:hal_dumpstate_default:s0 tcontext=u:object_r:tmpfs:s0 tclass=lnk_file permissive=1\\n[   61.086784] type=1400 audit(1789718119.330:140): avc: denied { getattr } for pid=1562 comm=\"android.hardwar\" path=\"/vendor\" dev=\"tmpfs\" ino=6431 scontext=u:r:hal_power_default:s0 tcontext=u:object_r:tmpfs:s0 tclass=lnk_file permissive=1\\n[   61.117233] type=1400 audit(1789718119.330:140): avc: denied { getattr } for pid=1562 comm=\"android.hardwar\" path=\"/vendor\" dev=\"tmpfs\" ino=6431 scontext=u:r:hal_power_default:s0 tcontext=u:object_r:tmpfs:s0 tclass=lnk_file permissive=1\\n[   61.117292] type=1400 audit(1789718119.330:141): avc: denied { read } for pid=1562 comm=\"android.hardwar\" name=\"vendor\" dev=\"tmpfs\" ino=6431 scontext=u:r:hal_power_default:s0 tcontext=u:object_r:tmpfs:s0 tclass=lnk_file permissive=1\\n[   61.134670] type=1400 audit(1789718119.330:141): avc: denied { read } for pid=1562 comm=\"android.hardwar\" name=\"vendor\" dev=\"tmpfs\" ino=6431 scontext=u:r:hal_power_default:s0 tcontext=u:object_r:tmpfs:s0 tclass=lnk_file permissive=1\\n[   61.134670] type=1400 audit(1789718119.420:142): avc: denied { getattr } for pid=1564 comm=\"lmkd\" path=\"/vendor\" dev=\"tmpfs\" ino=6431 scontext=u:r:lmkd:s0 tcontext=u:object_r:tmpfs:s0 tclass=lnk_file permissive=1\\n[   61.668271] audit: audit_lost=52 audit_rate_limit=5 audit_backlog_limit=64\\n[   61.668271] audit: rate limit exceeded\\n[  130.862899] type=1400 audit(1789718123.144:161): avc: denied { execute_no_trans } for pid=1569 comm=\"sh\" path=\"/android/bin/busybox\" dev=\"tmpfs\" ino=6622 scontext=u:r:kernel:s0 tcontext=u:object_r:tmpfs:s0 tclass=file permissive=1\\n[  130.862899] type=1400 audit(1789718192.335:165): avc: denied { read } for pid=2173 comm=\"sh\" name=\"bus\" dev=\"sysfs\" ino=8 scontext=u:r:kernel:s0 tcontext=u:object_r:sysfs:s0 tclass=dir permissive=1\\n[  130.953718] type=1400 audit(1789718192.335:165): avc: denied { read } for pid=2173 comm=\"sh\" name=\"bus\" dev=\"sysfs\" ino=8 scontext=u:r:kernel:s0 tcontext=u:object_r:sysfs:s0 tclass=dir permissive=1\\n[  130.953718] type=1400 audit(1789718192.351:166): avc: denied { open } for pid=2173 comm=\"sh\" path=\"/sys/bus\" dev=\"sysfs\" ino=8 scontext=u:r:kernel:s0 tcontext=u:object_r:sysfs:s0 tclass=dir permissive=1\\n[  130.953718] type=1400 audit(1789718192.351:166): avc: denied { open } for pid=2173 comm=\"sh\" path=\"/sys/bus\" dev=\"sysfs\" ino=8 scontext=u:r:kernel:s0 tcontext=u:object_r:sysfs:s0 tclass=dir permissive=1\\n[  130.979309] type=1400 audit(1789718192.351:167): avc: denied { getattr } for pid=2173 comm=\"sh\" path=\"/sys/devices/platform/i8042/serio0/uevent\" dev=\"sysfs\" ino=8410 scontext=u:r:kernel:s0 tcontext=u:object_r:sysfs:s0 tclass=file permissive=1\\n[  130.992702] type=1400 audit(1789718192.351:167): avc: denied { getattr } for pid=2173 comm=\"sh\" path=\"/sys/devices/platform/i8042/serio0/uevent\" dev=\"sysfs\" ino=8410 scontext=u:r:kernel:s0 tcontext=u:object_r:sysfs:s0 tclass=file permissive=1\\n[  130.992702] type=1400 audit(1789718192.415:168): avc: denied { read } for pid=2173 comm=\"cat\" name=\"uevent\" dev=\"sysfs\" ino=2924 scontext=u:r:kernel:s0 tcontext=u:object_r:sysfs:s0 tclass=file permissive=1\\n[  130.992702] type=1400 audit(1789718192.415:168): avc: denied { read } for pid=2173 comm=\"cat\" name=\"uevent\" dev=\"sysfs\" ino=2924 scontext=u:r:kernel:s0 tcontext=u:object_r:sysfs:s0 tclass=file permissive=1\\n[  131.010913] type=1400 audit(1789718192.415:169): avc: denied { open } for pid=2173 comm=\"cat\" path=\"/sys/devices/LNXSYSTM:00/LNXSYBUS:00/ACPI0010:00/uevent\" dev=\"sysfs\" ino=2924 scontext=u:r:kernel:s0 tcontext=u:object_r:sysfs:s0 tclass=file permissive=1\\n[  131.119007] audit: audit_lost=55 audit_rate_limit=5 audit_backlog_limit=64\\n[  131.119007] audit: rate limit exceeded\\n[  131.842668] powernow_k8: Power state transitions not supported\\n[  131.842962] powernow_k8: Power state transitions not supported\\n[  132.596333] init: Untracked pid 1052 exited with status 0\\n[  374.395192] hrtimer: interrupt took 4630600 ns\\n'",
+      "detail": {}
+    }
+  ],
+  "phone_ready": false,
+  "adb_proven": false,
+  "claim": "Installer ISOLINUX remains a non-READY proof. ADB userspace was not proven; phone_ready stays false.",
+  "error": "1 thyris android boot checks failed",
+  "artifacts": {
+    "json": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260918_030932\\result.json",
+    "md": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260918_030932\\result.md",
+    "log": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260918_030932\\result.log",
+    "run_dir": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260918_030932"
+  }
+}

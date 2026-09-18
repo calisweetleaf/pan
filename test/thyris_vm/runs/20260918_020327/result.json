@@ -1,0 +1,156 @@
+{
+  "name": "thyris_android_boot",
+  "passed": false,
+  "status": "fail",
+  "pass_count": 7,
+  "fail_count": 1,
+  "skip_count": 0,
+  "elapsed_seconds": 903.009565114975,
+  "checks": [
+    {
+      "name": "qemu_system_resolves",
+      "status": "pass",
+      "detail": {
+        "qemu_system": "C:\\Program Files\\qemu\\qemu-system-x86_64.exe",
+        "accelerator": [
+          "-accel",
+          "tcg"
+        ]
+      }
+    },
+    {
+      "name": "android_iso_authentic",
+      "status": "pass",
+      "detail": {
+        "iso_path": "C:\\Users\\trent\\pan\\android_images\\android-x86_64-9.0-r2.iso",
+        "iso_bytes": 965738496,
+        "sha1": "1cc85b5ed7c830ff71aecf8405c7281a9c995aa0"
+      }
+    },
+    {
+      "name": "nographic_argv",
+      "status": "pass",
+      "detail": {
+        "argv": [
+          "C:\\Program Files\\qemu\\qemu-system-x86_64.exe",
+          "-accel",
+          "tcg",
+          "-cpu",
+          "qemu64",
+          "-name",
+          "thyris-argv-probe",
+          "-m",
+          "2048",
+          "-smp",
+          "2",
+          "-drive",
+          "file=C:\\Users\\trent\\pan\\disk.qcow2,format=qcow2,if=ide,index=0,media=disk",
+          "-drive",
+          "file=C:\\Users\\trent\\pan\\android.iso,format=raw,if=ide,index=1,media=cdrom,readonly=on",
+          "-boot",
+          "order=d",
+          "-no-reboot",
+          "-nographic",
+          "-netdev",
+          "user,id=net0",
+          "-device",
+          "e1000,netdev=net0"
+        ]
+      }
+    },
+    {
+      "name": "adb_resolves",
+      "status": "pass",
+      "detail": {
+        "adb": "C:\\Users\\trent\\Downloads\\scrcpy-win64-v4.1\\scrcpy-win64-v4.1\\adb.exe"
+      }
+    },
+    {
+      "name": "extract_live_boot_files",
+      "status": "pass",
+      "detail": {
+        "kernel_bytes": 7511040,
+        "initrd_bytes": 1358743,
+        "iso_path": "C:\\Users\\trent\\pan\\android_images\\android-x86_64-9.0-r2.iso"
+      }
+    },
+    {
+      "name": "live_argv_forwards_adb",
+      "status": "pass",
+      "detail": {
+        "argv": [
+          "C:\\Program Files\\qemu\\qemu-system-x86_64.exe",
+          "-accel",
+          "tcg",
+          "-cpu",
+          "qemu64",
+          "-name",
+          "thyris-live-argv",
+          "-m",
+          "2048",
+          "-smp",
+          "2",
+          "-drive",
+          "file=C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_liveargv_sklr2sjf\\disk.qcow2,format=qcow2,if=ide,index=0,media=disk",
+          "-drive",
+          "file=C:\\Users\\trent\\pan\\android_images\\android-x86_64-9.0-r2.iso,format=raw,if=ide,index=1,media=cdrom,readonly=on",
+          "-kernel",
+          "C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_liveargv_sklr2sjf\\boot\\kernel",
+          "-initrd",
+          "C:\\Users\\trent\\AppData\\Local\\Temp\\thyris_liveargv_sklr2sjf\\boot\\initrd.img",
+          "-append",
+          "root=/dev/ram0 SRC= DATA= SETUPWIZARD=0 androidboot.selinux=permissive console=ttyS0,115200 androidboot.console=ttyS0",
+          "-no-reboot",
+          "-nographic",
+          "-netdev",
+          "user,id=net0,hostfwd=tcp::15555-:5555",
+          "-device",
+          "e1000,netdev=net0"
+        ]
+      }
+    },
+    {
+      "name": "android_installer_boot",
+      "status": "pass",
+      "detail": {
+        "pid": 20624,
+        "markers": [
+          "SeaBIOS",
+          "Booting from DVD",
+          "ISOLINUX",
+          "isolinux"
+        ],
+        "iso_bootloader_markers": [
+          "ISOLINUX",
+          "isolinux"
+        ],
+        "iso_bytes": 965738496,
+        "accelerator": [
+          "-accel",
+          "tcg"
+        ],
+        "console_excerpt": "\u001bc\u001b[?7l\u001b[2J\u001b[0mSeaBIOS (version rel-1.17.0-0-gb52ca86e094d-prebuilt.qemu.org)\n\n\niPXE (http://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+7EFD1F90+7EF31F90 CA00\nPress Ctrl-B to configure iPXE (PCI 00:03.0)...\n                                                                               \n\n\nBooting from DVD/CD...\n\nISOLINUX 6.03 2014-10-06 ETCD Copyright (C) 1994-2014 H. Peter Anvin et al\n\u001b[01;01H",
+        "phone_ready": false,
+        "adb_proven": false,
+        "qemu_system": "C:\\Program Files\\qemu\\qemu-system-x86_64.exe",
+        "disk_owner": "telecom.vm_image_manager.ISOConverter._create_disk"
+      }
+    },
+    {
+      "name": "android_adb_userspace",
+      "status": "fail",
+      "error": "CheckFailure: Android ADB userspace failed loud: No adb shell within 900.0s on 127.0.0.1:60455. ISOLINUX/userspace console is not READY. detail=\"connect='already connected to 127.0.0.1:60455' shell='adb.exe: device offline' rc=1\" markers=['Detecting Android-x86', 'init: '] stderr='' console='   1.721484] usbcore: registered new interface driver ums-sddr55\\n[    1.721827] usbcore: registered new interface driver ums-usbat\\n[    1.724458] i8042: PNP: PS/2 Controller [PNP0303:KBD,PNP0f13:MOU] at 0x60,0x64 irq 1,12\\n[    1.732495] serio: i8042 KBD port at 0x60,0x64 irq 1\\n[    1.735225] serio: i8042 AUX port at 0x60,0x64 irq 12\\n[    1.738339] hv_vmbus: registering driver hyperv_keyboard\\n[    1.739631] mousedev: PS/2 mouse device common for all mice\\n[    1.741977] rtc_cmos 00:05: RTC can wake from S4\\n[    1.748935] rtc_cmos 00:05: registered as rtc0\\n[    1.750080] rtc_cmos 00:05: setting system clock to 2026-09-18 07:03:31 UTC (1789715011)\\n[    1.752316] rtc_cmos 00:05: alarms up to one day, y3k, 242 bytes nvram, hpet irqs\\n[    1.753599] IR Sharp protocol handler initialized\\n[    1.754036] IR XMP protocol handler initialized\\n[    1.755011] device-mapper: uevent: version 1.0.3\\n[    1.756734] device-mapper: ioctl: 4.39.0-ioctl (2018-04-03) initialised: dm-devel@redhat.com\\n[    1.760715] sdhci: Secure Digital Host Controller Interface driver\\n[    1.760980] sdhci: Copyright(c) Pierre Ossman\\n[    1.761963] sdhci-pltfm: SDHCI platform and OF driver helper\\n[    1.763542] hidraw: raw HID events driver (C) Jiri Kosina\\n[    1.766771] usbcore: registered new interface driver usbhid\\n[    1.767083] usbhid: USB HID core driver\\n[    1.769643] ashmem: initialized\\n[    1.774896] oprofile: using NMI interrupt.\\n[    1.789779] xt_time: kernel timezone is -0000\\n[    1.798959] Initializing XFRM netlink socket\\n[    1.800604] NET: Registered protocol family 10\\n[    1.812463] Segment Routing with IPv6\\n[    1.814397] mip6: Mobile IPv6\\n[    1.818368] sit: IPv6, IPv4 and MPLS over IPv4 tunneling driver\\n[    1.827884] NET: Registered protocol family 17\\n[    1.828845] NET: Registered protocol family 15\\n[    1.830077] NET: Registered protocol family 35\\n[    1.834068] mce: Using 10 MCE banks\\n[    1.837752] registered taskstats version 1\\n[    1.838036] Loading compiled-in X.509 certificates\\n[    1.839619] Key type ._fscrypt registered\\n[    1.840040] Key type .fscrypt registered\\n[    1.840225] Key type fscrypt-provisioning registered\\n[    1.847541]   Magic number: 10:624:66\\n[    1.850201] Unstable clock detected, switching default tracing clock to \"global\"\\n[    1.850201] If you want to keep using the local clock, then add:\\n[    1.850201]   \"trace_clock=local\"\\n[    1.850201] on the kernel command line\\n[    1.864355] ata2.00: ATAPI: QEMU DVD-ROM, 2.5+, max UDMA/100\\n[    1.869141] ata1.00: ATA-7: QEMU HARDDISK, 2.5+, max UDMA/100\\n[    1.869452] ata1.00: 2097152 sectors, multi 16: LBA48 \\n[    1.870010] ata1.01: ATAPI: QEMU DVD-ROM, 2.5+, max UDMA/100\\n[    1.890884] scsi 0:0:0:0: Direct-Access     ATA      QEMU HARDDISK    2.5+ PQ: 0 ANSI: 5\\n[    1.897707] sd 0:0:0:0: Attached scsi generic sg0 type 0\\n[    1.902153] scsi 0:0:1:0: CD-ROM            QEMU     QEMU DVD-ROM     2.5+ PQ: 0 ANSI: 5\\n[    1.907430] sd 0:0:0:0: [sda] 2097152 512-byte logical blocks: (1.07 GB/1.00 GiB)\\n[    1.910122] sd 0:0:0:0: [sda] Write Protect is off\\n[    1.911428] sr 0:0:1:0: [sr0] scsi3-mmc drive: 4x/4x cd/rw xa/form2 tray\\n[    1.912682] cdrom: Uniform CD-ROM driver Revision: 3.20\\n[    1.913376] sd 0:0:0:0: [sda] Write cache: enabled, read cache: enabled, doesn\\'t support DPO or FUA\\n[    1.919478] sr 0:0:1:0: Attached scsi generic sg1 type 5\\n[    1.925162] scsi 1:0:0:0: CD-ROM            QEMU     QEMU DVD-ROM     2.5+ PQ: 0 ANSI: 5\\n[    1.929220] sd 0:0:0:0: [sda] Attached SCSI disk\\n[    1.953511] sr 1:0:0:0: [sr1] scsi3-mmc drive: 4x/4x cd/rw xa/form2 tray\\n[    1.955737] sr 1:0:0:0: Attached scsi generic sg2 type 5\\n[    2.085922] Freeing unused kernel image memory: 1492K\\n[    2.085922] Write protecting the kernel read-only data: 18432k\\n[    2.100528] Freeing unused kernel image memory: 2016K\\n[    2.100528] Freeing unused kernel image memory: 412K\\n[    2.100528] rodata_test: all tests were successful\\n[    2.100528] Run /init as init process\\nDetecting Android-x86... found at /dev/sr0\\n'",
+      "detail": {}
+    }
+  ],
+  "phone_ready": false,
+  "adb_proven": false,
+  "claim": "Installer ISOLINUX remains a non-READY proof. ADB userspace was not proven; phone_ready stays false.",
+  "error": "1 thyris android boot checks failed",
+  "artifacts": {
+    "json": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260918_020327\\result.json",
+    "md": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260918_020327\\result.md",
+    "log": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260918_020327\\result.log",
+    "run_dir": "C:\\Users\\trent\\pan\\test\\thyris_vm\\runs\\20260918_020327"
+  }
+}

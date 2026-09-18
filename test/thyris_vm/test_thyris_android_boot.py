@@ -8,6 +8,7 @@ boot. JSON+MD+LOG artifacts.
 from __future__ import annotations
 
 import asyncio
+import gzip
 import io
 import json
 import os
@@ -17,6 +18,7 @@ import time
 import traceback
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
+from uuid import uuid4
 
 CURRENT_DIR = Path(__file__).resolve().parent
 ROOT_DIR = CURRENT_DIR.parent.parent
@@ -28,16 +30,31 @@ if (_WINDOWS_QEMU / "qemu-img.exe").is_file():
     os.environ["PATH"] = str(_WINDOWS_QEMU) + os.pathsep + os.environ.get("PATH", "")
 
 from telecom.phone_orchestrator import (
+    ADB_HEALTH_TOKEN,
+    ANDROID_ISOLINUX_DEBUG_APPEND,
+    ANDROID_LIVE_CMDLINE,
+    ANDROID_LIVE_INITRD,
+    ANDROID_LIVE_KERNEL,
     ANDROID_X86_9_R2_ISO,
     ANDROID_X86_9_R2_SHA1,
+    AndroidPhoneVM,
     ISO_BOOTLOADER_MARKERS,
+    PhoneVMState,
+    QEMU_USERNET_GUEST_IP,
+    ThyrisAdbError,
     ThyrisBootError,
     ThyrisPhoneOrchestrator,
+    apply_adb_ready,
     build_android_qemu_argv,
     ensure_windows_qemu_on_path,
+    extract_android_live_boot_files,
+    resolve_adb,
     resolve_qemu_system,
+    run_android_adb_userspace_boot,
     select_qemu_accelerator,
     sha1_file,
+    terminate_stale_thyris_qemu,
+    _adb_output_is_offline,
 )
 from telecom.vm_image_manager import ISOConverter, QemuImgError
 
@@ -116,6 +133,87 @@ def check_nographic_argv(details: dict[str, object]) -> None:
         raise CheckFailure("boot argv is missing -nographic")
     if sys.platform == "win32" and "-enable-kvm" in argv:
         raise CheckFailure("Windows qemu argv still contains -enable-kvm")
+    if "-kernel" in argv:
+        raise CheckFailure("installer argv unexpectedly contains -kernel")
+
+
+def check_adb_resolves(details: dict[str, object]) -> None:
+    """Host adb must be a real file. READY cannot be claimed without it."""
+    adb = resolve_adb()
+    print(f"adb={adb}")
+    if not adb.is_file():
+        raise CheckFailure(f"adb is not a file: {adb}")
+    details["adb"] = str(adb)
+
+
+def check_extract_live_boot_files(details: dict[str, object]) -> None:
+    """Kernel and initrd come from the same official ISO, not a second image."""
+    iso = _android_iso()
+    with tempfile.TemporaryDirectory(prefix="thyris_liveboot_") as tmpdir:
+        kernel, initrd = extract_android_live_boot_files(iso, Path(tmpdir))
+        print(f"kernel={kernel} bytes={kernel.stat().st_size}")
+        print(f"initrd={initrd} bytes={initrd.stat().st_size}")
+        if kernel.name != ANDROID_LIVE_KERNEL:
+            raise CheckFailure(f"unexpected kernel name {kernel.name}")
+        if initrd.name != ANDROID_LIVE_INITRD:
+            raise CheckFailure(f"unexpected initrd name {initrd.name}")
+        if kernel.stat().st_size < 1_000_000:
+            raise CheckFailure("extracted kernel is too small")
+        if initrd.stat().st_size < 100_000:
+            raise CheckFailure("extracted initrd is too small")
+        init_text = gzip.decompress(initrd.read_bytes()).decode("latin-1", "replace")
+        if "service.adb.tcp.port=5555" not in init_text:
+            raise CheckFailure("live initrd was not injected with ADB TCP default.prop writes")
+        if "setprop service.adb.tcp.port" in init_text:
+            raise CheckFailure("live initrd still uses serial setprop spam")
+        details["kernel_bytes"] = kernel.stat().st_size
+        details["initrd_bytes"] = initrd.stat().st_size
+        details["iso_path"] = str(iso)
+
+
+def check_live_argv_forwards_adb(details: dict[str, object]) -> None:
+    """Live userspace argv must skip vesamenu and forward host ADB to guest 5555."""
+    iso = _android_iso()
+    qemu_system = resolve_qemu_system()
+    with tempfile.TemporaryDirectory(prefix="thyris_liveargv_") as tmpdir:
+        work = Path(tmpdir)
+        kernel, initrd = extract_android_live_boot_files(iso, work / "boot")
+        argv = build_android_qemu_argv(
+            qemu_system=qemu_system,
+            disk_path=work / "disk.qcow2",
+            iso_path=iso,
+            name="thyris-live-argv",
+            memory_mb=2048,
+            vcpus=2,
+            nographic=True,
+            adb_port=15555,
+            kernel_path=kernel,
+            initrd_path=initrd,
+            kernel_append=ANDROID_LIVE_CMDLINE,
+        )
+        print("live_argv=" + " ".join(argv))
+        details["argv"] = argv
+        if "-kernel" not in argv:
+            raise CheckFailure("live argv is missing -kernel")
+        if "-initrd" not in argv:
+            raise CheckFailure("live argv is missing -initrd")
+        if ANDROID_LIVE_CMDLINE not in argv:
+            raise CheckFailure("live argv is missing isolinux.cfg DEBUG=2 SRC= DATA= append")
+        if ANDROID_ISOLINUX_DEBUG_APPEND not in ANDROID_LIVE_CMDLINE:
+            raise CheckFailure("ANDROID_LIVE_CMDLINE drifted off isolinux.cfg label debug")
+        if "AUTO_INSTALL" in ANDROID_LIVE_CMDLINE:
+            raise CheckFailure("live cmdline used AUTO_INSTALL; that is not this unit")
+        if "setprop" in ANDROID_LIVE_CMDLINE:
+            raise CheckFailure("live cmdline still carries setprop spam")
+        if "-boot" in argv:
+            raise CheckFailure("live argv still uses CDROM -boot order=d")
+        if "-nographic" not in argv:
+            raise CheckFailure("live argv is missing -nographic; create_phone_vm must match")
+        forwarded = [item for item in argv if "hostfwd=tcp::15555-:5555" in item]
+        if not forwarded:
+            raise CheckFailure("live argv does not forward host 15555 to guest 5555")
+        if sys.platform == "win32" and "-enable-kvm" in argv:
+            raise CheckFailure("Windows live argv still contains -enable-kvm")
 
 
 def check_android_installer_boot(details: dict[str, object]) -> None:
@@ -193,6 +291,95 @@ def check_android_installer_boot(details: dict[str, object]) -> None:
             orch.cache.shutdown()
 
 
+def check_android_adb_userspace(details: dict[str, object]) -> None:
+    """Live-boot the same ISO and demand adb shell. ISOLINUX is not READY."""
+    iso = _android_iso()
+    with tempfile.TemporaryDirectory(prefix="thyris_adb_") as tmpdir:
+        work = Path(tmpdir)
+        disk = work / "phone-adb.qcow2"
+        created = asyncio.run(ISOConverter()._create_disk(disk, 1))
+        if created is not True or not disk.is_file():
+            raise CheckFailure("landed ISOConverter._create_disk did not write a qcow2")
+        console = work / "adb-console.log"
+        stderr_path = work / "adb-qemu.stderr.log"
+        print(f"disk={disk} iso={iso} adb={resolve_adb()}")
+        killed = terminate_stale_thyris_qemu()
+        print(f"stale_qemu_killed={killed}")
+        print("starting live kernel qemu-system-x86_64 for ADB userspace...")
+        try:
+            evidence = asyncio.run(
+                run_android_adb_userspace_boot(
+                    disk,
+                    iso,
+                    console,
+                    memory_mb=2048,
+                    vcpus=2,
+                    timeout_seconds=900.0,
+                    qemu_stderr_path=stderr_path,
+                    live_boot_dir=work / "liveboot",
+                )
+            )
+        except ThyrisAdbError as exc:
+            raise CheckFailure(f"Android ADB userspace failed loud: {exc}") from exc
+        except ThyrisBootError as exc:
+            raise CheckFailure(f"Android live boot failed before ADB: {exc}") from exc
+        printable = {key: value for key, value in evidence.items() if key != "argv"}
+        print(json.dumps(printable, indent=2, default=str))
+        print("argv=" + " ".join(str(item) for item in evidence.get("argv", [])))
+        if not evidence.get("adb_proven"):
+            raise CheckFailure("ADB userspace returned without adb_proven")
+        if not evidence.get("phone_ready"):
+            raise CheckFailure("ADB userspace returned without phone_ready")
+        if evidence.get("vm_state") != PhoneVMState.READY.value:
+            raise CheckFailure("ADB proof did not set PhoneVMState.READY")
+        probe = AndroidPhoneVM(
+            vm_id=uuid4(),
+            sovereign_id="thyris-adb-probe",
+            instance_name="thyris-adb-probe",
+            pan_phone_address="probe",
+            vm_state=PhoneVMState.BOOTING,
+        )
+        apply_adb_ready(probe, str(evidence.get("internal_ip")))
+        if probe.vm_state != PhoneVMState.READY:
+            raise CheckFailure("apply_adb_ready did not flip AndroidPhoneVM.vm_state to READY")
+        if evidence.get("internal_ip") != QEMU_USERNET_GUEST_IP:
+            raise CheckFailure("ADB proof used a fabricated libvirt IP")
+        if not str(evidence.get("adb_detail") or ""):
+            raise CheckFailure("ADB proof omitted connect/shell detail")
+        if _adb_output_is_offline(str(evidence.get("adb_detail") or "")):
+            raise CheckFailure("ADB proof accepted a device-offline transport")
+        if ADB_HEALTH_TOKEN not in str(evidence.get("adb_detail") or "") and "thyris_adb_health" not in str(
+            evidence.get("adb_detail") or ""
+        ):
+            # connect text may omit the token; require the helper to have proven shell
+            if not evidence.get("android_release"):
+                raise CheckFailure("ADB proof omitted android_release after shell health")
+        append = " ".join(str(item) for item in evidence.get("argv") or [])
+        if "DEBUG=2" not in append or "SRC=" not in append:
+            raise CheckFailure("ADB guest was not launched with isolinux DEBUG=2 SRC=")
+        if "setprop" in append:
+            raise CheckFailure("ADB argv still contains setprop")
+        details.update(
+            {
+                "pid": evidence.get("pid"),
+                "adb": evidence.get("adb"),
+                "adb_port": evidence.get("adb_port"),
+                "adb_serial": evidence.get("adb_serial"),
+                "android_release": evidence.get("android_release"),
+                "userspace_markers": evidence.get("userspace_markers"),
+                "kernel_bytes": evidence.get("kernel_bytes"),
+                "initrd_bytes": evidence.get("initrd_bytes"),
+                "internal_ip": evidence.get("internal_ip"),
+                "phone_ready": evidence.get("phone_ready"),
+                "adb_proven": evidence.get("adb_proven"),
+                "vm_state": evidence.get("vm_state"),
+                "stale_qemu_killed": evidence.get("stale_qemu_killed"),
+                "debug_exits_sent": evidence.get("debug_exits_sent"),
+                "console_excerpt": str(evidence.get("console_excerpt") or "")[-1500:],
+                "disk_owner": "telecom.vm_image_manager.ISOConverter._create_disk",
+            }
+        )
+
 def run() -> dict[str, object]:
     """Run Thyris Android boot checks and persist artifacts."""
     _print_banner("THYRIS ANDROID GUEST BOOT CONSUMER")
@@ -204,7 +391,11 @@ def run() -> dict[str, object]:
         ("qemu_system_resolves", check_qemu_system_resolves),
         ("android_iso_authentic", check_android_iso_authentic),
         ("nographic_argv", check_nographic_argv),
+        ("adb_resolves", check_adb_resolves),
+        ("extract_live_boot_files", check_extract_live_boot_files),
+        ("live_argv_forwards_adb", check_live_argv_forwards_adb),
         ("android_installer_boot", check_android_installer_boot),
+        ("android_adb_userspace", check_android_adb_userspace),
     )
     for name, fn in runners:
         detail: dict[str, object] = {}
@@ -217,6 +408,7 @@ def run() -> dict[str, object]:
             CheckFailure,
             QemuImgError,
             ThyrisBootError,
+            ThyrisAdbError,
             AssertionError,
             OSError,
             RuntimeError,
@@ -238,6 +430,15 @@ def run() -> dict[str, object]:
             failed_count += 1
     elapsed = time.time() - started
     passed = failed_count == 0
+    adb_check = next(
+        (
+            item
+            for item in checks
+            if isinstance(item, dict) and item.get("name") == "android_adb_userspace"
+        ),
+        {},
+    )
+    adb_ready = isinstance(adb_check, dict) and adb_check.get("status") == "pass"
     payload: dict[str, object] = {
         "name": "thyris_android_boot",
         "passed": passed,
@@ -247,11 +448,17 @@ def run() -> dict[str, object]:
         "skip_count": 0,
         "elapsed_seconds": elapsed,
         "checks": checks,
+        "phone_ready": adb_ready,
+        "adb_proven": adb_ready,
         "claim": (
-            "qemu-system-x86_64 -nographic booted official "
-            "android-x86_64-9.0-r2.iso far enough for SeaBIOS/ISOLINUX console "
-            "evidence. Disk came from landed ISOConverter._create_disk. "
-            "This is not PhoneVMState.READY or ADB userspace."
+            "qemu-system-x86_64 live-booted official android-x86_64-9.0-r2.iso "
+            "via kernel/initrd extracted from that same ISO. Disk came from "
+            "landed ISOConverter._create_disk. PhoneVMState.READY is claimed "
+            "only after adb connect + adb shell on the qemu user-net forward."
+            if adb_ready
+            else
+            "Installer ISOLINUX remains a non-READY proof. ADB userspace was "
+            "not proven; phone_ready stays false."
         ),
     }
     if not passed:
@@ -284,9 +491,10 @@ def write_artifacts(payload: dict[str, object], timestamp: str, log_text: str) -
         "",
         "I required qemu-system-x86_64, the official android-x86_64-9.0-r2.iso",
         "(SHA-1 1cc85b5ed7c830ff71aecf8405c7281a9c995aa0), a qcow2 from landed",
-        "ISOConverter._create_disk, and SeaBIOS/ISOLINUX on -nographic stdout.",
-        "I refused a dummy boot, prompt_bridge, a second disk-create owner, and",
-        "a READY-phone claim.",
+        "ISOConverter._create_disk, SeaBIOS/ISOLINUX on installer -nographic stdout,",
+        "and a separate live kernel/initrd boot that only sets phone_ready after",
+        "adb connect + adb shell. I refused a dummy boot, prompt_bridge, a second",
+        "disk-create owner, and READY from ISOLINUX.",
         "",
         f"Claim: {payload.get('claim')}",
         "",

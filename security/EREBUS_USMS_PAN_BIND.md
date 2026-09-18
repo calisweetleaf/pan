@@ -3,7 +3,7 @@
 ```
 DOCUMENT TITLE: Erebus cognition bind (USMS Ed25519 DAG to PAN RSA packets)
 Classification: INTERNAL RESEARCH / DEFENSIVE OPERATIONS
-Version: 1.1
+Version: 1.2
 Date: 2026-09-18
 Author/Origin: PAN security lane (operator workspace C:\Users\trent\pan)
 Status: OPERATIONAL REFERENCE from live owners; immune towers consumer-verified 2026-09-18; project gate not re-run
@@ -303,6 +303,7 @@ ROE Level 4 against external hosts is **not implemented** by the immune landing 
 | Towers as a second package | Rejected | Four META towers live on `planetary_immune_system.py`. No new package |
 | Towers on the mesh bulletin | Not shipped | `winning_tower` / `tower_allocations` are local USMS. Protocol omits them |
 | Orama / whitepaper §6.2 vector spaces | Unlanded civic surface | Not this bind |
+| Civic inference / Proof-of-Inference | Not Erebus | `PAN_SDK.PAN_SDK.SovereignInferenceEngine` PANLIN01 decoder and `PAN_SDK.treasury` PoI mint. See `docs/CIVIC_INFERENCE_POI.md` |
 
 ## 8. LINEAGE (do not promote)
 
@@ -435,3 +436,4 @@ The following were **not** written as production because they would invent a rep
 | --- | --- | --- |
 | 1.0 | 2026-09-18 | Initial bind dossier from live owners |
 | 1.1 | 2026-09-18 | Standing USMS META towers and local softmax competition moved to LIVE. Bulletin still omits `winning_tower` / `tower_allocations`. Immune 20/20 `20260918_010347`. Project gate not re-run |
+| 1.2 | 2026-09-18 | One-line pointer: civic inference is not Erebus; see `docs/CIVIC_INFERENCE_POI.md` |

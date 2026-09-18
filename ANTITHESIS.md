@@ -74,3 +74,7 @@ take unless Daeron explicitly changes the product thesis.
 - Next justified production work is ADB userspace / `PhoneVMState.READY` on
   a real Android guest. AIPC `prompt_bridge` is a rejected layer. Connecting
   PAN to the public internet is a rejected transition.
+- Civic inference is the landed PANLIN01 integer decoder in
+  `PAN_SDK/PAN_SDK.py` (`docs/CIVIC_INFERENCE_POI.md`). Do not invent a
+  second engine, chatbot, or local-LLM runtime, and do not promote
+  `PAN_SDK/API.server.py` `_run_inference_async` as the owner.
