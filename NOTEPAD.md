@@ -2,24 +2,39 @@
 
 Scratch only; current runtime truth belongs in STATE.md.
 
+## 2026-09-18 dispatch v1.2 — WHPX and AUTO_INSTALL FAIL (not READY)
+
+Crowd-internal: [docs/NATION_DISPATCH.md](docs/NATION_DISPATCH.md) v1.2 and
+[docs/NATION_DISPATCH_SHORT.md](docs/NATION_DISPATCH_SHORT.md). Unpublished.
+No X post. v1.1 in-flight WHPX/qcow paragraph is expired.
+
+- B WHPX livem FAIL: `test/thyris_vm/runs/20260918_050641/` 7/8, 571.3s.
+  `-accel whpx,kernel-irqchip=off`. ISOLINUX pass. Detecting `/dev/sr0`
+  then `console:/ #`. QEMU rc=`4294967295`. `phone_ready=false`.
+  `adb_proven=false`.
+- D AUTO_INSTALL=force then disk boot FAIL:
+  `test/thyris_vm/runs/20260918_052020/` 7/8, 1428.4s. Install
+  Congratulations on sda1 (8G qcow). Disk boot `found at /dev/sda1`
+  then the same `console:/ #`. No `thyris_adb_health`.
+- Wall: android-x86 9.0-r2 ramdisk init on `-nographic` serial presents
+  `console:/ #` (live sr0 AND installed sda1) and never proves TCP adbd.
+- Do not flip READY. Do not name a next accelerator. `snapshots/v0.15`
+  is not a READY landing.
+
 ## 2026-09-18 Thyris ADB READY (still false)
 
-- Fletcher pass: isolinux `DEBUG=2 SRC=`, kill leftover adb/qemu, refuse
-  offline, unify `_start_android_vm` to nographic helper argv,
-  `apply_adb_ready` only after shell health. No prompt_bridge, no dummy
-  inference, no second qemu-img, no AUTO_INSTALL, no STATE.md rewrite,
-  no v0.15 promotion.
-- Killed leftover adb.exe PID 26304 before retry.
-- Consumer `20260918_025416` 7/8. `android_adb_userspace` fail-loud:
-  `failed to connect` / `127.0.0.1:PORT offline` at 900s. Markers
-  Detecting Android-x86 + init + healthd. Guest reached Android HALs on TCG.
-  That is not PhoneVMState.READY.
-- Next at phone owner: get adbd listening on TCP 5555 on this same live
-  guest (WHPX is listed by qemu-system and a probe started on this host;
-  TCG 900s is not enough for a READY shell). Do not dummy READY.
+- Option A TCG livem+nosetup exhausted: 20260918_032455 / 20260918_035525.
+- Option B WHPX: 20260918_050641. `-accel whpx,kernel-irqchip=off`.
+  ISOLINUX pass. Stuck at Detecting /dev/sr0 then `console:/ #`.
+  adb_proven false.
+- Option D AUTO_INSTALL=force then disk boot: 20260918_052020.
+  Install markers Formatting / Installing / Syncing / Congratulations.
+  Disk boot found at /dev/sda1 then `console:/ #`. No thyris_adb_health.
+- Wall: after "found at", this ISO's ramdisk init presents `console:/ #`
+  on -nographic serial and never proves TCP adbd. Do not dummy READY.
+  Do not invent a next accel.
 
 ## 2026-09-18 Erebus towers
-
 
 - Landed standing towers + cosine competition at planetary_immune_system.py.
   Immune 20/20 `test/immune/runs/20260918_010347/`. Gate not re-run.
@@ -104,6 +119,8 @@ Scratch only; current runtime truth belongs in STATE.md.
 
 ## Next imperative
 
-Locate qemu-img + qemu-system-x86_64 and an Android image, then prove a
-Thyris disk-create path. Alternate: implement real `_run_inference`. Do not
-pull prompt files. Do not claim phones boot until those exist and are tested.
+ADB userspace / `PhoneVMState.READY` is blocked on this Windows
+`-nographic` host. TCG live, WHPX livem (`20260918_050641`), and
+AUTO_INSTALL-then-disk (`20260918_052020`) all stop at `console:/ #`
+without TCP adbd. Do not dummy READY. Do not name a next accelerator
+here. Do not pull prompt files. Do not post the dispatch.

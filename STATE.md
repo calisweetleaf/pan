@@ -42,7 +42,9 @@ invented alternative.
   and has a real qemu-img consumer (`ba05cf4`). `phone_orchestrator` now also
   boots official android-x86 9.0-r2 via `qemu-system-x86_64 -nographic` and
   fails loud without ISOLINUX. That is installer-media boot evidence, not
-  `PhoneVMState.READY` or ADB. AIPC `PromptSystemBridge` is unbound.
+  `PhoneVMState.READY` or ADB. TCG live, WHPX livem (`20260918_050641`),
+  and AUTO_INSTALL-then-disk (`20260918_052020`) all reached Android-x86
+  detect then `console:/ #`; TCP adbd was never proven. AIPC `PromptSystemBridge` is unbound.
   Thyris does not import or require `core.prompt_bridge`.
 - Direct project gate: `python test/run_pan_gate.py` (immune, highway,
   treasury, email_social, master_db, thyris_memory, thyris_vm slices).
@@ -129,12 +131,19 @@ invented alternative.
 
 1. Android installer media boots (SeaBIOS/ISOLINUX on `-nographic` stdout).
    Combined Linux gate 20260912_094045 is green. `/dev/kvm` may exist without
-   being usable; TCG fallback is proven. `phone_ready` and `adb_proven` remain
-   false. ADB userspace is the next Thyris unit.
-   `PhoneVMState.READY` and ADB userspace are unproven. The ISO is local
+   being usable; TCG fallback is proven. TCG live CD on this Windows host
+   reached Android init; DEBUG=2 also reached healthd
+   (`test/thyris_vm/runs/20260918_025416/`, 7/8, 915.5s). livem+nosetup
+   (`test/thyris_vm/runs/20260918_032455/`, 7/8, 1829.9s) stopped at
+   `Detecting Android-x86... found at /dev/sr0` without healthd. adbd never
+   listened. Host adb stayed offline. `phone_ready` and `adb_proven` remain
+   false. `test/thyris_vm/runs/20260918_035525/` is not an independent trial
+   (JSON/MD duplicate `032455`). WHPX livem (`20260918_050641`) and
+   AUTO_INSTALL-then-disk (`20260918_052020`) both failed loud: detect then
+   `console:/ #`, no `thyris_adb_health`. The ISO is local
    under gitignored `android_images/`; the project gate still does not
-   boot phones. Next Thyris unit is ADB userspace, not a second disk-create
-   and not a redo of `BlockchainThreatIntelligence`.
+   boot phones. Do not dummy READY from ISOLINUX, init, healthd, or install
+   Congratulations. Do not invent a third phone stack.
 2. `memory/memory_integration.py` still imports `schemas.session`, which is
    absent. That is leftover AIPC session-memory, not a Thyris telecom
    requirement. Do not scaffold a fake schemas package.
@@ -185,7 +194,12 @@ through FileTree Pro.
 
 ## Next justified action
 
-ADB userspace / `PhoneVMState.READY` on a real Android guest. Do not dummy a
-READY phone from ISOLINUX. Do not pull prompt files. Do not construct
-`BlockchainThreatIntelligence`. Do not invent mesh-strand/`usms_linkage`.
-Do not reconnect the public internet. Do not open a second civic wire.
+ADB userspace / `PhoneVMState.READY` is blocked on this Windows nographic
+host. TCG live, WHPX live (`20260918_050641`), and AUTO_INSTALL-then-disk
+(`20260918_052020`) all reached Android-x86 detect then `console:/ #`
+without `adb shell echo thyris_adb_health`. `phone_ready` stays false.
+`snapshots/v0.15` is not a READY landing. Do not dummy a READY phone.
+Do not name a next accelerator here. Do not pull prompt files. Do not
+construct `BlockchainThreatIntelligence`. Do not invent a third phone
+stack. Do not reconnect the public internet. Next host or display
+contract is a material decision; it is not selected here.

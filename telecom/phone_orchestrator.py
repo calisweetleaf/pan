@@ -82,6 +82,28 @@ Justification: TCG DEBUG=2 reached Android init/healthd but adbd stayed offline
     WHPX, and kept PhoneVMState.READY only after adb shell thyris_adb_health.
 Provenance: SCOPE.md engagement thyris-adb-userspace-ready
 Files: telecom/phone_orchestrator.py
+
+Modified: 2026-09-18
+Modified by: cursor-grok (daeron)
+Justification: TCG isolinux live/debug/livem/nosetup exhausted without adbd
+    (20260918_025416, 20260918_032455, 20260918_035525). I bound Windows
+    qemu-system to -accel whpx,kernel-irqchip=off at select_qemu_accelerator
+    because wrapping a second argv owner would duplicate build_android_qemu_argv
+    and ISOConverter._create_disk. PhoneVMState.READY still only flips after
+    adb shell thyris_adb_health. TCG is no longer a silent Windows fallback.
+Provenance: SCOPE.md engagement thyris-adb-userspace-ready
+Files: telecom/phone_orchestrator.py, test/thyris_vm/test_thyris_android_boot.py
+
+Modified: 2026-09-18
+Modified by: cursor-grok (daeron)
+Justification: WHPX livem still could not start adbd (20260918_050641:
+    Detecting Android-x86 at /dev/sr0 then console:/ #, no thyris_adb_health).
+    I bound the READY owner onto this ISO's own AUTO_INSTALL=force installer
+    then a disk boot with SRC=/thyris, because wrapping a second installer
+    would duplicate ISOConverter._create_disk and the qemu argv owner.
+    READY still only flips after adb shell thyris_adb_health.
+Provenance: SCOPE.md engagement thyris-adb-userspace-ready
+Files: telecom/phone_orchestrator.py, test/thyris_vm/test_thyris_android_boot.py
 """
 
 from __future__ import annotations
@@ -176,6 +198,32 @@ ANDROID_ISOLINUX_LIVE_APPEND = "root=/dev/ram0 SETUPWIZARD=0 nomodeset SRC= DATA
 ANDROID_LIVE_CMDLINE = (
     ANDROID_ISOLINUX_LIVE_APPEND
     + " console=ttyS0,115200 androidboot.console=ttyS0"
+)
+WINDOWS_WHPX_ACCEL = "whpx,kernel-irqchip=off"
+# ISO install.img scripts/1-install: AUTO_INSTALL=force skips the last
+# destructive-confirm dialog and auto-partitions the first hard disk.
+ANDROID_INSTALL_PREFIX = "thyris"
+ANDROID_INSTALL_DISK_GB = 8
+ANDROID_INSTALLED_DISK_MIN_BYTES = 50_000_000
+ANDROID_AUTO_INSTALL_APPEND = (
+    "root=/dev/ram0 AUTO_INSTALL=force "
+    f"INSTALL_PREFIX={ANDROID_INSTALL_PREFIX} SRC= DATA="
+)
+ANDROID_AUTO_INSTALL_CMDLINE = (
+    ANDROID_AUTO_INSTALL_APPEND
+    + " console=ttyS0,115200 androidboot.console=ttyS0"
+)
+ANDROID_DISK_BOOT_CMDLINE = (
+    f"root=/dev/ram0 SETUPWIZARD=0 nomodeset SRC=/{ANDROID_INSTALL_PREFIX} DATA= "
+    "console=ttyS0,115200 androidboot.console=ttyS0"
+)
+INSTALL_PROGRESS_MARKERS: tuple[str, ...] = (
+    "Auto Installer",
+    "Congratulations",
+    "installed successfully",
+    "Installing Android-x86",
+    "Syncing to disk",
+    "Formatting",
 )
 ISOLINUX_DEBUG_SHELL_PROMPTS: tuple[str, ...] = (
     "Type 'exit' to continue booting",
@@ -290,6 +338,8 @@ def allocate_local_tcp_port() -> int:
 def terminate_stale_thyris_qemu(*, keep_pid: Optional[int] = None) -> List[int]:
     """Kill leftover qemu-system-x86_64 guests from prior Thyris ADB attempts.
 
+    Untagged WHPX probes are leftover qemu and must die too.
+
     Args:
         keep_pid: Live guest to preserve, if any.
 
@@ -308,12 +358,25 @@ def terminate_stale_thyris_qemu(*, keep_pid: Optional[int] = None) -> List[int]:
             is_qemu = "qemu-system-x86_64" in name or "qemu-system-x86_64" in joined
             if not is_qemu:
                 continue
-            thyris_guest = (
-                "thyris" in joined
-                or "android-x86" in joined
-                or "android_images" in joined
-            )
-            if not thyris_guest:
+            proc.kill()
+            killed.append(pid)
+        except (psutil.Error, ProcessLookupError, TypeError, ValueError, OSError):
+            continue
+    return killed
+
+
+def terminate_stale_adb() -> List[int]:
+    """Kill leftover adb.exe so a dead guest cannot leave an offline transport.
+
+    Returns:
+        PIDs that were sent process kill.
+    """
+    killed: List[int] = []
+    for proc in psutil.process_iter(["pid", "name"]):
+        try:
+            pid = int(proc.info["pid"])
+            name = str(proc.info.get("name") or "").lower()
+            if name not in {"adb", "adb.exe"}:
                 continue
             proc.kill()
             killed.append(pid)
@@ -354,6 +417,39 @@ async def continue_isolinux_debug_shells(
         exits_sent += 1
         logger.info("sent isolinux DEBUG=2 exit %s/%s", exits_sent, needed)
     return exits_sent
+
+
+async def continue_auto_install_menu(
+    process: asyncio.subprocess.Process,
+    console_text: str,
+    reboot_keys_sent: int,
+) -> int:
+    """Select Reboot on the ISO installer's Congratulations dialog.
+
+    scripts/1-install leaves an interactive menu after AUTO_INSTALL=force
+    finishes copying. Down+Enter picks Reboot so -no-reboot exits QEMU.
+    """
+    if process.stdin is None or reboot_keys_sent >= 1:
+        return reboot_keys_sent
+    lower = console_text.lower()
+    if "congratulations" not in lower and "installed successfully" not in lower:
+        return reboot_keys_sent
+    process.stdin.write(b"\x1b[B\r")
+    await process.stdin.drain()
+    logger.info("sent AUTO_INSTALL Congratulations Reboot keys")
+    return reboot_keys_sent + 1
+
+
+async def _stop_qemu_process(process: Optional[asyncio.subprocess.Process]) -> None:
+    """Terminate a qemu subprocess. Kill if it ignores SIGTERM."""
+    if process is None or process.returncode is not None:
+        return
+    process.terminate()
+    try:
+        await asyncio.wait_for(process.wait(), timeout=10)
+    except asyncio.TimeoutError:
+        process.kill()
+        await process.wait()
 
 
 def _iso9660_normalize_name(raw: bytes) -> str:
@@ -560,6 +656,8 @@ def _extract_cpio_newc_file(blob: bytes, filename: str) -> bytes:
 def select_qemu_accelerator() -> Tuple[str, ...]:
     """Choose a real QEMU accelerator. Never pass -enable-kvm on Windows.
 
+    Windows Option B uses WHPX with kernel-irqchip=off. TCG isolinux
+    live/debug/livem/nosetup was exhausted without adbd.
     /dev/kvm existing is not enough: this process must be able to open it.
     Otherwise qemu-system exits immediately with Permission denied.
     """
@@ -567,7 +665,7 @@ def select_qemu_accelerator() -> Tuple[str, ...]:
     if forced:
         return ("-accel", forced)
     if sys.platform == "win32":
-        return ("-accel", "tcg")
+        return ("-accel", WINDOWS_WHPX_ACCEL)
     kvm = Path("/dev/kvm")
     if kvm.exists():
         try:
@@ -579,22 +677,32 @@ def select_qemu_accelerator() -> Tuple[str, ...]:
     return ("-accel", "tcg")
 
 
-def refuse_whpx_accelerator(accel: Tuple[str, ...]) -> Tuple[str, ...]:
-    """Option A stays TCG. WHPX is a different host-tool contract.
+def require_windows_whpx_accelerator(accel: Tuple[str, ...]) -> Tuple[str, ...]:
+    """Option B on Windows demands WHPX with kernel-irqchip=off.
+
+    Silent TCG fallback is refused. POSIX keeps KVM or TCG.
 
     Args:
         accel: Result of select_qemu_accelerator.
 
     Returns:
-        The same tuple when it is TCG or KVM.
+        The same tuple when Windows WHPX is correctly spelled, or when the
+        host is not Windows.
 
     Raises:
-        ThyrisBootError: WHPX (or another non-TCG Windows accel) was selected.
+        ThyrisBootError: Windows selected TCG, HAX, or WHPX without
+            kernel-irqchip=off.
     """
+    if sys.platform != "win32":
+        return accel
     joined = " ".join(str(part).lower() for part in accel)
-    if "whpx" in joined or "hax" in joined:
+    if "hax" in joined:
         raise ThyrisBootError(
-            f"refusing accelerator {accel!r}; Thyris ADB userspace stays TCG"
+            f"refusing accelerator {accel!r}; Windows Thyris ADB uses WHPX"
+        )
+    if "whpx" not in joined or "kernel-irqchip=off" not in joined:
+        raise ThyrisBootError(
+            f"Windows Thyris ADB requires -accel {WINDOWS_WHPX_ACCEL}; got {accel!r}"
         )
     return accel
 
@@ -613,18 +721,23 @@ def build_android_qemu_argv(
     kernel_path: Optional[Path] = None,
     initrd_path: Optional[Path] = None,
     kernel_append: Optional[str] = None,
+    attach_iso: bool = True,
+    boot_order: str = "d",
 ) -> List[str]:
     """Build qemu-system-x86_64 argv for Android-x86.
 
     Installer-boot (no kernel_path): SeaBIOS/ISOLINUX on -nographic stdout.
-    Live userspace (kernel_path+initrd_path): skip vesamenu.c32 using files
-    extracted from the same ISO. The ISO stays attached so SRC= finds system.sfs.
+    Live/install (kernel_path+initrd_path): skip vesamenu.c32 using files
+    extracted from the same ISO. Disk userspace omits the ISO so SRC cannot
+    land on live /dev/sr0.
     """
     if (kernel_path is None) != (initrd_path is None):
         raise ThyrisBootError("live boot requires both kernel_path and initrd_path")
+    if boot_order not in {"c", "d", "cd", "dc"}:
+        raise ThyrisBootError(f"unsupported boot_order {boot_order!r}")
     cmd: List[str] = [
         str(qemu_system),
-        *refuse_whpx_accelerator(select_qemu_accelerator()),
+        *require_windows_whpx_accelerator(select_qemu_accelerator()),
         "-cpu",
         "qemu64",
         "-name",
@@ -635,9 +748,14 @@ def build_android_qemu_argv(
         str(vcpus),
         "-drive",
         f"file={disk_path.resolve()},format=qcow2,if=ide,index=0,media=disk",
-        "-drive",
-        f"file={iso_path.resolve()},format=raw,if=ide,index=1,media=cdrom,readonly=on",
     ]
+    if attach_iso:
+        cmd.extend(
+            [
+                "-drive",
+                f"file={iso_path.resolve()},format=raw,if=ide,index=1,media=cdrom,readonly=on",
+            ]
+        )
     if kernel_path is not None and initrd_path is not None:
         if not kernel_path.is_file():
             raise ThyrisBootError(f"live kernel missing: {kernel_path}")
@@ -657,7 +775,7 @@ def build_android_qemu_argv(
             ]
         )
     else:
-        cmd.extend(["-boot", "order=d"])
+        cmd.extend(["-boot", f"order={boot_order}"])
     cmd.append("-no-reboot")
     if nographic:
         cmd.append("-nographic")
@@ -815,28 +933,29 @@ async def run_android_adb_userspace_boot(
     memory_mb: int = 2048,
     vcpus: int = 2,
     timeout_seconds: float = 1800.0,
+    install_timeout_seconds: float = 900.0,
     adb_port: Optional[int] = None,
     qemu_stderr_path: Optional[Path] = None,
     live_boot_dir: Optional[Path] = None,
 ) -> Dict[str, Any]:
-    """Boot the official Android-x86 live kernel and demand a real adb shell.
+    """Install this ISO onto the qcow, boot that disk, and demand adb shell.
 
-    This is the PhoneVMState.READY owner. ISOLINUX installer text and
-    Detecting Android-x86 markers are not sufficient. Disk create stays
-    ISOConverter._create_disk. Kernel and initrd come from the same ISO.
-    Live append is isolinux.cfg livem+nosetup (SETUPWIZARD=0 SRC= DATA=)
-    plus vesa nomodeset without vga=ask. DEBUG=2 is not this path because
-    that ISO init uses chroot instead of switch_root.
+    This is the PhoneVMState.READY owner. Option D uses this ISO's own
+    AUTO_INSTALL=force path, then boots SRC=/thyris from the qcow without
+    live /dev/sr0. ISOLINUX text is not READY. Disk create stays
+    ISOConverter._create_disk. Windows accel is WHPX with kernel-irqchip=off.
     """
-    refuse_whpx_accelerator(select_qemu_accelerator())
-    if "DEBUG=2" in ANDROID_LIVE_CMDLINE:
-        raise ThyrisBootError(
-            "live ADB cmdline still carries DEBUG=2; that ISO init chroots"
-        )
-    if "SETUPWIZARD=0" not in ANDROID_LIVE_CMDLINE or "SRC=" not in ANDROID_LIVE_CMDLINE:
-        raise ThyrisBootError("live ADB cmdline is missing isolinux livem/nosetup append")
-    if "setprop" in ANDROID_LIVE_CMDLINE or "AUTO_INSTALL" in ANDROID_LIVE_CMDLINE:
-        raise ThyrisBootError("live ADB cmdline used setprop or AUTO_INSTALL")
+    require_windows_whpx_accelerator(select_qemu_accelerator())
+    if "AUTO_INSTALL=force" not in ANDROID_AUTO_INSTALL_CMDLINE:
+        raise ThyrisBootError("auto-install cmdline is missing AUTO_INSTALL=force")
+    if f"INSTALL_PREFIX={ANDROID_INSTALL_PREFIX}" not in ANDROID_AUTO_INSTALL_CMDLINE:
+        raise ThyrisBootError("auto-install cmdline is missing INSTALL_PREFIX")
+    if f"SRC=/{ANDROID_INSTALL_PREFIX}" not in ANDROID_DISK_BOOT_CMDLINE:
+        raise ThyrisBootError("disk-boot cmdline is not rooted on the installed prefix")
+    if "AUTO_INSTALL" in ANDROID_LIVE_CMDLINE:
+        raise ThyrisBootError("livem cmdline drifted onto AUTO_INSTALL")
+    if "setprop" in ANDROID_AUTO_INSTALL_CMDLINE or "setprop" in ANDROID_DISK_BOOT_CMDLINE:
+        raise ThyrisBootError("install/disk cmdline used setprop spam")
     qemu_system = resolve_qemu_system()
     adb = resolve_adb()
     disk = Path(disk_path)
@@ -846,38 +965,42 @@ async def run_android_adb_userspace_boot(
         raise FileNotFoundError(f"qcow2 missing: {disk}")
     if not iso.is_file():
         raise FileNotFoundError(f"Android ISO missing: {iso}")
-    if timeout_seconds <= 0:
-        raise ThyrisAdbError("timeout_seconds must be > 0")
+    if timeout_seconds <= 0 or install_timeout_seconds <= 0:
+        raise ThyrisAdbError("timeout_seconds and install_timeout_seconds must be > 0")
     killed_qemu = terminate_stale_thyris_qemu()
     kill_server_before = await adb_kill_server(adb)
+    killed_adb = terminate_stale_adb()
     logger.info(
-        "cleared leftover Thyris qemu pids=%s adb_kill_server=%s",
+        "cleared leftover Thyris qemu pids=%s adb_kill_server=%s stale_adb=%s",
         killed_qemu,
         kill_server_before,
+        killed_adb,
     )
     console.parent.mkdir(parents=True, exist_ok=True)
     stderr_file = Path(qemu_stderr_path) if qemu_stderr_path is not None else console.with_suffix(".qemu.stderr.log")
     boot_dir = Path(live_boot_dir) if live_boot_dir is not None else console.parent / "liveboot"
     kernel_path, initrd_path = extract_android_live_boot_files(iso, boot_dir)
     host_adb_port = adb_port if adb_port is not None else allocate_local_tcp_port()
-    argv = build_android_qemu_argv(
+    install_argv = build_android_qemu_argv(
         qemu_system=qemu_system,
         disk_path=disk,
         iso_path=iso,
-        name=f"thyris-android-adb-{uuid4().hex[:8]}",
+        name=f"thyris-android-install-{uuid4().hex[:8]}",
         memory_mb=memory_mb,
         vcpus=vcpus,
         nographic=True,
         adb_port=host_adb_port,
         kernel_path=kernel_path,
         initrd_path=initrd_path,
-        kernel_append=ANDROID_LIVE_CMDLINE,
+        kernel_append=ANDROID_AUTO_INSTALL_CMDLINE,
+        attach_iso=True,
     )
-    if "-nographic" not in argv:
-        raise ThyrisBootError("live ADB argv is missing -nographic; refusing a VNC-only guest")
-    if ANDROID_LIVE_CMDLINE not in argv:
-        raise ThyrisBootError("live ADB argv is missing isolinux livem/nosetup append")
-    logger.info("Android ADB userspace argv: %s", " ".join(str(item) for item in argv))
+    if "-nographic" not in install_argv:
+        raise ThyrisBootError("install argv is missing -nographic; refusing a VNC-only guest")
+    if ANDROID_AUTO_INSTALL_CMDLINE not in install_argv:
+        raise ThyrisBootError("install argv is missing AUTO_INSTALL=force")
+    logger.info("Android AUTO_INSTALL argv: %s", " ".join(str(item) for item in install_argv))
+    argv = install_argv
     stdout_handle = console.open("wb")
     stderr_handle = stderr_file.open("wb")
     process: Optional[asyncio.subprocess.Process] = None
@@ -886,93 +1009,183 @@ async def run_android_adb_userspace_boot(
     def _read_logs() -> tuple[str, str]:
         stdout_handle.flush()
         stderr_handle.flush()
-        console_text = console.read_text(encoding="utf-8", errors="replace") if console.exists() else ""
-        stderr_text = stderr_file.read_text(encoding="utf-8", errors="replace") if stderr_file.exists() else ""
+        console_text = log_console.read_text(encoding="utf-8", errors="replace") if log_console.exists() else ""
+        stderr_text = log_stderr.read_text(encoding="utf-8", errors="replace") if log_stderr.exists() else ""
         return console_text, stderr_text
 
+    async def _proven(console_text: str, boot_argv: List[str], kernel_append: str, boot_mode: str) -> Dict[str, Any]:
+        release = await adb_getprop(adb, host_adb_port, "ro.build.version.release")
+        userspace_markers = [
+            marker
+            for marker in USERSPACE_EVIDENCE_MARKERS
+            if marker.lower() in console_text.lower()
+        ]
+        return {
+            "status": "adb_userspace",
+            "pid": process.pid if process is not None else None,
+            "qemu_system": str(qemu_system),
+            "adb": str(adb),
+            "accelerator": list(select_qemu_accelerator()),
+            "disk_path": str(disk),
+            "iso_path": str(iso),
+            "iso_bytes": iso.stat().st_size,
+            "kernel_path": str(kernel_path),
+            "kernel_bytes": kernel_path.stat().st_size,
+            "initrd_path": str(initrd_path),
+            "initrd_bytes": initrd_path.stat().st_size,
+            "console_path": str(log_console),
+            "userspace_markers": userspace_markers,
+            "console_excerpt": console_text[-4000:],
+            "argv": boot_argv,
+            "install_argv": install_argv,
+            "adb_port": host_adb_port,
+            "adb_serial": serial,
+            "adb_detail": adb_detail,
+            "android_release": release,
+            "internal_ip": QEMU_USERNET_GUEST_IP,
+            "install_markers": install_markers,
+            "install_reboot_keys": reboot_keys,
+            "stale_qemu_killed": killed_qemu,
+            "stale_adb_killed": killed_adb,
+            "adb_kill_server": kill_server_before,
+            "kernel_append": kernel_append,
+            "boot_mode": boot_mode,
+            "vm_state": PhoneVMState.READY.value,
+            "phone_ready": True,
+            "adb_proven": True,
+        }
+
+    log_console = console
+    log_stderr = stderr_file
+    install_markers: List[str] = []
+    reboot_keys = 0
+    adb_detail = "adb not yet probed"
+    console_text = ""
+    stderr_text = ""
+    disk_argv: List[str] = []
     try:
         process = await asyncio.create_subprocess_exec(
-            *argv,
+            *install_argv,
             stdin=asyncio.subprocess.PIPE,
             stdout=stdout_handle,
             stderr=stderr_handle,
         )
         if process.pid is None:
             raise ThyrisBootError("qemu-system-x86_64 started without a pid")
+        argv = install_argv
+        install_deadline = time.monotonic() + install_timeout_seconds
+        while time.monotonic() < install_deadline:
+            console_text, stderr_text = _read_logs()
+            install_markers = [
+                marker
+                for marker in INSTALL_PROGRESS_MARKERS
+                if marker.lower() in console_text.lower()
+            ]
+            if process.returncode is None:
+                try:
+                    reboot_keys = await continue_auto_install_menu(
+                        process, console_text, reboot_keys
+                    )
+                except (BrokenPipeError, ConnectionResetError, OSError) as exc:
+                    logger.debug("AUTO_INSTALL reboot key write failed: %s", exc)
+                ok, adb_detail = await adb_shell_health(adb, host_adb_port)
+                if ok:
+                    return await _proven(
+                        console_text,
+                        install_argv,
+                        ANDROID_AUTO_INSTALL_CMDLINE,
+                        "auto_install_run",
+                    )
+            else:
+                logger.info(
+                    "AUTO_INSTALL qemu exited rc=%s disk_bytes=%s",
+                    process.returncode,
+                    disk.stat().st_size,
+                )
+                break
+            await asyncio.sleep(5)
+        await _stop_qemu_process(process)
+        process = None
+        stdout_handle.close()
+        stderr_handle.close()
+        disk_bytes = disk.stat().st_size
+        if disk_bytes < ANDROID_INSTALLED_DISK_MIN_BYTES:
+            raise ThyrisBootError(
+                f"AUTO_INSTALL=force did not populate the qcow ({disk_bytes} bytes). "
+                f"markers={install_markers!r} reboot_keys={reboot_keys} "
+                f"stderr={stderr_text[-2000:]!r} console={console_text[-4000:]!r}"
+            )
+        log_console = console.with_name("disk-" + console.name)
+        log_stderr = stderr_file.with_name("disk-" + stderr_file.name)
+        stdout_handle = log_console.open("wb")
+        stderr_handle = log_stderr.open("wb")
+        disk_argv = build_android_qemu_argv(
+            qemu_system=qemu_system,
+            disk_path=disk,
+            iso_path=iso,
+            name=f"thyris-android-disk-{uuid4().hex[:8]}",
+            memory_mb=memory_mb,
+            vcpus=vcpus,
+            nographic=True,
+            adb_port=host_adb_port,
+            kernel_path=kernel_path,
+            initrd_path=initrd_path,
+            kernel_append=ANDROID_DISK_BOOT_CMDLINE,
+            attach_iso=False,
+        )
+        argv = disk_argv
+        if "-nographic" not in disk_argv:
+            raise ThyrisBootError("disk-boot argv is missing -nographic")
+        if ANDROID_DISK_BOOT_CMDLINE not in disk_argv:
+            raise ThyrisBootError("disk-boot argv is missing SRC=/thyris")
+        if "media=cdrom" in " ".join(disk_argv):
+            raise ThyrisBootError("disk-boot argv still attached live /dev/sr0 ISO")
+        logger.info("Android disk-boot argv: %s", " ".join(str(item) for item in disk_argv))
+        process = await asyncio.create_subprocess_exec(
+            *disk_argv,
+            stdin=asyncio.subprocess.PIPE,
+            stdout=stdout_handle,
+            stderr=stderr_handle,
+        )
+        if process.pid is None:
+            raise ThyrisBootError("disk-boot qemu-system-x86_64 started without a pid")
         deadline = time.monotonic() + timeout_seconds
-        console_text = ""
         userspace_markers: List[str] = []
-        adb_detail = "adb not yet probed"
-        debug_exits = 0
         while time.monotonic() < deadline:
             if process.returncode is not None:
                 console_text, stderr_text = _read_logs()
                 raise ThyrisBootError(
-                    f"QEMU exited rc={process.returncode} before ADB userspace proof. "
+                    f"disk-boot QEMU exited rc={process.returncode} before ADB userspace proof. "
+                    f"install_markers={install_markers!r} "
                     f"stderr={stderr_text[-4000:]!r} console={console_text[-4000:]!r}"
                 )
-            console_text, _stderr_unused = _read_logs()
+            console_text, stderr_text = _read_logs()
             userspace_markers = [
                 marker
                 for marker in USERSPACE_EVIDENCE_MARKERS
                 if marker.lower() in console_text.lower()
             ]
-            try:
-                debug_exits = await continue_isolinux_debug_shells(
-                    process, console_text, debug_exits
-                )
-            except (BrokenPipeError, ConnectionResetError, OSError) as exc:
-                logger.debug("isolinux DEBUG=2 exit write failed: %s", exc)
             ok, adb_detail = await adb_shell_health(adb, host_adb_port)
             if ok:
-                release = await adb_getprop(adb, host_adb_port, "ro.build.version.release")
-                return {
-                    "status": "adb_userspace",
-                    "pid": process.pid,
-                    "qemu_system": str(qemu_system),
-                    "adb": str(adb),
-                    "accelerator": list(select_qemu_accelerator()),
-                    "disk_path": str(disk),
-                    "iso_path": str(iso),
-                    "iso_bytes": iso.stat().st_size,
-                    "kernel_path": str(kernel_path),
-                    "kernel_bytes": kernel_path.stat().st_size,
-                    "initrd_path": str(initrd_path),
-                    "initrd_bytes": initrd_path.stat().st_size,
-                    "console_path": str(console),
-                    "userspace_markers": userspace_markers,
-                    "console_excerpt": console_text[-4000:],
-                    "argv": argv,
-                    "adb_port": host_adb_port,
-                    "adb_serial": serial,
-                    "adb_detail": adb_detail,
-                    "android_release": release,
-                    "internal_ip": QEMU_USERNET_GUEST_IP,
-                    "debug_exits_sent": debug_exits,
-                    "stale_qemu_killed": killed_qemu,
-                    "adb_kill_server": kill_server_before,
-                    "kernel_append": ANDROID_LIVE_CMDLINE,
-                    "vm_state": PhoneVMState.READY.value,
-                    "phone_ready": True,
-                    "adb_proven": True,
-                }
+                return await _proven(
+                    console_text,
+                    disk_argv,
+                    ANDROID_DISK_BOOT_CMDLINE,
+                    "installed_disk",
+                )
             await asyncio.sleep(10)
         console_text, stderr_text = _read_logs()
         raise ThyrisAdbError(
-            f"No adb shell within {timeout_seconds}s on {serial}. "
+            f"No adb shell within {timeout_seconds}s on {serial} after AUTO_INSTALL=force. "
             f"Detecting Android-x86 / init markers are not READY. "
+            f"accel={list(select_qemu_accelerator())!r} "
             f"detail={adb_detail!r} markers={userspace_markers!r} "
-            f"debug_exits={debug_exits} stale_qemu={killed_qemu!r} "
+            f"install_markers={install_markers!r} reboot_keys={reboot_keys} "
+            f"stale_qemu={killed_qemu!r} stale_adb={killed_adb!r} "
             f"stderr={stderr_text[-2000:]!r} console={console_text[-4000:]!r}"
         )
     finally:
-        if process is not None and process.returncode is None:
-            process.terminate()
-            try:
-                await asyncio.wait_for(process.wait(), timeout=10)
-            except asyncio.TimeoutError:
-                process.kill()
-                await process.wait()
+        await _stop_qemu_process(process)
         stdout_handle.close()
         stderr_handle.close()
         await adb_disconnect(adb, host_adb_port)
@@ -1754,11 +1967,13 @@ class ThyrisPhoneOrchestrator:
             kill_server = await adb_kill_server(adb)
         except FileNotFoundError as exc:
             raise ThyrisAdbError(str(exc)) from exc
+        killed_adb = terminate_stale_adb()
         logger.info(
-            "[%s] cleared leftover qemu pids=%s adb_kill_server=%s",
+            "[%s] cleared leftover qemu pids=%s adb_kill_server=%s stale_adb=%s",
             correlation_id,
             killed_qemu,
             kill_server,
+            killed_adb,
         )
         serial_log = disk_path.with_suffix(".serial.log")
         stderr_log = disk_path.with_suffix(".qemu.stderr.log")

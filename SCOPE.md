@@ -1,8 +1,8 @@
 # SCOPE — EDIT 2026-09-18: thyris-adb-userspace-ready
 
-**Status:** OPEN. `snapshots/v0.15` is NOT promoted. STATE.md is not rewritten
-until `check_android_adb_userspace` is pass with `adb_proven=true` on a live
-guest. Inference untouched. Erebus untouched.
+**Status:** OPEN. B (WHPX livem) and D (AUTO_INSTALL=force then disk)
+failed loud. `snapshots/v0.15` is NOT promoted. STATE.md is not rewritten
+to READY. `phone_ready` and `adb_proven` stay false.
 
 ## Engagement Mode
 
@@ -12,35 +12,30 @@ guest. Inference untouched. Erebus untouched.
 - target_module_provenance: snapshots/v0.11/manifest.json domains.thyris
 - subsequent_targets:
   - test/thyris_vm/test_thyris_android_boot.py
-- justification: I am editing the live Thyris phone owner because TCG
-  DEBUG=2 reached Android init/healthd but adbd stayed offline
-  (20260918_025416). The ISO init execs chroot when DEBUG is set. WRAP is
-  rejected. This continuation uses isolinux livem+nosetup
-  (SETUPWIZARD=0 SRC= DATA=) plus vesa nomodeset without vga=ask, refuses
-  WHPX, kills leftover qemu/adb, and sets READY only after adb shell
-  thyris_adb_health.
+- justification: I am editing the live Thyris phone owner because WHPX
+  livem reached `console:/ #` without adbd (20260918_050641). WRAP is
+  rejected. This continuation uses this ISO's own AUTO_INSTALL=force onto
+  an 8G qcow from ISOConverter._create_disk, then boots SRC=/thyris without
+  live /dev/sr0. READY only after adb shell thyris_adb_health.
 - author: daeron
 - date: 2026-09-18
 
 ## Runtime / host-tool OPTIONS (evidence, then selection)
 
-Surveyed this Windows host and the official ISO (stdlib ISO9660 plus the
-isolinux.cfg text at the end of android-x86_64-9.0-r2.iso):
-
 | Option | What it is | Evidence | Verdict |
 |---|---|---|---|
-| 1. isolinux `label debug` (`DEBUG=2 SRC= DATA=`) | Same-ISO kernel/initrd. ISO init sets SWITCH=chroot. | Consumer FAIL 20260918_025416: 900s TCG, init+healthd, `127.0.0.1:PORT offline`. | Tried. Not READY. |
-| 2. isolinux `label livem` + `label nosetup` | `SETUPWIZARD=0 SRC= DATA=`. switch_root. Omit `quiet` for serial evidence. | isolinux.cfg. ISO init writes SETUPWIZARD default.prop then switch_root. | **SELECTED.** |
-| 3. isolinux `label vesa` `nomodeset vga=ask` | No GPU accel. | `vga=ask` is interactive. | Take `nomodeset` only. |
-| 4. WHPX | Windows hypervisor accel. | qemu-system lists it. | Rejected. Stay TCG. |
-| 5. AUTO_INSTALL / serial setprop / prompt_bridge / dummy READY | Shortcuts. | ANTITHESIS. | Rejected. |
+| 1. isolinux debug DEBUG=2 | ISO init chroot | 20260918_025416 TCG 900s, adb offline | Exhausted |
+| 2. isolinux livem+nosetup TCG | SETUPWIZARD=0 SRC= DATA= | 20260918_032455, 20260918_035525 1800s Detecting /dev/sr0, adb offline | Exhausted |
+| 3. WHPX livem+nosetup | `-accel whpx,kernel-irqchip=off` same ISO | 20260918_050641: ISOLINUX pass, then Detecting /dev/sr0 + `console:/ #`, no adbd. SVM warning only. | Exhausted. Not READY. |
+| 4. AUTO_INSTALL=force then disk boot SRC=/thyris | ISO install.img scripts/1-install unattended path. 8G qcow via landed _create_disk. | ISO own installer. Still requires real adb shell. | **SELECTED.** |
+| 5. serial setprop / prompt_bridge / dummy READY / BlissOS download | Shortcuts | ANTITHESIS | Rejected |
 
 Disk-create remains `ISOConverter._create_disk`. `boot_android_installer`
 stays ISOLINUX-only and still returns `phone_ready=False` / `adb_proven=False`.
 
 ## Fletcher continuation (this pass)
 
-1. Kill leftover qemu/adb before retry; `adb kill-server` after guest dead
-2. isolinux livem+nosetup append, not DEBUG=2 chroot, not setprop spam
-3. Prove with `python test/thyris_vm/test_thyris_android_boot.py` (1800s ADB wait)
-4. READY only via `apply_adb_ready` after the same adb proof. Fail loud if offline.
+1. Kill leftover qemu/adb before retry
+2. AUTO_INSTALL=force INSTALL_PREFIX=thyris onto 8G qcow (WHPX)
+3. On Congratulations, send Reboot keys; if qcow grew, boot SRC=/thyris with no ISO
+4. READY only via `apply_adb_ready` after adb shell thyris_adb_health

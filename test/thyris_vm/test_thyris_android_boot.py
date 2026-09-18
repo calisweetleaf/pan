@@ -36,6 +36,10 @@ from telecom.phone_orchestrator import (
     ANDROID_LIVE_CMDLINE,
     ANDROID_LIVE_INITRD,
     ANDROID_LIVE_KERNEL,
+    ANDROID_AUTO_INSTALL_CMDLINE,
+    ANDROID_DISK_BOOT_CMDLINE,
+    ANDROID_INSTALL_DISK_GB,
+    ANDROID_INSTALL_PREFIX,
     ANDROID_X86_9_R2_ISO,
     ANDROID_X86_9_R2_SHA1,
     AndroidPhoneVM,
@@ -45,16 +49,18 @@ from telecom.phone_orchestrator import (
     ThyrisAdbError,
     ThyrisBootError,
     ThyrisPhoneOrchestrator,
+    WINDOWS_WHPX_ACCEL,
     apply_adb_ready,
     build_android_qemu_argv,
     ensure_windows_qemu_on_path,
     extract_android_live_boot_files,
-    refuse_whpx_accelerator,
+    require_windows_whpx_accelerator,
     resolve_adb,
     resolve_qemu_system,
     run_android_adb_userspace_boot,
     select_qemu_accelerator,
     sha1_file,
+    terminate_stale_adb,
     terminate_stale_thyris_qemu,
     _adb_output_is_offline,
 )
@@ -92,14 +98,18 @@ def check_qemu_system_resolves(details: dict[str, object]) -> None:
     print(f"qemu-system-x86_64={qemu_system}")
     if not qemu_system.is_file():
         raise CheckFailure(f"qemu-system-x86_64 is not a file: {qemu_system}")
-    accel = list(refuse_whpx_accelerator(select_qemu_accelerator()))
+    accel = list(require_windows_whpx_accelerator(select_qemu_accelerator()))
     print(f"accelerator={accel}")
     details["qemu_system"] = str(qemu_system)
     details["accelerator"] = accel
-    if "whpx" in " ".join(str(part).lower() for part in accel):
-        raise CheckFailure(f"WHPX is rejected for Thyris ADB; accelerator={accel}")
-    if sys.platform == "win32" and accel != ["-accel", "tcg"] and os.environ.get("THYRIS_QEMU_ACCEL", "").strip() == "":
-        raise CheckFailure(f"Windows default accelerator is not tcg: {accel}")
+    if sys.platform == "win32":
+        joined = " ".join(str(part).lower() for part in accel)
+        if "whpx" not in joined or "kernel-irqchip=off" not in joined:
+            raise CheckFailure(f"Windows accelerator is not WHPX kernel-irqchip=off: {accel}")
+        if os.environ.get("THYRIS_QEMU_ACCEL", "").strip() == "" and accel != ["-accel", WINDOWS_WHPX_ACCEL]:
+            raise CheckFailure(f"Windows default accelerator is not WHPX: {accel}")
+    elif "whpx" in " ".join(str(part).lower() for part in accel):
+        raise CheckFailure(f"POSIX accelerator selected WHPX: {accel}")
 
 
 def check_android_iso_authentic(details: dict[str, object]) -> None:
@@ -219,8 +229,14 @@ def check_live_argv_forwards_adb(details: dict[str, object]) -> None:
             raise CheckFailure("live cmdline used AUTO_INSTALL; that is not this unit")
         if "setprop" in ANDROID_LIVE_CMDLINE:
             raise CheckFailure("live cmdline still carries setprop spam")
-        if "whpx" in " ".join(str(item).lower() for item in argv):
-            raise CheckFailure("live argv selected WHPX; this pass stays TCG")
+        argv_text = " ".join(str(item).lower() for item in argv)
+        if sys.platform == "win32":
+            if WINDOWS_WHPX_ACCEL not in argv_text:
+                raise CheckFailure("Windows live argv is missing WHPX kernel-irqchip=off")
+            if " -accel tcg" in f" {argv_text} " or argv_text.endswith("-accel tcg"):
+                raise CheckFailure("Windows live argv still selected TCG")
+        elif "whpx" in argv_text:
+            raise CheckFailure("POSIX live argv selected WHPX")
         if "-boot" in argv:
             raise CheckFailure("live argv still uses CDROM -boot order=d")
         if "-nographic" not in argv:
@@ -308,19 +324,21 @@ def check_android_installer_boot(details: dict[str, object]) -> None:
 
 
 def check_android_adb_userspace(details: dict[str, object]) -> None:
-    """Live-boot the same ISO and demand adb shell. ISOLINUX is not READY."""
+    """Install the same ISO to qcow, boot that disk, and demand adb shell."""
     iso = _android_iso()
     with tempfile.TemporaryDirectory(prefix="thyris_adb_") as tmpdir:
         work = Path(tmpdir)
         disk = work / "phone-adb.qcow2"
-        created = asyncio.run(ISOConverter()._create_disk(disk, 1))
+        created = asyncio.run(ISOConverter()._create_disk(disk, ANDROID_INSTALL_DISK_GB))
         if created is not True or not disk.is_file():
             raise CheckFailure("landed ISOConverter._create_disk did not write a qcow2")
         console = work / "adb-console.log"
         stderr_path = work / "adb-qemu.stderr.log"
         print(f"disk={disk} iso={iso} adb={resolve_adb()}")
         killed = terminate_stale_thyris_qemu()
+        killed_adb = terminate_stale_adb()
         print(f"stale_qemu_killed={killed}")
+        print(f"stale_adb_killed={killed_adb}")
         print("starting live kernel qemu-system-x86_64 for ADB userspace...")
         try:
             evidence = asyncio.run(
@@ -331,6 +349,7 @@ def check_android_adb_userspace(details: dict[str, object]) -> None:
                     memory_mb=2048,
                     vcpus=2,
                     timeout_seconds=1800.0,
+                    install_timeout_seconds=900.0,
                     qemu_stderr_path=stderr_path,
                     live_boot_dir=work / "liveboot",
                 )
@@ -371,13 +390,30 @@ def check_android_adb_userspace(details: dict[str, object]) -> None:
             if not evidence.get("android_release"):
                 raise CheckFailure("ADB proof omitted android_release after shell health")
         append = " ".join(str(item) for item in evidence.get("argv") or [])
-        if "SETUPWIZARD=0" not in append or "SRC=" not in append:
-            raise CheckFailure("ADB guest was not launched with isolinux livem/nosetup")
-        if "DEBUG=2" in append:
+        install_append = " ".join(str(item) for item in evidence.get("install_argv") or [])
+        if "AUTO_INSTALL=force" not in install_append:
+            raise CheckFailure("ADB path did not run this ISO's AUTO_INSTALL=force installer")
+        if f"INSTALL_PREFIX={ANDROID_INSTALL_PREFIX}" not in install_append:
+            raise CheckFailure("AUTO_INSTALL did not pin INSTALL_PREFIX=thyris")
+        boot_mode = str(evidence.get("boot_mode") or "")
+        if boot_mode == "installed_disk":
+            if ANDROID_DISK_BOOT_CMDLINE not in append:
+                raise CheckFailure("disk-boot argv is missing SRC=/thyris")
+            if "media=cdrom" in append:
+                raise CheckFailure("disk-boot still attached live /dev/sr0 ISO")
+        elif boot_mode == "auto_install_run":
+            if ANDROID_AUTO_INSTALL_CMDLINE not in append:
+                raise CheckFailure("install-run argv lost AUTO_INSTALL=force")
+        else:
+            raise CheckFailure(f"ADB proof used unknown boot_mode {boot_mode!r}")
+        if "DEBUG=2" in append or "DEBUG=2" in install_append:
             raise CheckFailure("ADB guest still used DEBUG=2 chroot")
-        if "whpx" in append.lower():
-            raise CheckFailure("ADB guest selected WHPX; this pass stays TCG")
-        if "setprop" in append:
+        if sys.platform == "win32":
+            if WINDOWS_WHPX_ACCEL not in append.lower() and WINDOWS_WHPX_ACCEL not in install_append.lower():
+                raise CheckFailure("ADB guest was not launched with WHPX kernel-irqchip=off")
+        elif "whpx" in append.lower():
+            raise CheckFailure("POSIX ADB guest selected WHPX")
+        if "setprop" in append or "setprop" in install_append:
             raise CheckFailure("ADB argv still contains setprop")
         details.update(
             {
@@ -394,7 +430,11 @@ def check_android_adb_userspace(details: dict[str, object]) -> None:
                 "adb_proven": evidence.get("adb_proven"),
                 "vm_state": evidence.get("vm_state"),
                 "stale_qemu_killed": evidence.get("stale_qemu_killed"),
+                "stale_adb_killed": evidence.get("stale_adb_killed"),
+                "accelerator": evidence.get("accelerator"),
                 "debug_exits_sent": evidence.get("debug_exits_sent"),
+                "install_markers": evidence.get("install_markers"),
+                "boot_mode": evidence.get("boot_mode"),
                 "console_excerpt": str(evidence.get("console_excerpt") or "")[-1500:],
                 "disk_owner": "telecom.vm_image_manager.ISOConverter._create_disk",
             }
@@ -512,9 +552,10 @@ def write_artifacts(payload: dict[str, object], timestamp: str, log_text: str) -
         "I required qemu-system-x86_64, the official android-x86_64-9.0-r2.iso",
         "(SHA-1 1cc85b5ed7c830ff71aecf8405c7281a9c995aa0), a qcow2 from landed",
         "ISOConverter._create_disk, SeaBIOS/ISOLINUX on installer -nographic stdout,",
-        "and a separate live kernel/initrd boot that only sets phone_ready after",
-        "adb connect + adb shell. I refused a dummy boot, prompt_bridge, a second",
-        "disk-create owner, and READY from ISOLINUX.",
+        "and a disk-install via this ISO's AUTO_INSTALL=force, then a disk boot",
+        "that only sets phone_ready after adb connect + adb shell. Windows uses",
+        "-accel whpx,kernel-irqchip=off. I refused a dummy boot, prompt_bridge,",
+        "a second disk-create owner, and READY from ISOLINUX.",
         "",
         f"Claim: {payload.get('claim')}",
         "",

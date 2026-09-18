@@ -3,12 +3,13 @@
 ```
 DOCUMENT TITLE: Interior Dispatch of the Planetary Autonomous Network
 Classification: INTERNAL RESEARCH (not published; not a public release)
-Version: 1.0
+Version: 1.2
 Date: 2026-09-18
 Author/Origin: PAN operator workspace (C:\Users\trent\pan)
 Status: OPERATIONAL DISPATCH from live owners
 Cited full gate: results/pan_gate_20260912_235357.json
 Cited immune landing: test/immune/runs/20260918_010347/ (20/20)
+Cited Thyris FAIL (not READY): test/thyris_vm/runs/20260918_050641/ (WHPX livem) and 20260918_052020/ (AUTO_INSTALL then disk)
 ```
 
 ## 1. Ninety seconds
@@ -21,9 +22,9 @@ We mint only after a validator re-executes the same `PANLIN01` integer decode th
 
 The immune nation is Erebus. Four standing META towers (observe, deceive, degrade, neutralize) persist on the local USMS Ed25519 DAG, coherence-bound to a PAN RSA identity. They do not ride the mesh bulletin. `THREAT_MEMORY_BULLETIN` carries origin ROE, `neural_activation`, and `human_authorized` as a receipt. Neutralize without a human fails loud. RSA and Ed25519 stay two types. We bound them. We did not collapse them.
 
-Thyris, the telecommunications arm, just spoke Android into serial. Official android-x86 9.0-r2 installer media booted through `qemu-system-x86_64 -nographic`. SeaBIOS. ISOLINUX 6.03. That is a phone factory coming online. It is not `PhoneVMState.READY`. It is not ADB userspace. Citizens are not carrying phones yet.
+Thyris, the telecommunications arm, still boots official android-x86 9.0-r2 installer media through `qemu-system-x86_64 -nographic`: SeaBIOS, ISOLINUX 6.03. That installer proof is LIVE. The ADB path is not. TCG live, WHPX livem, and AUTO_INSTALL-then-disk all reached Android-x86 detect, then this ISO's ramdisk init presented `console:/ #` on serial — live `/dev/sr0` and installed `/dev/sda1` alike. TCP `adbd` was never proven. `phone_ready` and `adb_proven` stay false. `console:/ #` is not a citizen phone.
 
-If you can hold only one sentence: **a lie does not become money, a tower does not become a packet, and a boot prompt does not become a phone.**
+If you can hold only one sentence: **a lie does not become money, a tower does not become a packet, and `console:/ #` is not a phone.**
 
 ## 2. Contents
 
@@ -43,14 +44,15 @@ If you can hold only one sentence: **a lie does not become money, a tower does n
 14. Next justified action
 15. Vocabulary
 16. Crowd cut (postable; unpublished)
+17. Dispatch changelog (crowd-internal)
 
 ## 3. Seal of the nation (topology)
 
-The seal is a map, not a logo. The gold ring is the security-owned firewall. The four towers stand inside local USMS memory. They are omitted from the bulletin by protocol. Thyris sits outside the ring as host-tool frontier: installer boot proven, citizens not yet armed with phones.
+The seal is a map, not a logo. The gold ring is the security-owned firewall. The four towers stand inside local USMS memory. They are omitted from the bulletin by protocol. Thyris sits outside the ring as host-tool frontier: installer boot proven, ramdisk init presents `console:/ #` on `-nographic` serial (live sr0 and installed sda1), TCP adbd unproven, citizens not armed with phones.
 
 If the seal does not render in your viewer, the table under it is the same topology in plain language.
 
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" role="img" aria-label="PAN sovereign topology: firewall ring, local Erebus towers, civic mint, sealed highway, Thyris factory outside READY">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" role="img" aria-label="PAN sovereign topology: firewall ring, local Erebus towers, civic mint, sealed highway, Thyris ISOLINUX live, console busybox not READY">
   <defs>
     <linearGradient id="panVoid" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#05070d"/>
@@ -162,11 +164,12 @@ If the seal does not render in your viewer, the table under it is the same topol
   <text x="806" y="246" text-anchor="middle" fill="#9eb0c7" font-family="Segoe UI, Helvetica, sans-serif" font-size="9">ROE · neural_activation</text>
   <text x="806" y="262" text-anchor="middle" fill="#9eb0c7" font-family="Segoe UI, Helvetica, sans-serif" font-size="9">human_authorized</text>
 
-  <rect x="700" y="360" width="212" height="120" rx="4" fill="#0c1018" stroke="#6f829a" stroke-width="1" stroke-dasharray="6 4"/>
-  <text x="806" y="390" text-anchor="middle" fill="#9eb0c7" font-family="Segoe UI, Helvetica, sans-serif" font-size="10">THYRIS FACTORY</text>
-  <text x="806" y="412" text-anchor="middle" fill="#f0d48a" font-family="Georgia, 'Times New Roman', serif" font-size="13">SeaBIOS · ISOLINUX</text>
-  <text x="806" y="434" text-anchor="middle" fill="#6f829a" font-family="Segoe UI, Helvetica, sans-serif" font-size="9">android-x86 9.0-r2 installer</text>
-  <text x="806" y="454" text-anchor="middle" fill="#ff6b73" font-family="Segoe UI, Helvetica, sans-serif" font-size="10">NOT PhoneVMState.READY</text>
+  <rect x="700" y="352" width="212" height="132" rx="4" fill="#0c1018" stroke="#6f829a" stroke-width="1" stroke-dasharray="6 4"/>
+  <text x="806" y="378" text-anchor="middle" fill="#9eb0c7" font-family="Segoe UI, Helvetica, sans-serif" font-size="10">THYRIS · ISOLINUX LIVE</text>
+  <text x="806" y="400" text-anchor="middle" fill="#f0d48a" font-family="Georgia, 'Times New Roman', serif" font-size="13">SeaBIOS · ISOLINUX</text>
+  <text x="806" y="422" text-anchor="middle" fill="#6f829a" font-family="Segoe UI, Helvetica, sans-serif" font-size="9">sr0 and sda1: console:/ #</text>
+  <text x="806" y="442" text-anchor="middle" fill="#6f829a" font-family="Segoe UI, Helvetica, sans-serif" font-size="9">TCP adbd never proven</text>
+  <text x="806" y="464" text-anchor="middle" fill="#ff6b73" font-family="Segoe UI, Helvetica, sans-serif" font-size="10">NOT PhoneVMState.READY</text>
 
   <text x="48" y="530" fill="#5c6b7e" font-family="Segoe UI, Helvetica, sans-serif" font-size="10">WAN SMTP / webhook / feeds / whois / deauth: fail loud on purpose. Public internet is not a peer.</text>
 </svg>
@@ -179,7 +182,7 @@ If the seal does not render in your viewer, the table under it is the same topol
 | Four towers | Local USMS META nodes `observe/deceive/degrade/neutralize` | Fields on `THREAT_MEMORY_BULLETIN` |
 | Two identity seals | PAN RSA and USMS Ed25519, bound under one `runtime_root` | One collapsed key class |
 | Highway | Sealed USMS cargo on `UnifiedDataPacket` hops | Host:port consciousness, public sockets |
-| Dashed Thyris | qemu-img disk-create + ISOLINUX installer boot on this Windows host | `PhoneVMState.READY`, ADB userspace, citizens with phones |
+| Dashed Thyris | qemu-img disk-create + ISOLINUX installer boot; WHPX livem and AUTO_INSTALL disk both FAIL at `console:/ #` | `PhoneVMState.READY`, listening adbd, ADB userspace, citizens with phones |
 
 ## 4. What is LIVE
 
@@ -196,7 +199,7 @@ Directional canon remains [PLAN.md](../PLAN.md) and [Building a Sovereign Digita
 | Immune memory | `memory/unified_memory_system.py` | Signed Ed25519 DAG. Not Thyris VM RAM. |
 | Packet border | `security/sovereign_firewall.py` | Security-owned. Fail-closed. WAN egress types fail loud. |
 | Highway | `security/planetary_highway.py` | `HIGHWAY_EMBARK` / `HOP` / `ARRIVE` / `LOCATE`. Destination-sealed cargo. |
-| Thyris telecom | `telecom/phone_orchestrator.py` | Disk-create landed. Installer boot proven. READY/ADB unproven. |
+| Thyris telecom | `telecom/phone_orchestrator.py` | Disk-create landed. Installer boot proven. TCG live, WHPX livem, and AUTO_INSTALL-then-disk FAIL at `console:/ #`. READY/ADB unproven. |
 | Thyris VM memory | `memory/memory_core.py`, `memory/system_cache.py` | Coexists with USMS. Not the immune DAG. |
 
 We did not invent a second package to look like a country. The country is the monolith.
@@ -272,19 +275,41 @@ WAN isolation is a feature, not a missing integration. SMTP alerts, HTTP webhook
 
 ## 8. Thyris: phone factory, not READY
 
-Thyris is telecommunications. Phones do not contain in-device AI. `core.prompt_bridge` is rejected, unbound, and is not next work.
+Thyris is telecommunications. Phones do not contain in-device AI. `core.prompt_bridge` is rejected, unbound, and is not next work. Installer ISOLINUX is LIVE. TCP `adbd` is not. `snapshots/v0.15` is not a READY landing.
 
-What roared, and what did not:
+```mermaid
+stateDiagram-v2
+  [*] --> IsolinuxBoot: qemu-system-x86_64 -nographic
+  IsolinuxBoot --> TcgLive: TCG kernel/initrd
+  IsolinuxBoot --> WhpxLive: WHPX livem 20260918_050641
+  IsolinuxBoot --> AutoInstall: AUTO_INSTALL=force 20260918_052020
+  TcgLive --> DetectSr0: found at /dev/sr0
+  WhpxLive --> DetectSr0: found at /dev/sr0
+  AutoInstall --> InstalledSda1: Congratulations / sda1
+  InstalledSda1 --> DetectSda1: disk boot found at /dev/sda1
+  DetectSr0 --> BusyboxSerial: console:/ #
+  DetectSda1 --> BusyboxSerial: console:/ #
+  BusyboxSerial --> NotReady: no thyris_adb_health
+  IsolinuxBoot --> NotReady: installer proof is not a phone
+```
+
+Legend: every ADB-bound path on this Windows `-nographic` host ended at ramdisk `console:/ #`. That prompt is not listening `adbd`.
+
+What roared, what failed, and what is not a phone:
 
 | Claim | Status | Evidence |
 | --- | --- | --- |
 | `ISOConverter._create_disk` writes qcow2 via real `qemu-img` | LIVE | `ba05cf4`; gate slice `thyris_vm.qemu_img_disk_create` on hosts that have the tool |
-| android-x86 9.0-r2 installer boot on `-nographic` | LIVE on this Windows host | SeaBIOS plus ISOLINUX 6.03 on stdout. ISO gitignored. SHA-1 `1cc85b5ed7c830ff71aecf8405c7281a9c995aa0` matched. Not in `run_pan_gate.py`. |
-| `PhoneVMState.READY` | UNPROVEN | READY is gated on real ADB userspace |
-| ADB `adb shell` as a citizen phone | UNPROVEN | Next Thyris unit |
+| android-x86 9.0-r2 installer boot on `-nographic` | LIVE on this Windows host | SeaBIOS plus ISOLINUX 6.03. Still passing inside `20260918_050641` and `20260918_052020`. ISO gitignored. SHA-1 `1cc85b5ed7c830ff71aecf8405c7281a9c995aa0` matched. Not in `run_pan_gate.py`. |
+| TCG live CD `DEBUG=2` / livem+nosetup | FAIL as an ADB path | `20260918_025416` 7/8 (init+healthd, adb offline); `20260918_032455` 7/8 (init only, stopped at `/dev/sr0`). `20260918_035525` is a duplicate of `032455`, not a trial. |
+| B WHPX livem (`-accel whpx,kernel-irqchip=off`) | FAIL | `test/thyris_vm/runs/20260918_050641/` 7/8, 571.3s. Installer ISOLINUX pass. Live `Detecting Android-x86... found at /dev/sr0` then `console:/ #`. QEMU exited rc=`4294967295` before ADB proof. `phone_ready=false`. `adb_proven=false`. |
+| D `AUTO_INSTALL=force` then disk boot | FAIL | `test/thyris_vm/runs/20260918_052020/` 7/8, 1428.4s. Install markers: Formatting, Installing Android-x86, Syncing to disk, Congratulations, installed successfully (sda1, 8G qcow). Disk boot `found at /dev/sda1` then the same `console:/ #`. No `thyris_adb_health`. `phone_ready=false`. `adb_proven=false`. |
+| Listening `adbd` / `adb shell` / `PhoneVMState.READY` | UNPROVEN | READY remains gated on real ADB userspace. `console:/ #` is not a phone. |
 | In-device AI / prompt bridge | REJECTED | Phones are phones |
 
-We heard the factory speak. We did not hand out handsets.
+**Wall (landed, not a next-accel pitch):** android-x86 9.0-r2 ramdisk init on `-nographic` serial presents `console:/ #` for live `/dev/sr0` and installed `/dev/sda1`, and never proves TCP `adbd`. The v1.1 in-flight paragraph for WHPX then install-to-qcow is expired. Those paths now have FAIL artifacts. This dispatch does not name a next accelerator.
+
+We heard the factory speak. We kept the line. We did not hand out handsets.
 
 ## 9. Production doctor (instrumentation, not proof)
 
@@ -301,8 +326,12 @@ Do not cite a later finish without a new artifact in `STATE.md`. Working-tree ru
 | Highway 10/10 | `python test/highway/test_planetary_highway.py` | `test/highway/runs/20260912_235119/` | Sealed itinerary |
 | Civic inference landing | `python3 test/run_pan_gate.py` | `results/pan_gate_20260911_085638.json` | First landed `_run_inference` |
 | Android installer boot | `python test/thyris_vm/test_thyris_android_boot.py` | `test/thyris_vm/runs/20260912_043438/` (Windows); `20260912_094201/` (Linux TCG) | ISOLINUX, not READY |
+| TCG live CD DEBUG=2 (init+healthd, no adbd) | same consumer | `test/thyris_vm/runs/20260918_025416/` 7/8 FAIL `android_adb_userspace` | Not READY. Not a full gate. |
+| TCG live CD livem+nosetup (init only, no adbd) | same consumer | `test/thyris_vm/runs/20260918_032455/` 7/8 FAIL `android_adb_userspace` | Not READY. Not a full gate. |
+| B WHPX livem (`console:/ #`, no ADB) | same consumer | `test/thyris_vm/runs/20260918_050641/` 7/8 FAIL `android_adb_userspace` | ISOLINUX pass. Not READY. Recorded in [STATE.md](../STATE.md). |
+| D AUTO_INSTALL=force then disk boot (`sda1` then `console:/ #`) | same consumer | `test/thyris_vm/runs/20260918_052020/` 7/8 FAIL `android_adb_userspace` | Install Congratulations is not ADB. Not READY. |
 
-`snapshots/v0.14` records the Erebus-tower landing. This dispatch does not treat `snapshots/v0.15` as green READY. `phone_ready` and `adb_proven` stayed false in every cited run.
+`snapshots/v0.14` records the Erebus-tower landing. This dispatch does not treat `snapshots/v0.15` as green READY. `phone_ready` and `adb_proven` stayed false in every cited run. No leftover qemu/adb is claimed from those FAIL artifacts. `20260918_035525` is not a cited trial.
 
 ## 11. Owner tables
 
@@ -318,7 +347,7 @@ Do not cite a later finish without a new artifact in `STATE.md`. Working-tree ru
 | Erebus | `security/planetary_immune_system.py` | Bind, towers, bulletins, L4 fail-loud |
 | Border | `security/sovereign_firewall.py` | `InspectionLane`, `LegacyInternetEgressError` |
 | Highway | `security/planetary_highway.py` | Sealed itinerary |
-| Phone orchestration | `telecom/phone_orchestrator.py` | Thyris V1; ISOLINUX boot; READY owner is ADB |
+| Phone orchestration | `telecom/phone_orchestrator.py` | Thyris V1; ISOLINUX boot LIVE; WHPX livem and AUTO_INSTALL disk FAIL at `console:/ #`; READY owner is ADB |
 | Image / disk | `telecom/vm_image_manager.py` | `ISOConverter._create_disk` |
 | VM supervisor | `telecom/vm_supervisor.py` | `VMSupervisor`, `VMState`, `ResourceProfile` |
 
@@ -365,7 +394,10 @@ This document contains no exploit recipes, recon procedures, or WAN bypasses.
 
 The following would be a lie, a rejected architecture, or both. We did not write them as victory.
 
-- `PhoneVMState.READY`, proven ADB userspace, or "phones work"
+- `PhoneVMState.READY`, proven ADB userspace, listening `adbd`, or "phones work"
+- WHPX success, install-to-qcow success, or treating `20260918_050641` / `20260918_052020` as anything but FAIL
+- A next accelerator, next display contract, or next host as if already selected
+- `20260918_035525` as a third independent consumer or as WHPX evidence
 - A local LLM, llama, torch, GGUF, Gemma-as-runtime, or `core.prompt_bridge`
 - In-device AI on Thyris phones
 - Identity collapse: one `SovereignIdentity` class for RSA and Ed25519
@@ -382,9 +414,9 @@ Rejected transitions live in [ANTITHESIS.md](../ANTITHESIS.md).
 
 ## 14. Next justified action
 
-ADB userspace / `PhoneVMState.READY` on a real Android guest.
+ADB userspace / `PhoneVMState.READY` is blocked on this Windows `-nographic` host. TCG live, WHPX livem (`20260918_050641`), and AUTO_INSTALL-then-disk (`20260918_052020`) all reached Android-x86 detect then `console:/ #` without `adb shell echo thyris_adb_health`. `phone_ready` stays false. `snapshots/v0.15` is not a READY landing.
 
-Do not dummy READY from ISOLINUX. Do not pull prompt files. Do not construct `BlockchainThreatIntelligence`. Do not invent mesh-strand / `usms_linkage`. Do not reconnect the public internet. Do not open a second civic wire. Do not expand `master_db` whitepaper §6.2.
+Do not dummy READY from ISOLINUX, init, healthd, Congratulations, or `console:/ #`. Do not name a next accelerator in this dispatch. Do not pull prompt files. Do not construct `BlockchainThreatIntelligence`. Do not invent mesh-strand / `usms_linkage`. Do not reconnect the public internet. Do not open a second civic wire. Do not expand `master_db` whitepaper §6.2. Next host or display contract is a material decision; it is not selected here.
 
 ## 15. Vocabulary
 
@@ -396,7 +428,7 @@ Do not dummy READY from ISOLINUX. Do not pull prompt files. Do not construct `Bl
 | Tower | Standing local USMS META node in ROE order |
 | Bulletin | `THREAT_MEMORY_BULLETIN` dual-signed receipt; no tower allocations |
 | Highway | Sealed packet fabric; not cognition |
-| Thyris | Telecommunications VMs as phones/relays |
+| Thyris | Telecommunications VMs as phones/relays. ISOLINUX LIVE. `console:/ #` is not a phone |
 | Bind | Two identity types persist together and co-sign |
 | Collapse | Pretend the two identity types are one key. Rejected |
 | Fail loud | Raise a domain error. No silent fallback, no mock green |
@@ -405,4 +437,14 @@ Do not dummy READY from ISOLINUX. Do not pull prompt files. Do not construct `Bl
 
 This block is also [NATION_DISPATCH_SHORT.md](NATION_DISPATCH_SHORT.md). It has not been posted to X, Twitter, GitHub, or anywhere else.
 
-PAN is a digital country, not a website: an offline-first SQLite monolith with a fail-closed packet border. We mint tokens only after validators re-execute the same PANLIN01 integer decode the worker ran; a forged output is rejected out loud. Erebus, the immune nation, stands as four local towers on a signed Ed25519 memory DAG bound to RSA packets, and neutralize without a human fails loud. Threat bulletins carry origin ROE, neural activation, and human authorization as a receipt; tower allocations stay home. The highway is sealed cargo, not a second internet; WAN SMTP, webhooks, and feeds fail on purpose. Thyris just spoke Android through SeaBIOS into serial: a phone factory coming online, not citizens carrying phones. We did not reconnect the old internet, and we did not collapse identity. The nation is already minting, remembering, and refusing.
+PAN is a digital country, not a website: an offline-first SQLite monolith with a fail-closed packet border. We mint tokens only after validators re-execute the same PANLIN01 integer decode the worker ran; a forged output is rejected out loud. Erebus, the immune nation, stands as four local towers on a signed Ed25519 memory DAG bound to RSA packets, and neutralize without a human fails loud. Threat bulletins carry origin ROE, neural activation, and human authorization as a receipt; tower allocations stay home. The highway is sealed cargo, not a second internet; WAN SMTP, webhooks, and feeds fail on purpose. Thyris boots android-x86 through SeaBIOS into serial; installer ISOLINUX is live; live CD and an installed sda1 both stop at console:/ # and never prove TCP adbd. That is not a citizen carrying a phone. We did not lie. We did not reconnect the old internet, and we did not collapse identity. The nation is already minting, remembering, and refusing.
+
+## 17. Dispatch changelog (crowd-internal)
+
+This is not a public release log. It exists so a later pass cannot pretend a FAIL artifact was a phone.
+
+| Version | Date | What changed | What did not change |
+| --- | --- | --- | --- |
+| 1.0 | 2026-09-18 | First interior dispatch from live owners (civic mint, Erebus towers, highway, ISOLINUX factory). | READY phones. Public post. |
+| 1.1 | 2026-09-18 | TCG live CD exhausted (init/healthd, adbd never listened); WHPX then install-to-qcow named in-flight pending artifact. | `PhoneVMState.READY`, `adb_proven`, public post. |
+| 1.2 | 2026-09-18 | Expired the in-flight paragraph. Landed FAIL artifacts `20260918_050641` (WHPX livem, `console:/ #`) and `20260918_052020` (AUTO_INSTALL then sda1, same `console:/ #`). Wall: ramdisk init on `-nographic` serial never proves TCP adbd. No next accelerator named. | `PhoneVMState.READY`, `adb_proven`, `snapshots/v0.15` as READY, X/Twitter/GitHub post, production Python. |
