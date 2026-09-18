@@ -1,0 +1,1496 @@
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for PersistenceNode with ID: 6ad1600cd8f5 in hashchain
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:PAN_SDK.PAN_SDK:PANEconomicEngine initialized
+INFO:PAN_SDK.PAN_SDK:PANNameRegistry initialized
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for PersistenceNode
+INFO:SovereignTreasury:SovereignTreasury online state=GENESIS chair= validators=0
+INFO:MasterDatabase:MasterDatabase online replica=6ad1600cd8f5 docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:DHTNode initialized for PersistenceNode at 127.0.0.1:8462, ID: 6ad1600cd8f58e4c
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for PersistenceNode, depth: 1
+INFO:PAN_SDK.PAN_SDK:Stored key name:alice in PAN DHT with hash c9b5f489cf76
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for PersistenceNode, depth: 2
+INFO:PAN_SDK.PAN_SDK:Executed transaction ecd66d53-4bf on PAN network
+INFO:PAN_SDK.PAN_SDK:Minted 50 tokens to 6ad1600cd8f5 for bootstrap. Total supply: 50
+INFO:PAN_SDK.PAN_SDK:Registered governance member 6ad1600cd8f5 (admin)
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for PersistenceNode, depth: 3
+INFO:PAN_SDK.PAN_SDK:Executed transaction 2e6f0b4f-4d0 on PAN network
+INFO:PAN_SDK.PAN_SDK:Executed transaction 2e6f0b4f-4d0: 10 tokens from 6ad1600cd8f5 to treasury:pan
+INFO:PAN_SDK.PAN_SDK:Submitted proposal fb7172ee-c9d of type policy
+WARNING:PAN_SDK.PAN_SDK:Proposal fb7172ee-c9d not found for voting
+INFO:PAN_SDK.PAN_SDK:Recorded YES vote on proposal fb7172ee-c9d by 6ad1600cd8f5
+INFO:PAN_SDK.PAN_SDK:Proposed consensus for policy:e90367b8-7b37-594c-a71d-d913470927ff with ID 41ebc19c-703
+INFO:PAN_SDK.PAN_SDK:Proposal 41ebc19c-703 accepted by consensus
+INFO:PAN_SDK.PAN_SDK:Vote recorded for proposal 41ebc19c-703 by 6ad1600cd8f5
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for PersistenceNode, depth: 4
+INFO:PAN_SDK.PAN_SDK:Stored key policy:e90367b8-7b37-594c-a71d-d913470927ff in PAN DHT with hash 5764c86bbef3
+INFO:PAN_SDK.PAN_SDK:Registered policy e90367b8-7b3
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for PersistenceNode, depth: 5
+INFO:PAN_SDK.PAN_SDK:Executed transaction a6d53069-3bb on PAN network
+INFO:PAN_SDK.PAN_SDK:Executed transaction a6d53069-3bb: 10 tokens from treasury:pan to 6ad1600cd8f5
+INFO:PAN_SDK.PAN_SDK:Finalized proposal fb7172ee-c9d with status ACCEPTED
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:PAN_SDK.PAN_SDK:PANEconomicEngine initialized
+INFO:PAN_SDK.PAN_SDK:PANNameRegistry initialized
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for PersistenceNode
+INFO:SovereignTreasury:SovereignTreasury online state=GENESIS chair= validators=0
+INFO:MasterDatabase:MasterDatabase online replica=6ad1600cd8f5 docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:DHTNode initialized for PersistenceNode at 127.0.0.1:8462, ID: 6ad1600cd8f58e4c
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for NameNode with ID: 259281e24ff7 in hashchain
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for Stranger with ID: ab76b176923b in hashchain
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:PAN_SDK.PAN_SDK:PANEconomicEngine initialized
+INFO:PAN_SDK.PAN_SDK:PANNameRegistry initialized
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for NameNode
+INFO:SovereignTreasury:SovereignTreasury online state=GENESIS chair= validators=0
+INFO:MasterDatabase:MasterDatabase online replica=259281e24ff7 docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:DHTNode initialized for NameNode at 127.0.0.1:8462, ID: 259281e24ff7e01b
+INFO:PAN_SDK.PAN_SDK:Proposed consensus for name:testname with ID 357a8a93-7ea
+INFO:PAN_SDK.PAN_SDK:Proposal 357a8a93-7ea accepted by consensus
+INFO:PAN_SDK.PAN_SDK:Vote recorded for proposal 357a8a93-7ea by 259281e24ff7
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for NameNode, depth: 1
+INFO:PAN_SDK.PAN_SDK:Stored key name:testname in PAN DHT with hash 0ef49dbb4a23
+INFO:PAN_SDK.PAN_SDK:Successfully registered name testname for identity 259281e24ff7
+WARNING:PAN_SDK.PAN_SDK:Invalid name format: NO
+WARNING:PAN_SDK.PAN_SDK:Unauthorized deregister attempt for testname
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:PAN_SDK.PAN_SDK:PANEconomicEngine initialized
+INFO:PAN_SDK.PAN_SDK:PANNameRegistry initialized
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for NameNode
+INFO:SovereignTreasury:SovereignTreasury online state=GENESIS chair= validators=0
+INFO:MasterDatabase:MasterDatabase online replica=259281e24ff7 docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:DHTNode initialized for NameNode at 127.0.0.1:8462, ID: 259281e24ff7e01b
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for Distributor with ID: 037003cab34b in hashchain
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for Model with ID: 35c5417bafaf in hashchain
+INFO:PAN_SDK.PAN_SDK:Created manifest for model gemma3-4b-it.lacka
+WARNING:PAN_SDK.PAN_SDK:Content hash mismatch for manifest gemma3-4b-it.lacka: stored=6123a23f88fb, recalculated=5e2720bed786
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for Intruder with ID: d7e5d321880d in hashchain
+WARNING:PAN_SDK.PAN_SDK:Stored creator identity hash mismatch for manifest gemma3-4b-it.lacka: manifest=037003cab34b, provided=d7e5d321880d
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for PersonalOwner with ID: f998db76ab4a in hashchain
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for PersonalPeer with ID: 660b8941e20a in hashchain
+INFO:PAN_SDK.personal_data:Saved preferences for f998db76ab4a
+INFO:PAN_SDK.personal_data:PANPersonalDataStore initialized for sovereign f998db76ab4a
+INFO:PAN_SDK.personal_data:PANPhoneAddressRegistry initialized
+INFO:PAN_SDK.personal_data:Added contact Ada (1f15c351-57a) for f998db76ab4a
+INFO:PAN_SDK.personal_data:Sent message c9a1ced9-f44 to 660b8941e20a
+INFO:PAN_SDK.personal_data:Logged outgoing voice call a34c86e3-9b9
+INFO:PAN_SDK.personal_data:Saved preferences for f998db76ab4a
+INFO:PAN_SDK.personal_data:Assigned phone address pan:netlab:motiflab:voice to sovereign f998db76ab4a
+INFO:PAN_SDK.personal_data:Closed PANPersonalDataStore for sovereign f998db76ab4a
+INFO:PAN_SDK.personal_data:PANPersonalDataStore initialized for sovereign f998db76ab4a
+INFO:PAN_SDK.personal_data:PANPhoneAddressRegistry initialized
+INFO:PAN_SDK.personal_data:Closed PANPersonalDataStore for sovereign f998db76ab4a
+INFO:pan_sdk_system_scenario:Starting PAN SDK scenario. Persistence path: /tmp/pan_sdk_system_i94m8w6j
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for ScenarioNode with ID: 8e351937b2d1 in hashchain
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for ScenarioCitizen with ID: e17d80e1843c in hashchain
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for ScenarioDeveloper with ID: ed58e9bfff87 in hashchain
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for ScenarioModel with ID: 0e3e4e6a4c8d in hashchain
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for ScenarioDistributor with ID: e24640806e1f in hashchain
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:PAN_SDK.PAN_SDK:PANEconomicEngine initialized
+INFO:PAN_SDK.PAN_SDK:PANNameRegistry initialized
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for ScenarioNode
+INFO:SovereignTreasury:SovereignTreasury online state=GENESIS chair= validators=0
+INFO:MasterDatabase:MasterDatabase online replica=8e351937b2d1 docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:DHTNode initialized for ScenarioNode at 127.0.0.1:8462, ID: 8e351937b2d1bea0
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:pan_sdk_system_scenario:Initializing communicator, manifest, and pipeline
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for ScenarioCitizen
+INFO:PAN_SDK.PAN_SDK:Created manifest for model test_model
+INFO:PAN_SDK.PAN_SDK:SovereignPipeline initialized
+INFO:PAN_SDK.PAN_SDK:Created test_packet packet: 1cc6a67333eb
+INFO:pan_sdk_system_scenario:Created test packet 1cc6a67333eb verified=True
+INFO:pan_sdk_system_scenario:Manifest verification: True
+INFO:PAN_SDK.PAN_SDK:Created manifest for model test_model
+INFO:PAN_SDK.PAN_SDK:Proposed consensus for model:test_model with ID 570e169f-abd
+INFO:PAN_SDK.PAN_SDK:Proposal 570e169f-abd accepted by consensus
+INFO:PAN_SDK.PAN_SDK:Vote recorded for proposal 570e169f-abd by 8e351937b2d1
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for ScenarioNode, depth: 1
+INFO:PAN_SDK.PAN_SDK:Stored key model:test_model in PAN DHT with hash 889664a2ed8b
+INFO:PAN_SDK.PAN_SDK:Registered model test_model in pipeline and DHT
+INFO:PAN_SDK.personal_data:Saved preferences for e17d80e1843c
+INFO:PAN_SDK.personal_data:PANPersonalDataStore initialized for sovereign e17d80e1843c
+INFO:PAN_SDK.personal_data:PANPhoneAddressRegistry initialized
+INFO:pan_sdk_system_scenario:--- Phase 1: Initial operations ---
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for ScenarioNode, depth: 2
+INFO:PAN_SDK.PAN_SDK:Stored key registry:name:alice in PAN DHT with hash 0729d5b56a3b
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for ScenarioNode, depth: 3
+INFO:PAN_SDK.PAN_SDK:Stored key registry:name:bob in PAN DHT with hash 6e3220e294ae
+INFO:PAN_SDK.PAN_SDK:PANCitizen registered: f75385e9-550 (admin)
+INFO:PAN_SDK.PAN_SDK:Proposed consensus for citizen:f75385e9-5509-5b2b-93b1-e55456e6c05a with ID b65775d3-f37
+INFO:PAN_SDK.PAN_SDK:Proposal b65775d3-f37 accepted by consensus
+INFO:PAN_SDK.PAN_SDK:Vote recorded for proposal b65775d3-f37 by 8e351937b2d1
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for ScenarioNode, depth: 4
+INFO:PAN_SDK.PAN_SDK:Stored key citizen:f75385e9-5509-5b2b-93b1-e55456e6c05a in PAN DHT with hash c43375ab26a8
+INFO:PAN_SDK.PAN_SDK:Successfully registered citizen f75385e9-550
+INFO:PAN_SDK.PAN_SDK:PANCitizen registered: 19a624bc-05d (developer)
+INFO:PAN_SDK.PAN_SDK:Proposed consensus for citizen:19a624bc-05d9-542f-b1f6-40a5c13dc93a with ID c712f5ee-840
+INFO:PAN_SDK.PAN_SDK:Proposal c712f5ee-840 accepted by consensus
+INFO:PAN_SDK.PAN_SDK:Vote recorded for proposal c712f5ee-840 by 8e351937b2d1
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for ScenarioNode, depth: 5
+INFO:PAN_SDK.PAN_SDK:Stored key citizen:19a624bc-05d9-542f-b1f6-40a5c13dc93a in PAN DHT with hash b1decc0bd5b5
+INFO:PAN_SDK.PAN_SDK:Successfully registered citizen 19a624bc-05d
+INFO:PAN_SDK.PAN_SDK:Registered governance member e17d80e1843c (admin)
+INFO:PAN_SDK.PAN_SDK:PANApplication registered: sovereign-feed (6d660ba6-50f)
+INFO:PAN_SDK.PAN_SDK:Proposed consensus for app:6d660ba6-50f6-5ed4-99b5-60f5ec722de9 with ID fdf95ec7-c6d
+INFO:PAN_SDK.PAN_SDK:Proposal fdf95ec7-c6d accepted by consensus
+INFO:PAN_SDK.PAN_SDK:Vote recorded for proposal fdf95ec7-c6d by 8e351937b2d1
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for ScenarioNode, depth: 6
+INFO:PAN_SDK.PAN_SDK:Stored key app:6d660ba6-50f6-5ed4-99b5-60f5ec722de9 in PAN DHT with hash fa5e1e318401
+INFO:PAN_SDK.PAN_SDK:Successfully registered app sovereign-feed (6d660ba6-50f)
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for ScenarioNode, depth: 7
+INFO:PAN_SDK.PAN_SDK:Executed transaction e2a891aa-fae on PAN network
+INFO:PAN_SDK.PAN_SDK:Minted 250 tokens to e17d80e1843c for genesis_reward. Total supply: 250
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for ScenarioNode, depth: 8
+INFO:PAN_SDK.PAN_SDK:Executed transaction e313fa7a-ab2 on PAN network
+INFO:PAN_SDK.PAN_SDK:Minted 3 tokens to 6d660ba6-50f for usage_reward_app_usage. Total supply: 253
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for ScenarioNode, depth: 9
+INFO:PAN_SDK.PAN_SDK:Stored key usage:ee2ae9ff-39cf-5a09-bb10-6c2c3a54e244 in PAN DHT with hash 894820b4129c
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for NeighborNode with ID: 5aa8ff91658a in hashchain
+INFO:PAN_SDK.PAN_SDK:Added neighbor 5aa8ff91658af0e2a55b7920881865cb315388c1dd5956f720a7760aaa5112b3 at 127.0.0.1:8463
+INFO:pan_sdk_system_scenario:Closest nodes: 1
+INFO:PAN_SDK.PAN_SDK:Proposed consensus for consensus_test with ID e04848f1-373
+INFO:PAN_SDK.PAN_SDK:Proposal e04848f1-373 accepted by consensus
+INFO:PAN_SDK.PAN_SDK:Vote recorded for proposal e04848f1-373 by 8e351937b2d1
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for ScenarioNode, depth: 10
+INFO:PAN_SDK.PAN_SDK:Stored key consensus_test in PAN DHT with hash 4af13cc2b7d3
+INFO:pan_sdk_system_scenario:Consensus store result: True
+INFO:PAN_SDK.PAN_SDK:Proposed consensus for name:testname with ID 357a8a93-7ea
+INFO:PAN_SDK.PAN_SDK:Proposal 357a8a93-7ea accepted by consensus
+INFO:PAN_SDK.PAN_SDK:Vote recorded for proposal 357a8a93-7ea by 8e351937b2d1
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for ScenarioNode, depth: 11
+INFO:PAN_SDK.PAN_SDK:Stored key name:testname in PAN DHT with hash 8c338e8ffa04
+INFO:PAN_SDK.PAN_SDK:Successfully registered name testname for identity e17d80e1843c
+INFO:pan_sdk_system_scenario:Name registration: True
+INFO:pan_sdk_system_scenario:Citizen balance: 250
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for ScenarioNode, depth: 12
+INFO:PAN_SDK.PAN_SDK:Executed transaction 5f1f9290-eb3 on PAN network
+INFO:PAN_SDK.PAN_SDK:Executed transaction 5f1f9290-eb3: 50 tokens from e17d80e1843c to ed58e9bfff87
+INFO:pan_sdk_system_scenario:Token transfer: True
+INFO:pan_sdk_system_scenario:Open proposals: 0
+INFO:pan_sdk_system_scenario:Added constitution article: db1ddcba-5f3
+INFO:PAN_SDK.PAN_SDK:Proposed consensus for policy:3794fd1c-6819-5381-b312-46da07d97766 with ID a44d4d30-89a
+INFO:PAN_SDK.PAN_SDK:Proposal a44d4d30-89a accepted by consensus
+INFO:PAN_SDK.PAN_SDK:Vote recorded for proposal a44d4d30-89a by 8e351937b2d1
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for ScenarioNode, depth: 13
+INFO:PAN_SDK.PAN_SDK:Stored key policy:3794fd1c-6819-5381-b312-46da07d97766 in PAN DHT with hash 5de450461286
+INFO:PAN_SDK.PAN_SDK:Registered policy 3794fd1c-681
+INFO:pan_sdk_system_scenario:Registered policy: 3794fd1c-681
+INFO:PAN_SDK.PAN_SDK:Usage of sovereign-feed by f75385e9-550 earned 1 tokens
+INFO:PAN_SDK.PAN_SDK:Added 1 tokens to f75385e9-550 for using_sovereign-feed. Total: 1
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for ScenarioNode, depth: 14
+INFO:PAN_SDK.PAN_SDK:Executed transaction 4f6492a0-986 on PAN network
+INFO:PAN_SDK.PAN_SDK:Minted 1 tokens to 6d660ba6-50f for usage_reward_app_usage. Total supply: 254
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for ScenarioNode, depth: 15
+INFO:PAN_SDK.PAN_SDK:Stored key usage:821ba8ed-242a-5eda-91f2-63920ed4e468 in PAN DHT with hash 0167bfa0216f
+INFO:PAN_SDK.PAN_SDK:Citizen f75385e9-550 used app 6d660ba6-50f, earned 1 tokens
+INFO:pan_sdk_system_scenario:App usage recorded tokens=1
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for ScenarioNode, depth: 16
+INFO:PAN_SDK.PAN_SDK:Executed transaction 5ed15dc2-913 on PAN network
+INFO:PAN_SDK.PAN_SDK:Executed transaction 5ed15dc2-913: 10 tokens from e17d80e1843c to treasury:pan
+INFO:PAN_SDK.PAN_SDK:Submitted proposal 69373e40-86d of type policy
+WARNING:PAN_SDK.PAN_SDK:Proposal 69373e40-86d not found for voting
+INFO:PAN_SDK.PAN_SDK:Recorded YES vote on proposal 69373e40-86d by e17d80e1843c
+INFO:PAN_SDK.PAN_SDK:Proposed consensus for policy:b0b4660c-b1da-5f38-addb-fa6f60410f02 with ID c6adaa1a-7b1
+INFO:PAN_SDK.PAN_SDK:Proposal c6adaa1a-7b1 accepted by consensus
+INFO:PAN_SDK.PAN_SDK:Vote recorded for proposal c6adaa1a-7b1 by 8e351937b2d1
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for ScenarioNode, depth: 17
+INFO:PAN_SDK.PAN_SDK:Stored key policy:b0b4660c-b1da-5f38-addb-fa6f60410f02 in PAN DHT with hash 60b864c630ae
+INFO:PAN_SDK.PAN_SDK:Registered policy b0b4660c-b1d
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for ScenarioNode, depth: 18
+INFO:PAN_SDK.PAN_SDK:Executed transaction 443a14fd-3a6 on PAN network
+INFO:PAN_SDK.PAN_SDK:Executed transaction 443a14fd-3a6: 10 tokens from treasury:pan to e17d80e1843c
+INFO:PAN_SDK.PAN_SDK:Finalized proposal 69373e40-86d with status ACCEPTED
+INFO:pan_sdk_system_scenario:Testing personal data operations...
+INFO:PAN_SDK.personal_data:Added contact Test Contact (87e9fb57-baa) for e17d80e1843c
+INFO:PAN_SDK.personal_data:Sent message 66bb6734-dad to ed58e9bfff87
+INFO:PAN_SDK.personal_data:Logged outgoing voice call 407ad44c-a47
+INFO:PAN_SDK.personal_data:Saved preferences for e17d80e1843c
+INFO:PAN_SDK.personal_data:Assigned phone address pan:test_net:test_motif:voice to sovereign e17d80e1843c
+INFO:pan_sdk_system_scenario:personal contact=87e9fb57-baa message=66bb6734-dad call=407ad44c-a47 phone=pan:test_net:test_motif:voice
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/pan_sdk_system_i94m8w6j/fw_civic.sqlite
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/pan_sdk_system_i94m8w6j/fw_peer.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for ScenarioNode
+INFO:EmailSocial:StatelessRelay online id=8e351937b2d1 events=0
+INFO:EmailSocial:EmailSocialNode online address=pan:id:8e351937b2d1bea06dbe328bf2afebe49e8f4d5ea65be38007ae893d2268b98e relay=8e351937b2d1
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for ScenarioMailPeer with ID: 0675be6ea60b in hashchain
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for ScenarioMailPeer
+INFO:EmailSocial:StatelessRelay online id=0675be6ea60b events=0
+INFO:EmailSocial:EmailSocialNode online address=pan:id:0675be6ea60ba14ca95c41b0ce9022643351318ae726a3c3ec2a4a83c1f57e21 relay=0675be6ea60b
+INFO:SovereignTreasury:Registered treasury validator 8e351937b2d1
+INFO:SovereignTreasury:Registered treasury validator e17d80e1843c
+INFO:SovereignTreasury:Registered treasury validator ed58e9bfff87
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for CivicPoILinearModel with ID: b77abba17572 in hashchain
+INFO:PAN_SDK.PAN_SDK:Created manifest for model civic-poi-linear-v1
+INFO:PAN_SDK.PAN_SDK:SovereignInferenceEngine initialized for civic-poi-linear-v1
+INFO:PAN_SDK.PAN_SDK:Loaded sovereign linear model /tmp/pan_sdk_system_i94m8w6j/civic_poi.panlin hash=7d68442919cd
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for ScenarioNode, depth: 19
+INFO:PAN_SDK.PAN_SDK:Executed transaction 8c0a6c42-495 on PAN network
+INFO:PAN_SDK.PAN_SDK:Minted 40 tokens to e17d80e1843c for proof_of_inference. Total supply: 294
+INFO:PAN_SDK.PAN_SDK:Created TREASURY_LEDGER packet: 9ed8746367fe
+INFO:PAN_SDK.PAN_SDK:Created MAIL_SEALED packet: 1575006523e0
+INFO:EmailSocial:Relay 8e351937b2d1 stored MAIL_SEALED 1575006523e0
+INFO:EmailSocial:Relay 0675be6ea60b stored MAIL_SEALED 1575006523e0
+INFO:PAN_SDK.PAN_SDK:Created SOCIAL_BROADCAST packet: a1c90482a3ca
+INFO:EmailSocial:Relay 8e351937b2d1 stored SOCIAL_BROADCAST a1c90482a3ca
+INFO:EmailSocial:Relay 0675be6ea60b stored SOCIAL_BROADCAST a1c90482a3ca
+INFO:pan_sdk_system_scenario:--- Phase 1: Snapshotting authoritative persistence ---
+INFO:PAN_SDK.personal_data:Closed PANPersonalDataStore for sovereign e17d80e1843c
+INFO:pan_sdk_system_scenario:--- Phase 2: Reloading from persistence ---
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:PAN_SDK.PAN_SDK:PANEconomicEngine initialized
+INFO:PAN_SDK.PAN_SDK:PANNameRegistry initialized
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for ScenarioNode
+INFO:SovereignTreasury:SovereignTreasury online state=MINT_PHASE chair=8e351937b2d1 validators=3
+INFO:MasterDatabase:MasterDatabase online replica=8e351937b2d1 docs=1 counters=1 sets=1
+INFO:PAN_SDK.PAN_SDK:DHTNode initialized for ScenarioNode at 127.0.0.1:8462, ID: 8e351937b2d1bea0
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:PAN_SDK.personal_data:PANPersonalDataStore initialized for sovereign e17d80e1843c
+INFO:pan_sdk_system_scenario:Reloaded name testname target=e17d80e1843c
+INFO:pan_sdk_system_scenario:State verified for dht_data
+INFO:pan_sdk_system_scenario:State verified for dht_ledger
+INFO:pan_sdk_system_scenario:State verified for economy_accounts
+INFO:pan_sdk_system_scenario:State verified for governance_proposals
+INFO:pan_sdk_system_scenario:State verified for governance_policies
+INFO:pan_sdk_system_scenario:State verified for citizens
+INFO:pan_sdk_system_scenario:State verified for applications
+INFO:pan_sdk_system_scenario:State verified for name_registry
+INFO:pan_sdk_system_scenario:State verified for phone_addresses
+INFO:pan_sdk_system_scenario:State verified for treasury_fsm
+INFO:pan_sdk_system_scenario:State verified for treasury_validators
+INFO:pan_sdk_system_scenario:State verified for treasury_proposals
+INFO:pan_sdk_system_scenario:State verified for master_db_docs
+INFO:pan_sdk_system_scenario:State verified for master_db_counters
+INFO:pan_sdk_system_scenario:State verified for master_db_sets
+INFO:pan_sdk_system_scenario:State verified for master_db_meta
+INFO:pan_sdk_system_scenario:State verified for email_relay_8e351937b2d1bea06dbe328bf2afebe49e8f4d5ea65be38007ae893d2268b98e
+INFO:pan_sdk_system_scenario:State verified for pending_transactions
+INFO:pan_sdk_system_scenario:State verified for usage_metrics
+INFO:pan_sdk_system_scenario:State verified for personal_contacts
+INFO:pan_sdk_system_scenario:State verified for personal_messages
+INFO:pan_sdk_system_scenario:State verified for personal_call_logs
+INFO:pan_sdk_system_scenario:State verified for personal_preferences
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/pan_sdk_system_i94m8w6j/fw_civic.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for ScenarioNode
+INFO:EmailSocial:StatelessRelay online id=8e351937b2d1 events=2
+INFO:EmailSocial:EmailSocialNode online address=pan:id:8e351937b2d1bea06dbe328bf2afebe49e8f4d5ea65be38007ae893d2268b98e relay=8e351937b2d1
+INFO:PAN_SDK.personal_data:Closed PANPersonalDataStore for sovereign e17d80e1843c
+INFO:pan_sdk_system_scenario:PAN SDK scenario completed successfully. All persisted state verified.
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/fw_telemetry_eo5wdhef/ledger.sqlite
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for FirewallProbe with ID: f5741910d772 in hashchain
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for FirewallProbe
+INFO:PAN_SDK.PAN_SDK:Created METRICS_UPLOAD packet: b840d15b1a3e
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/fw_chat_ymqz13_v/ledger.sqlite
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for FirewallProbe with ID: 4bd7b44a0bc3 in hashchain
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for FirewallProbe
+INFO:PAN_SDK.PAN_SDK:Created CHAT_MESSAGE packet: b56530c523c2
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/fw_compress_8w2o6983/ledger.sqlite
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/fw_signed_secret_oamt_ujg/ledger.sqlite
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for FirewallProbe with ID: ebe30b4ef967 in hashchain
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for FirewallProbe
+INFO:PAN_SDK.PAN_SDK:Created DATA_TRANSFER packet: 4ba8ebc1bd64
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/fw_block_xktv0hxe/ledger.sqlite
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for HostileNode with ID: 63f281204aea in hashchain
+WARNING:SovereignFirewall:Blocked identity 63f281204aea (test_block)
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for HostileNode
+INFO:PAN_SDK.PAN_SDK:Created CHAT_MESSAGE packet: ae8b44fdb769
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/fw_route_voqx94zy/ledger.sqlite
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for FirewallProbe with ID: ee17d8006229 in hashchain
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for FirewallProbe
+INFO:PAN_SDK.PAN_SDK:Created ROUTE_HINT packet: 715ebd56198e
+
+========================================================================
+RUNNING slice_compile
+========================================================================
+
+========================================================================
+SLICE: py_compile
+========================================================================
+compiled PAN_SDK/PAN_SDK.py
+compiled PAN_SDK/personal_data.py
+compiled PAN_SDK/citizen_simulator.py
+compiled PAN_SDK/__init__.py
+compiled PAN_SDK/treasury.py
+compiled PAN_SDK/email_social.py
+compiled PAN_SDK/master_db.py
+compiled security/sovereign_firewall.py
+compiled security/planetary_immune_system.py
+compiled security/planetary_highway.py
+compiled security/defensive_offensive_bridge.py
+compiled security/defensive_sovereignty.py
+compiled security/reactive_offense.py
+compiled memory/unified_memory_system.py
+compiled memory/memory_core.py
+compiled memory/system_cache.py
+compiled telecom/vm_supervisor.py
+compiled telecom/vm_image_manager.py
+compiled telecom/phone_orchestrator.py
+slice compile -> PASS
+
+========================================================================
+RUNNING slice_import
+========================================================================
+
+========================================================================
+SLICE: import PAN_SDK
+========================================================================
+{
+  "package": "/home/daeron/LAB/Experiments/projects/pan-sdk/PAN_SDK/__init__.py",
+  "has_persist_name": true,
+  "has_store_name": true,
+  "has_get_name": true,
+  "dht_node": "DHTNode",
+  "identity": "SovereignIdentity"
+}
+citizen_simulator=/home/daeron/LAB/Experiments/projects/pan-sdk/PAN_SDK/citizen_simulator.py
+slice import -> PASS
+
+========================================================================
+RUNNING run
+========================================================================
+=== persistence round-trip ===
+storage=/tmp/pan_persist_j02yiuvk
+dht.store name:alice -> True
+mint_tokens -> True
+proposal=fb7172ee-c9d status=ACCEPTED
+snapshot dht_data: 2 keys
+snapshot dht_ledger: 5 keys
+snapshot economy_accounts: 3 keys
+snapshot governance_proposals: 1 keys
+snapshot governance_policies: 1 keys
+compare dht_data: MATCH
+compare dht_ledger: MATCH
+compare economy_accounts: MATCH
+compare governance_proposals: MATCH
+compare governance_policies: MATCH
+hydrated accounts=3 proposals=1
+slice persistence -> PASS
+
+========================================================================
+RUNNING run
+========================================================================
+=== name registry persistence ===
+register testname -> True
+register invalid NO -> False
+unauthorized deregister -> False
+get_name after register: active=True
+hydrated resolve=True load_name_from_db=True
+hydrated names=['testname']
+get_name missing -> None
+store_name missing name key raised store_name requires a mapping that includes a 'name' key
+slice name_registry -> PASS
+
+========================================================================
+RUNNING run
+========================================================================
+=== manifest verification ===
+valid_manifest=True
+tampered_manifest=False
+wrong_key_manifest=False
+slice manifest -> PASS
+
+========================================================================
+RUNNING run
+========================================================================
+=== personal data + phone address reload ===
+contact=1f15c351-57a message=c9a1ced9-f44 call=a34c86e3-9b9
+phone_address=pan:netlab:motiflab:voice theme=light
+compare contacts: MATCH count=1
+compare messages: MATCH count=1
+compare call_logs: MATCH count=1
+compare preferences: MATCH count=10
+compare phone_addresses: MATCH count=1
+slice personal_data -> PASS
+
+========================================================================
+RUNNING slice_scenario
+========================================================================
+
+========================================================================
+SLICE: system scenario
+========================================================================
+
+========================================================================
+PHASE 1: Civic census, economy, names, personal data
+========================================================================
+
+========================================================================
+PHASE 1b: Nation pillars on one PANPersistenceStore
+========================================================================
+shared sqlite=/tmp/pan_sdk_system_i94m8w6j/pan_state.db
+treasury bound state=GENESIS
+master_db replica=8e351937b2d1
+email_social on DHTNode: absent (explicit construct required)
+explicit EmailSocialNode civic_relay=8e351937b2d1 peer_store=/tmp/pan_sdk_system_i94m8w6j/mail_peer/pan_state.db
+seal_genesis status=ok state=MINT_PHASE quorum=3
+bound civic PoI engine hash=7d68442919cd path=/tmp/pan_sdk_system_i94m8w6j/civic_poi.panlin
+poi output_len=32 model=7d68442919cd
+quorum PoI mint status=ok reason=executed
+citizen balance after PoI mint=240
+master_db civic:mint={'proposal_id': 'd9ba0f732377608a0ae8044ed6f64b1f', 'amount': 40, 'recipient': 'e17d80e1843cceac6dd39dc893b2172c8a1a5639c6a696d762de4907509906ee', 'treasury_state': 'MINT_PHASE'} inference_cycles=3
+published mail packet=1575006523e080a0cab133d8938cd8d3fd9ad44ea8d72c61dbd44b35c8cdfce2 ok=True relays=2
+peer opened subject='treasury-cycle' body='fed minted 40 after PoI quorum'
+social packet=a1c90482a3caee7e11f14d37bad3d40cc74e6d362a4aa280dac5a7ee3770bb7b ok=True
+nation pillars wrote treasury + master_db + email onto the civic sqlite
+
+========================================================================
+PHASE 2: Reload civic sqlite and compare snapshots
+========================================================================
+
+========================================================================
+PHASE 2b: Hydrate nation pillars from the same sqlite
+========================================================================
+reopened treasury state=MINT_PHASE validators=3
+reopened master_db civic:mint={'amount': 40, 'proposal_id': 'd9ba0f732377608a0ae8044ed6f64b1f', 'recipient': 'e17d80e1843cceac6dd39dc893b2172c8a1a5639c6a696d762de4907509906ee', 'treasury_state': 'MINT_PHASE'} cycles=3
+reopened civic relay mail=1 social=1
+scenario passed: civic snapshot + treasury/email/master_db shared sqlite hydrate
+scenario artifacts: pan_sdk_system_test_20260916_181113.txt, pan_sdk_system_test_20260916_181113.json, pan_sdk_system_test_20260916_181113.md
+slice system_scenario -> PASS
+
+========================================================================
+RUNNING run
+========================================================================
+
+========================================================================
+CHECK: firewall_blocks_telemetry
+========================================================================
+telemetry action=block reason=telemetry_dictionary
+PASS firewall_blocks_telemetry
+
+========================================================================
+CHECK: firewall_allows_civic_chat
+========================================================================
+civic chat action=allow
+PASS firewall_allows_civic_chat
+
+========================================================================
+CHECK: inspect_content_compresses_secrets
+========================================================================
+secret preflight action=compress
+PASS inspect_content_compresses_secrets
+
+========================================================================
+CHECK: signed_secret_packet_is_blocked
+========================================================================
+signed secret action=block reason=sensitive_plaintext_on_signed_packet
+PASS signed_secret_packet_is_blocked
+
+========================================================================
+CHECK: identity_blocklist
+========================================================================
+blocklist action=block
+PASS identity_blocklist
+
+========================================================================
+CHECK: legacy_ip_routing_blocked
+========================================================================
+routing action=block reason=legacy_routing_artifactINFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for immune-alpha with ID: 02b1b3c7659b in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/immune_restart_r295cw1q/firewall/ledger.sqlite
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:PAN_SDK.PAN_SDK:PANEconomicEngine initialized
+INFO:PAN_SDK.PAN_SDK:PANNameRegistry initialized
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for immune-alpha
+INFO:SovereignTreasury:SovereignTreasury online state=GENESIS chair= validators=0
+INFO:MasterDatabase:MasterDatabase online replica=02b1b3c7659b docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:DHTNode initialized for immune-alpha at 127.0.0.1:8462, ID: 02b1b3c7659b511d
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for immune-alpha
+INFO:PlanetaryImmuneSystem:PlanetaryImmuneSystem online for immune-alpha pan=02b1b3c7659b usms=d6f969460b50
+INFO:PAN_SDK.PAN_SDK:Created THREAT_MEMORY_BULLETIN packet: 73494ceb11fa
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for immune-alpha, depth: 1
+INFO:PAN_SDK.PAN_SDK:Stored key threat-memory:d3fc5d411322a4f1195a52d65e0cbd1bc6070f4bf7114300fe456697bd4feccb in PAN DHT with hash f91d7327d8e3
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for immune-alpha, depth: 2
+INFO:PAN_SDK.PAN_SDK:Stored key threat-memory:latest in PAN DHT with hash c9d6b3c7cb7e
+INFO:PlanetaryImmuneSystem:Broadcast threat bulletin 73494ceb11fa key=threat-memory:d3fc5d411322a4f1195a52d65e0cbd1bc6070f4bf7114300fe456697bd4feccb
+INFO:PlanetaryImmuneSystem:PlanetaryImmuneSystem closed for immune-alpha
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for immune-alpha with ID: 02b1b3c7659b in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/immune_restart_r295cw1q/firewall/ledger.sqlite
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:PAN_SDK.PAN_SDK:PANEconomicEngine initialized
+INFO:PAN_SDK.PAN_SDK:PANNameRegistry initialized
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for immune-alpha
+INFO:SovereignTreasury:SovereignTreasury online state=GENESIS chair= validators=0
+INFO:MasterDatabase:MasterDatabase online replica=02b1b3c7659b docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:DHTNode initialized for immune-alpha at 127.0.0.1:8462, ID: 02b1b3c7659b511d
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for immune-alpha
+INFO:PlanetaryImmuneSystem:PlanetaryImmuneSystem online for immune-alpha pan=02b1b3c7659b usms=d6f969460b50
+INFO:PlanetaryImmuneSystem:PlanetaryImmuneSystem closed for immune-alpha
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for immune-alpha with ID: 64e895ab3982 in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/immune_mesh_5bom59mo/alpha/firewall/ledger.sqlite
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:PAN_SDK.PAN_SDK:PANEconomicEngine initialized
+INFO:PAN_SDK.PAN_SDK:PANNameRegistry initialized
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for immune-alpha
+INFO:SovereignTreasury:SovereignTreasury online state=GENESIS chair= validators=0
+INFO:MasterDatabase:MasterDatabase online replica=64e895ab3982 docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:DHTNode initialized for immune-alpha at 127.0.0.1:8462, ID: 64e895ab39824b51
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for immune-alpha
+INFO:PlanetaryImmuneSystem:PlanetaryImmuneSystem online for immune-alpha pan=64e895ab3982 usms=f21ab3ef2ffe
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for immune-bravo with ID: ee37197d31de in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/immune_mesh_5bom59mo/bravo/firewall/ledger.sqlite
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:PAN_SDK.PAN_SDK:PANEconomicEngine initialized
+INFO:PAN_SDK.PAN_SDK:PANNameRegistry initialized
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for immune-bravo
+INFO:SovereignTreasury:SovereignTreasury online state=GENESIS chair= validators=0
+INFO:MasterDatabase:MasterDatabase online replica=ee37197d31de docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:DHTNode initialized for immune-bravo at 127.0.0.1:8462, ID: ee37197d31de4675
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for immune-bravo
+INFO:PlanetaryImmuneSystem:PlanetaryImmuneSystem online for immune-bravo pan=ee37197d31de usms=5f43fa467e00
+INFO:PAN_SDK.PAN_SDK:Created THREAT_MEMORY_BULLETIN packet: 9ea87c505f03
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for immune-alpha, depth: 1
+INFO:PAN_SDK.PAN_SDK:Stored key threat-memory:3ff0f59d449a946408474953d1765a82ad390ee52a9600ce9ddbd1a2120e02c5 in PAN DHT with hash ba9e1d7c9402
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for immune-alpha, depth: 2
+INFO:PAN_SDK.PAN_SDK:Stored key threat-memory:latest in PAN DHT with hash 413987ff3a8e
+INFO:PlanetaryImmuneSystem:Broadcast threat bulletin 9ea87c505f03 key=threat-memory:3ff0f59d449a946408474953d1765a82ad390ee52a9600ce9ddbd1a2120e02c5
+INFO:PlanetaryImmuneSystem:PlanetaryImmuneSystem closed for immune-alpha
+INFO:PlanetaryImmuneSystem:PlanetaryImmuneSystem closed for immune-bravo
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for immune-campaign with ID: cd24457a363a in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/immune_campaign_lkgh4zei/firewall/ledger.sqlite
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:PAN_SDK.PAN_SDK:PANEconomicEngine initialized
+INFO:PAN_SDK.PAN_SDK:PANNameRegistry initialized
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for immune-campaign
+INFO:SovereignTreasury:SovereignTreasury online state=GENESIS chair= validators=0
+INFO:MasterDatabase:MasterDatabase online replica=cd24457a363a docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:DHTNode initialized for immune-campaign at 127.0.0.1:8462, ID: cd24457a363a9c12
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for immune-campaign
+INFO:PlanetaryImmuneSystem:PlanetaryImmuneSystem online for immune-campaign pan=cd24457a363a usms=f9a47860abe8
+INFO:PAN_SDK.PAN_SDK:Created THREAT_MEMORY_BULLETIN packet: b589ad5eb5c4
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for immune-campaign, depth: 1
+INFO:PAN_SDK.PAN_SDK:Stored key threat-memory:d0c32415f8414038cb49346d3e2a2911182403b23ddf5256a9850a7399744399 in PAN DHT with hash 442b0bd5c19a
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for immune-campaign, depth: 2
+INFO:PAN_SDK.PAN_SDK:Stored key threat-memory:latest in PAN DHT with hash f53f0ba9d3d8
+INFO:PlanetaryImmuneSystem:Broadcast threat bulletin b589ad5eb5c4 key=threat-memory:d0c32415f8414038cb49346d3e2a2911182403b23ddf5256a9850a7399744399
+INFO:PAN_SDK.PAN_SDK:Created THREAT_MEMORY_BULLETIN packet: 223931547da5
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for immune-campaign, depth: 3
+INFO:PAN_SDK.PAN_SDK:Stored key threat-memory:1fb5fec3a3361649b80b2835a34c4f0419a947c56d021b1d2fa26bcb9a07f47d in PAN DHT with hash 2f200622310d
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for immune-campaign, depth: 4
+INFO:PAN_SDK.PAN_SDK:Stored key threat-memory:latest in PAN DHT with hash bf1ff13fb18d
+INFO:PlanetaryImmuneSystem:Broadcast threat bulletin 223931547da5 key=threat-memory:1fb5fec3a3361649b80b2835a34c4f0419a947c56d021b1d2fa26bcb9a07f47d
+INFO:PAN_SDK.PAN_SDK:Created THREAT_MEMORY_BULLETIN packet: 272073f8bf30
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for immune-campaign, depth: 5
+INFO:PAN_SDK.PAN_SDK:Stored key threat-memory:a2e519e2bc8857a5d52a6729aeac34812c0ea66686fa42680fccf8f15f913c3c in PAN DHT with hash efeb8f993ee3
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for immune-campaign, depth: 6
+INFO:PAN_SDK.PAN_SDK:Stored key threat-memory:latest in PAN DHT with hash 31e1ed70c8bb
+INFO:PlanetaryImmuneSystem:Broadcast threat bulletin 272073f8bf30 key=threat-memory:a2e519e2bc8857a5d52a6729aeac34812c0ea66686fa42680fccf8f15f913c3c
+INFO:PlanetaryImmuneSystem:PlanetaryImmuneSystem closed for immune-campaign
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for immune-node with ID: bbe25c16081b in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/immune_roe_y3voa9mf/firewall/ledger.sqlite
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:PAN_SDK.PAN_SDK:PANEconomicEngine initialized
+INFO:PAN_SDK.PAN_SDK:PANNameRegistry initialized
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for immune-node
+INFO:SovereignTreasury:SovereignTreasury online state=GENESIS chair= validators=0
+INFO:MasterDatabase:MasterDatabase online replica=bbe25c16081b docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:DHTNode initialized for immune-node at 127.0.0.1:8462, ID: bbe25c16081b014b
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for immune-node
+INFO:PlanetaryImmuneSystem:PlanetaryImmuneSystem online for immune-node pan=bbe25c16081b usms=17759a6f81cd
+INFO:security.defensive_offensive_bridge:Defensive-Offensive coordination started
+INFO:PlanetaryImmuneSystem:PlanetaryImmuneSystem closed for immune-node
+INFO:security.defensive_offensive_bridge:Defensive-Offensive coordination stopped
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for immune-node with ID: bbe25c16081b in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/immune_roe_y3voa9mf/firewall/ledger.sqlite
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:PAN_SDK.PAN_SDK:PANEconomicEngine initialized
+INFO:PAN_SDK.PAN_SDK:PANNameRegistry initialized
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for immune-node
+INFO:SovereignTreasury:SovereignTreasury online state=GENESIS chair= validators=0
+INFO:MasterDatabase:MasterDatabase online replica=bbe25c16081b docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:DHTNode initialized for immune-node at 127.0.0.1:8462, ID: bbe25c16081b014b
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for immune-node
+INFO:PlanetaryImmuneSystem:PlanetaryImmuneSystem online for immune-roe-reopen pan=bbe25c16081b usms=17759a6f81cd
+INFO:PlanetaryImmuneSystem:PlanetaryImmuneSystem closed for immune-roe-reopen
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for immune-l4 with ID: 01ee2bf8586d in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/immune_l4_8e90n0_v/firewall/ledger.sqlite
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:PAN_SDK.PAN_SDK:PANEconomicEngine initialized
+INFO:PAN_SDK.PAN_SDK:PANNameRegistry initialized
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for immune-l4
+INFO:SovereignTreasury:SovereignTreasury online state=GENESIS chair= validators=0
+INFO:MasterDatabase:MasterDatabase online replica=01ee2bf8586d docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:DHTNode initialized for immune-l4 at 127.0.0.1:8462, ID: 01ee2bf8586d73d9
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for immune-l4
+INFO:PlanetaryImmuneSystem:PlanetaryImmuneSystem online for immune-l4 pan=01ee2bf8586d usms=0cb2ccb2f885
+INFO:PlanetaryImmuneSystem:PlanetaryImmuneSystem closed for immune-l4
+ERROR:security.defensive_sovereignty:Error loading environment file: [Errno 2] No such file or directory: '.env'
+WARNING:security.defensive_sovereignty:API index file docs/PUBLIC_API_INDEX.json not found
+INFO:security.defensive_sovereignty:Loaded 0 API configurations
+ERROR:security.defensive_sovereignty:System baseline initialization failed: [Errno 13] Permission denied: '/etc/shadow'
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for immune-bind with ID: e4fbd8343b6a in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/immune_bind_vly1za53/firewall/ledger.sqlite
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:PAN_SDK.PAN_SDK:PANEconomicEngine initialized
+INFO:PAN_SDK.PAN_SDK:PANNameRegistry initialized
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for immune-bind
+INFO:SovereignTreasury:SovereignTreasury online state=GENESIS chair= validators=0
+INFO:MasterDatabase:MasterDatabase online replica=e4fbd8343b6a docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:DHTNode initialized for immune-bind at 127.0.0.1:8462, ID: e4fbd8343b6ac5d3
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for immune-bind
+INFO:PlanetaryImmuneSystem:PlanetaryImmuneSystem online for immune-bind pan=e4fbd8343b6a usms=03bfc3c1a77c
+INFO:security.defensive_sovereignty:Shared threat intelligence from source threat_detection_module via planetary immune system
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for BindHostile with ID: 01ea0972ad65 in hashchain
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for BindHostile
+INFO:PAN_SDK.PAN_SDK:Created METRICS_UPLOAD packet: 9c9901f23184
+ERROR:security.defensive_sovereignty:Error loading environment file: [Errno 2] No such file or directory: '.env'
+WARNING:security.defensive_sovereignty:API index file docs/PUBLIC_API_INDEX.json not found
+INFO:security.defensive_sovereignty:Loaded 0 API configurations
+WARNING:security.defensive_sovereignty:PAN packet 9c9901f23184 flagged by sovereign firewall: telemetry_dictionary
+INFO:PAN_SDK.PAN_SDK:Created THREAT_MEMORY_BULLETIN packet: 9b65088097d4
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for immune-bind, depth: 1
+INFO:PAN_SDK.PAN_SDK:Stored key threat-memory:6cc86d2c6365c7c754060c18745e3e2201d51de70b54a6013e18966bab832eac in PAN DHT with hash 914bc93f7c1c
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for immune-bind, depth: 2
+INFO:PAN_SDK.PAN_SDK:Stored key threat-memory:latest in PAN DHT with hash 2e59ec242804
+INFO:PlanetaryImmuneSystem:Broadcast threat bulletin 9b65088097d4 key=threat-memory:6cc86d2c6365c7c754060c18745e3e2201d51de70b54a6013e18966bab832eac
+INFO:PlanetaryImmuneSystem:PlanetaryImmuneSystem closed for immune-bind
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for immune-node with ID: 28b69d4c25cf in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/immune_no_sim_47dxr_on/firewall/ledger.sqlite
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:PAN_SDK.PAN_SDK:PANEconomicEngine initialized
+INFO:PAN_SDK.PAN_SDK:PANNameRegistry initialized
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for immune-node
+INFO:SovereignTreasury:SovereignTreasury online state=GENESIS chair= validators=0
+INFO:MasterDatabase:MasterDatabase online replica=28b69d4c25cf docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:DHTNode initialized for immune-node at 127.0.0.1:8462, ID: 28b69d4c25cfab43
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for immune-node
+INFO:PlanetaryImmuneSystem:PlanetaryImmuneSystem online for immune-node pan=28b69d4c25cf usms=4b47fbd86383
+INFO:security.defensive_offensive_bridge:Defensive-Offensive coordination started
+INFO:security.defensive_offensive_bridge:Dashboard notification: Authorization required for 20072424474e4d59
+INFO:security.defensive_offensive_bridge:Audio alert: High-priority authorization request 20072424474e4d59
+INFO:security.defensive_offensive_bridge:Human authorization requested: 20072424474e4d59
+WARNING:SovereignFirewall:Blocked identity abababababab (roe_degrade_on_mesh)
+INFO:PAN_SDK.PAN_SDK:Created THREAT_MEMORY_BULLETIN packet: 6053eaf7d1c4
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for immune-node, depth: 1
+INFO:PAN_SDK.PAN_SDK:Stored key threat-memory:c1ce77c187c5a41bfcb909f3e4d89fff8e58f70887c964d38973de6f37abfcdd in PAN DHT with hash 7b6b5de8a320
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for immune-node, depth: 2
+INFO:PAN_SDK.PAN_SDK:Stored key threat-memory:latest in PAN DHT with hash e96fb00bbcbd
+INFO:PlanetaryImmuneSystem:Broadcast threat bulletin 6053eaf7d1c4 key=threat-memory:c1ce77c187c5a41bfcb909f3e4d89fff8e58f70887c964d38973de6f37abfcdd
+INFO:PAN_SDK.PAN_SDK:Created THREAT_MEMORY_BULLETIN packet: b1d160bd94f0
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for immune-node, depth: 3
+INFO:PAN_SDK.PAN_SDK:Stored key threat-memory:3ef47ba0f9620ffa3f77b10b06de004efae9286f951174f0b4a8c2f02b00ecb8 in PAN DHT with hash 763f32624899
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for immune-node, depth: 4
+INFO:PAN_SDK.PAN_SDK:Stored key threat-memory:latest in PAN DHT with hash d8f7f7a8399b
+INFO:PlanetaryImmuneSystem:Broadcast threat bulletin b1d160bd94f0 key=threat-memory:3ef47ba0f9620ffa3f77b10b06de004efae9286f951174f0b4a8c2f02b00ecb8
+INFO:security.defensive_offensive_bridge:Dashboard notification: Authorization required for a33a7607eb1546a8
+INFO:security.defensive_offensive_bridge:Audio alert: High-priority authorization request a33a7607eb1546a8
+INFO:security.defensive_offensive_bridge:Human authorization requested: a33a7607eb1546a8
+INFO:PAN_SDK.PAN_SDK:Created THREAT_MEMORY_BULLETIN packet: 4287e6398c23
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for immune-node, depth: 5
+INFO:PAN_SDK.PAN_SDK:Stored key threat-memory:f8df4ee6bf3816fc9f780a431195199599d0f7cff09ad9741cdbc86097f12c8a in PAN DHT with hash 683a598700e1
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for immune-node, depth: 6
+INFO:PAN_SDK.PAN_SDK:Stored key threat-memory:latest in PAN DHT with hash 37ad93985fe5
+INFO:PlanetaryImmuneSystem:Broadcast threat bulletin 4287e6398c23 key=threat-memory:f8df4ee6bf3816fc9f780a431195199599d0f7cff09ad9741cdbc86097f12c8a
+INFO:PlanetaryImmuneSystem:PlanetaryImmuneSystem closed for immune-node
+INFO:security.defensive_offensive_bridge:Defensive-Offensive coordination stopped
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for NoFirewall with ID: d87234857fd8 in hashchain
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for HwyOrigin with ID: 600623910870 in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/hwy_direct_dq0igtjm/origin/fw.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for HwyOrigin
+INFO:EmailSocial:StatelessRelay online id=600623910870 events=0
+INFO:PlanetaryHighway:PlanetaryHighway online address=pan:id:600623910870662ebfc63017348fa9a92a8b16457c731936086f9fb8139bb7d2 usms=171a21396555
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for HwyHop with ID: 8474c1ad1a5f in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/hwy_direct_dq0igtjm/hop/fw.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for HwyHop
+INFO:EmailSocial:StatelessRelay online id=8474c1ad1a5f events=0
+INFO:PlanetaryHighway:PlanetaryHighway online address=pan:id:8474c1ad1a5f79baab4d091478dd0ef750c7f610c887a49c229ae1f74055900b usms=604279eb56dd
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for HwyDest with ID: 9abdc6f4875c in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/hwy_direct_dq0igtjm/dest/fw.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for HwyDest
+INFO:EmailSocial:StatelessRelay online id=9abdc6f4875c events=0
+INFO:PlanetaryHighway:PlanetaryHighway online address=pan:id:9abdc6f4875c434eaf0e354759620cdee69c41d65a95d10b3846d09ed242349a usms=ef7b4b16b37c
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for Stranger with ID: 13a216efed2f in hashchain
+INFO:PAN_SDK.PAN_SDK:Created HIGHWAY_HOP packet: b263a8a7dc48
+INFO:EmailSocial:Relay 600623910870 stored HIGHWAY_HOP b263a8a7dc48
+INFO:EmailSocial:Relay 8474c1ad1a5f stored HIGHWAY_HOP b263a8a7dc48
+INFO:EmailSocial:Relay 9abdc6f4875c stored HIGHWAY_HOP b263a8a7dc48
+INFO:PlanetaryHighway:Highway embark travel=3e253d0e091a dest=9abdc6f4875c hops=1
+INFO:PAN_SDK.PAN_SDK:Created HIGHWAY_ARRIVE packet: 19b3c6127e99
+INFO:EmailSocial:Relay 9abdc6f4875c stored HIGHWAY_ARRIVE 19b3c6127e99
+INFO:EmailSocial:Relay 600623910870 stored HIGHWAY_ARRIVE 19b3c6127e99
+INFO:EmailSocial:Relay 8474c1ad1a5f stored HIGHWAY_ARRIVE 19b3c6127e99
+INFO:PlanetaryHighway:Highway arrive travel=3e253d0e091a event=d6528be1-238
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for HwyOrigin with ID: 85707bc34acc in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/hwy_multi_zxsemebw/origin/fw.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for HwyOrigin
+INFO:EmailSocial:StatelessRelay online id=85707bc34acc events=0
+INFO:PlanetaryHighway:PlanetaryHighway online address=pan:id:85707bc34acc8b915fbd53ed55c5be2dc14d174a17880421e7eaf4e19d0e94b6 usms=375c4905f452
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for HwyHop with ID: 6dde2274129f in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/hwy_multi_zxsemebw/hop/fw.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for HwyHop
+INFO:EmailSocial:StatelessRelay online id=6dde2274129f events=0
+INFO:PlanetaryHighway:PlanetaryHighway online address=pan:id:6dde2274129feb3d191072b71d6fe1b23d959be812ec928aabab71db8d900d43 usms=294b02225e1b
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for HwyDest with ID: b3c8b7df8ed0 in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/hwy_multi_zxsemebw/dest/fw.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for HwyDest
+INFO:EmailSocial:StatelessRelay online id=b3c8b7df8ed0 events=0
+INFO:PlanetaryHighway:PlanetaryHighway online address=pan:id:b3c8b7df8ed097a95a6b2788a0921a14d64ba0f0c75a82a8984363c582bb25c5 usms=f82716f1f7af
+INFO:PAN_SDK.PAN_SDK:Created HIGHWAY_HOP packet: 22f7a3c06d17
+INFO:EmailSocial:Relay 85707bc34acc stored HIGHWAY_HOP 22f7a3c06d17
+INFO:EmailSocial:Relay 6dde2274129f stored HIGHWAY_HOP 22f7a3c06d17
+INFO:EmailSocial:Relay b3c8b7df8ed0 stored HIGHWAY_HOP 22f7a3c06d17
+INFO:PlanetaryHighway:Highway embark travel=7a5547a6646c dest=b3c8b7df8ed0 hops=2
+INFO:PAN_SDK.PAN_SDK:Created HIGHWAY_HOP packet: 16f942376bdb
+INFO:EmailSocial:Relay 6dde2274129f stored HIGHWAY_HOP 16f942376bdb
+INFO:EmailSocial:Relay 85707bc34acc stored HIGHWAY_HOP 16f942376bdb
+INFO:EmailSocial:Relay b3c8b7df8ed0 stored HIGHWAY_HOP 16f942376bdb
+INFO:PAN_SDK.PAN_SDK:Created HIGHWAY_ARRIVE packet: f5e7c9590a4c
+INFO:EmailSocial:Relay b3c8b7df8ed0 stored HIGHWAY_ARRIVE f5e7c9590a4c
+INFO:EmailSocial:Relay 85707bc34acc stored HIGHWAY_ARRIVE f5e7c9590a4c
+INFO:EmailSocial:Relay 6dde2274129f stored HIGHWAY_ARRIVE f5e7c9590a4c
+INFO:PlanetaryHighway:Highway arrive travel=7a5547a6646c event=479b6d49-402
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for HwyOrigin with ID: 4c0399d17185 in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/hwy_telem_h5apr7os/origin/fw.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for HwyOrigin
+INFO:EmailSocial:StatelessRelay online id=4c0399d17185 events=0
+INFO:PlanetaryHighway:PlanetaryHighway online address=pan:id:4c0399d17185055e573c64c8e57e5e12b5da7c616f99f137a1510a67e81cbf35 usms=b55c3bfeb1ca
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for HwyHop with ID: cc06e97f9e07 in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/hwy_telem_h5apr7os/hop/fw.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for HwyHop
+INFO:EmailSocial:StatelessRelay online id=cc06e97f9e07 events=0
+INFO:PlanetaryHighway:PlanetaryHighway online address=pan:id:cc06e97f9e07cb1cb235c8b234e2c5fa01e68291e7211ac9484da379e3e6a29a usms=65ea85ea0ac1
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for HwyDest with ID: 42aebe015f0c in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/hwy_telem_h5apr7os/dest/fw.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for HwyDest
+INFO:EmailSocial:StatelessRelay online id=42aebe015f0c events=0
+INFO:PlanetaryHighway:PlanetaryHighway online address=pan:id:42aebe015f0ceee6c51ce6bcc884ef1e82e45bdfe27dc31fcf911026cee784d7 usms=62f17cdde409
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for HwyOrigin with ID: f60a70522cfd in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/hwy_route_j1tq8cn1/origin/fw.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for HwyOrigin
+INFO:EmailSocial:StatelessRelay online id=f60a70522cfd events=0
+INFO:PlanetaryHighway:PlanetaryHighway online address=pan:id:f60a70522cfdc20bbb07d73dae2ae46a44ed0e1c322bbfae246059484680f4bc usms=e707a8317106
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for HwyHop with ID: 264fe08e9e01 in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/hwy_route_j1tq8cn1/hop/fw.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for HwyHop
+INFO:EmailSocial:StatelessRelay online id=264fe08e9e01 events=0
+INFO:PlanetaryHighway:PlanetaryHighway online address=pan:id:264fe08e9e01e16a98c2ef78c599e2e0039e037b4d1e7ac8941817e87a2ca6a6 usms=e37df9f6fdc0
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for HwyDest with ID: 0b486dd523fc in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/hwy_route_j1tq8cn1/dest/fw.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for HwyDest
+INFO:EmailSocial:StatelessRelay online id=0b486dd523fc events=0
+INFO:PlanetaryHighway:PlanetaryHighway online address=pan:id:0b486dd523fc74f789b538af2ec63142bfa8454f3d3bf124cdc4eb9a1c7a01f6 usms=f2b27d14dd5b
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for HwyOrigin with ID: 6527a121d373 in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/hwy_block_ulkzxyjp/origin/fw.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for HwyOrigin
+INFO:EmailSocial:StatelessRelay online id=6527a121d373 events=0
+INFO:PlanetaryHighway:PlanetaryHighway online address=pan:id:6527a121d373422a2ae1772afc58f88a435a7ea1881840002fc3e95ae7f55d60 usms=6578f61b65ed
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for HwyHop with ID: 81f15bb47fa4 in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/hwy_block_ulkzxyjp/hop/fw.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for HwyHop
+INFO:EmailSocial:StatelessRelay online id=81f15bb47fa4 events=0
+INFO:PlanetaryHighway:PlanetaryHighway online address=pan:id:81f15bb47fa43c68d886efe342a51a859f43bb26c7989675098b04de7682919e usms=0185aa3048d8
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for HwyDest with ID: 1280e544d024 in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/hwy_block_ulkzxyjp/dest/fw.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for HwyDest
+INFO:EmailSocial:StatelessRelay online id=1280e544d024 events=0
+INFO:PlanetaryHighway:PlanetaryHighway online address=pan:id:1280e544d024ed4ad3b1a708349ba573d1c4dcd393acbc9bff27f17bae7ae41b usms=72e9f205054e
+WARNING:SovereignFirewall:Blocked identity 6527a121d373 (test_block)
+INFO:PAN_SDK.PAN_SDK:Created HIGHWAY_HOP packet: 97cfe9534174
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for HwyOrigin with ID: 0160d063d92f in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/hwy_badsig_aa6f972r/origin/fw.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for HwyOrigin
+INFO:EmailSocial:StatelessRelay online id=0160d063d92f events=0
+INFO:PlanetaryHighway:PlanetaryHighway online address=pan:id:0160d063d92f0eb587f00a703e1ae3bc6da2c90992502909a715ed7992a23d8a usms=9f2b6a2a18ce
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for HwyHop with ID: 0a8e5a174f3a in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/hwy_badsig_aa6f972r/hop/fw.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for HwyHop
+INFO:EmailSocial:StatelessRelay online id=0a8e5a174f3a events=0
+INFO:PlanetaryHighway:PlanetaryHighway online address=pan:id:0a8e5a174f3a4c821ca993fc28ee82c57e945e14fed879affb7c53639c9a49cb usms=7b132a98e212
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for HwyDest with ID: b860ccdece0f in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/hwy_badsig_aa6f972r/dest/fw.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for HwyDest
+INFO:EmailSocial:StatelessRelay online id=b860ccdece0f events=0
+INFO:PlanetaryHighway:PlanetaryHighway online address=pan:id:b860ccdece0f2561512e65df2cc03d21d6164ab9fd19c1cc1ecfaedfb91c1235 usms=eeeaf84f13ee
+INFO:PAN_SDK.PAN_SDK:Created HIGHWAY_HOP packet: 499a9e6b8a59
+INFO:EmailSocial:Relay 0160d063d92f stored HIGHWAY_HOP 499a9e6b8a59
+INFO:EmailSocial:Relay 0a8e5a174f3a stored HIGHWAY_HOP 499a9e6b8a59
+INFO:EmailSocial:Relay b860ccdece0f stored HIGHWAY_HOP 499a9e6b8a59
+INFO:PlanetaryHighway:Highway embark travel=7c8bca95bbf4 dest=b860ccdece0f hops=1
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for HwyOrigin
+INFO:PAN_SDK.PAN_SDK:Created HIGHWAY_HOP packet: cdb8182c3e88
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for HwyOrigin with ID: c77baef0255b in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/hwy_restart_e56l8ncx/origin/fw.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for HwyOrigin
+INFO:EmailSocial:StatelessRelay online id=c77baef0255b events=0
+INFO:PlanetaryHighway:PlanetaryHighway online address=pan:id:c77baef0255b76d5349edad92a83d8dad0c3e9eb14b36dbf573adc3a6441d986 usms=1e2222bbcd47
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for HwyHop with ID: c1e852e37c3a in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/hwy_restart_e56l8ncx/hop/fw.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for HwyHop
+INFO:EmailSocial:StatelessRelay online id=c1e852e37c3a events=0
+INFO:PlanetaryHighway:PlanetaryHighway online address=pan:id:c1e852e37c3aea26824ae5fb931622b830fd6b056f867ed3bf0320a0d4ebe524 usms=c8a38f8a8430
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for HwyDest with ID: e58e3057c93c in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/hwy_restart_e56l8ncx/dest/fw.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for HwyDest
+INFO:EmailSocial:StatelessRelay online id=e58e3057c93c events=0
+INFO:PlanetaryHighway:PlanetaryHighway online address=pan:id:e58e3057c93ce71ccac848b5137445791bd15b0164ab8339efa3a1dcd1837986 usms=97bb80f6e782
+INFO:PAN_SDK.PAN_SDK:Created HIGHWAY_HOP packet: 48ff1f3b0093
+INFO:EmailSocial:Relay c77baef0255b stored HIGHWAY_HOP 48ff1f3b0093
+INFO:EmailSocial:Relay c1e852e37c3a stored HIGHWAY_HOP 48ff1f3b0093
+INFO:EmailSocial:Relay e58e3057c93c stored HIGHWAY_HOP 48ff1f3b0093
+INFO:PlanetaryHighway:Highway embark travel=44e931ad7dad dest=e58e3057c93c hops=1
+INFO:PAN_SDK.PAN_SDK:Created HIGHWAY_ARRIVE packet: 1cf2f27c4b2e
+INFO:EmailSocial:Relay e58e3057c93c stored HIGHWAY_ARRIVE 1cf2f27c4b2e
+INFO:EmailSocial:Relay c77baef0255b stored HIGHWAY_ARRIVE 1cf2f27c4b2e
+INFO:EmailSocial:Relay c1e852e37c3a stored HIGHWAY_ARRIVE 1cf2f27c4b2e
+INFO:PlanetaryHighway:Highway arrive travel=44e931ad7dad event=e9afc649-112
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/hwy_restart_e56l8ncx/dest/fw.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for HwyDest
+INFO:EmailSocial:StatelessRelay online id=e58e3057c93c events=2
+INFO:PlanetaryHighway:PlanetaryHighway online address=pan:id:e58e3057c93ce71ccac848b5137445791bd15b0164ab8339efa3a1dcd1837986 usms=97bb80f6e782
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for HwyOrigin with ID: 1b78f3b3364d in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/hwy_dht_ky63xiet/mesh/origin/fw.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for HwyOrigin
+INFO:EmailSocial:StatelessRelay online id=1b78f3b3364d events=0
+INFO:PlanetaryHighway:PlanetaryHighway online address=pan:id:1b78f3b3364d649f7787f0a99d9409d2b31a3a94d6f86532dc8464bf21476fc7 usms=ef9b385bcff1
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for HwyHop with ID: ab0df0e6c0ec in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/hwy_dht_ky63xiet/mesh/hop/fw.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for HwyHop
+INFO:EmailSocial:StatelessRelay online id=ab0df0e6c0ec events=0
+INFO:PlanetaryHighway:PlanetaryHighway online address=pan:id:ab0df0e6c0ec2ef0293298877e11dff39239e995501c589f93b9c6f15ad1b024 usms=8bdb5d7079d1
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for HwyDest with ID: 8da40799f8f1 in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/hwy_dht_ky63xiet/mesh/dest/fw.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for HwyDest
+INFO:EmailSocial:StatelessRelay online id=8da40799f8f1 events=0
+INFO:PlanetaryHighway:PlanetaryHighway online address=pan:id:8da40799f8f14778854982c25eec062dbbe92e3d03828299a76eb1bd093cfd69 usms=2f3ff658f295
+INFO:PAN_SDK.PAN_SDK:DHTNode initialized for HwyOrigin at 127.0.0.1:8462, ID: 1b78f3b3364d649f
+INFO:PAN_SDK.PAN_SDK:Created HIGHWAY_HOP packet: ecf54130e36e
+INFO:EmailSocial:Relay 1b78f3b3364d stored HIGHWAY_HOP ecf54130e36e
+INFO:EmailSocial:Relay ab0df0e6c0ec stored HIGHWAY_HOP ecf54130e36e
+INFO:EmailSocial:Relay 8da40799f8f1 stored HIGHWAY_HOP ecf54130e36e
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for HwyOrigin, depth: 1
+INFO:PAN_SDK.PAN_SDK:Stored key highway:travel:8fa5cd61efb907a182c3561afd30ffe256579c70a2ca5b9ffc5254cb23be7dc6 in PAN DHT with hash d25226cff087
+INFO:PlanetaryHighway:Highway embark travel=8fa5cd61efb9 dest=8da40799f8f1 hops=1
+
+PASS legacy_ip_routing_blocked
+
+========================================================================
+CHECK: memory_survives_restart
+========================================================================
+first share intel_id=1bc950516579d598 event=3c19e079-065 belief=416daf37-b02 dht=threat-memory:d3fc5d411322a4f1195a52d65e0cbd1bc6070f4bf7114300fe456697bd4feccb
+restart search hits=4
+PASS memory_survives_restart
+
+========================================================================
+CHECK: peer_ingests_bulletin
+========================================================================
+bravo ingested intel_id=9777ccc17641673f event=fcbfbfa7-4d7
+PASS peer_ingests_bulletin
+
+========================================================================
+CHECK: contradiction_and_campaign_entangle
+========================================================================
+campaign vector=network event=b4ca4735-769
+campaign vector=filesystem event=fd1b002f-59c
+campaign vector=memory event=c9a9029a-9e6
+contradiction node=ed0fea7d-bbb targets=['eef1c3c2-ea5d-4ad8-8971-0d225adc232e']
+PASS contradiction_and_campaign_entangle
+
+========================================================================
+CHECK: roe_ladder_persists_through_bridge
+========================================================================
+bridge threat_id=5b18b502fa46dd38 mapped_roe=DECEIVE
+belief roe_level=deceive deceive=True activation=0.385
+PASS roe_ladder_persists_through_bridge
+
+========================================================================
+CHECK: neutralize_requires_human_authorization
+========================================================================
+share L4 denied: ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized
+record L4 denied: ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized
+PASS neutralize_requires_human_authorization
+
+========================================================================
+CHECK: second_chain_retired_share_uses_immune
+========================================================================
+construct denied: BlockchainThreatIntelligence is retired. Bind PlanetaryImmuneSystem and persist through share_intelligence / USMS. PAN RSA and USMS Ed25519 stay two identity types. This class is not a live store.
+unbound share denied: ThreatDetectionModule.share_threat_intelligence requires a bound PlanetaryImmuneSystem; BlockchainThreatIntelligence is retired
+detector intel=e2be0d2086cc8c7f event=c182a80c-da73-40fa-9c10-005d21866bf7 roe=observe bulletin=None
+monitor threats={'pan_packet_firewall_violation': 0.9}
+PASS second_chain_retired_share_uses_immune
+
+========================================================================
+CHECK: smtp_alert_fails_loud
+========================================================================
+smtp refused: SMTP egress is forbidden; use PAN email_social
+PASS smtp_alert_fails_loud
+
+========================================================================
+CHECK: webhook_alert_fails_loud
+========================================================================
+webhook refused: HTTP webhook egress is forbidden
+PASS webhook_alert_fails_loud
+
+========================================================================
+CHECK: threat_feed_fetch_fails_loud
+========================================================================
+feed fetch refused: external threat feeds are forbidden; combat memory is USMS
+feed sync refused: external threat feeds are forbidden; combat memory is USMS
+PASS threat_feed_fetch_fails_loud
+
+========================================================================
+CHECK: whois_fails_loud
+========================================================================
+whois refused: legacy internet recon is forbidden
+map_infrastructure refused: legacy internet recon is forbidden
+PASS whois_fails_loud
+
+========================================================================
+CHECK: wifi_deauth_fails_loud
+========================================================================
+wifi deauth refused: RF/host neutralization is forbidden; ROE L4 is a USMS receipt only
+deauth packets refused: RF/host neutralization is forbidden; ROE L4 is a USMS receipt only
+PASS wifi_deauth_fails_loud
+
+========================================================================
+CHECK: bridge_refuses_simulated_authorization
+========================================================================
+HIGH authorized=False pending=True
+CRITICAL L4 denied: ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized
+PASS bridge_refuses_simulated_authorization
+slice planetary_immune_system -> PASS
+
+========================================================================
+RUNNING run
+========================================================================
+
+========================================================================
+CHECK: source_has_no_legacy_mesh
+========================================================================
+banned tokens found=[]
+PASS source_has_no_legacy_mesh
+
+========================================================================
+CHECK: requires_explicit_firewall
+========================================================================
+unbound firewall refused: PlanetaryHighway requires SovereignFirewall
+PASS requires_explicit_firewall
+
+========================================================================
+CHECK: direct_travel_sealed_cargo
+========================================================================
+embark travel=3e253d0e091aa76972630a972f1719cb78c1e5159a4d80b9029e6fb893784954 packet=b263a8a7dc48d5d68f02f6864f0d5b39796548c8860115d2073774c60d74b11f
+stranger correctly failed: sealed envelope is not addressed to this identity
+PASS direct_travel_sealed_cargo
+
+========================================================================
+CHECK: multi_hop_three_nodes
+========================================================================
+multi embark next=6dde2274129f
+hop USMS hits=1 leaked=0
+hop correctly cannot open: sealed envelope is not addressed to this identity
+PASS multi_hop_three_nodes
+
+========================================================================
+CHECK: firewall_blocks_telemetry_on_hop
+========================================================================
+telemetry hop blocked: highway tracker blocked: telemetry_dictionary
+PASS firewall_blocks_telemetry_on_hop
+
+========================================================================
+CHECK: legacy_routing_key_rejected
+========================================================================
+legacy routing refused: legacy routing key forbidden: next_hop
+envelope next_hop refused: legacy routing key forbidden: next_hop
+PASS legacy_routing_key_rejected
+
+========================================================================
+CHECK: identity_blocklist_stops_travel
+========================================================================
+blocklist stopped travel: highway blocked after signing: identity_blocklist
+PASS identity_blocklist_stops_travel
+
+========================================================================
+CHECK: bad_usms_signature_fails_loud
+========================================================================
+bad USMS signature refused: USMS cargo signature is invalid
+PASS bad_usms_signature_fails_loud
+
+========================================================================
+CHECK: cargo_survives_restart
+========================================================================
+locate after restart=arrived
+PASS cargo_survives_restart
+
+========================================================================
+CHECK: dht_index_optional_and_unbound_to_firewall
+========================================================================
+dht index present=True
+PASS dht_index_optional_and_unbound_to_firewall
+slice planetary_highway -> PASS
+
+========================================================================
+RUNNING run
+========================================================================
+
+========================================================================
+CHECK: genesis_rejects_mint
+========================================================================INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for FedChair with ID: 803bf01b390c in hashchain
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for VerifierOne with ID: 1e1ac57e005a in hashchain
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for VerifierTwo with ID: b5daa96ae7d0 in hashchain
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:PAN_SDK.PAN_SDK:PANEconomicEngine initialized
+INFO:PAN_SDK.PAN_SDK:PANNameRegistry initialized
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for FedChair
+INFO:SovereignTreasury:SovereignTreasury online state=GENESIS chair= validators=0
+INFO:MasterDatabase:MasterDatabase online replica=803bf01b390c docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:DHTNode initialized for FedChair at 127.0.0.1:8462, ID: 803bf01b390c9e5d
+INFO:SovereignTreasury:Registered treasury validator 803bf01b390c
+INFO:SovereignTreasury:Registered treasury validator 1e1ac57e005a
+INFO:SovereignTreasury:Registered treasury validator b5daa96ae7d0
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for FedChair with ID: 089bcc8ba364 in hashchain
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for VerifierOne with ID: a2b319717701 in hashchain
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for VerifierTwo with ID: 1ec4d82628f8 in hashchain
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:PAN_SDK.PAN_SDK:PANEconomicEngine initialized
+INFO:PAN_SDK.PAN_SDK:PANNameRegistry initialized
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for FedChair
+INFO:SovereignTreasury:SovereignTreasury online state=GENESIS chair= validators=0
+INFO:MasterDatabase:MasterDatabase online replica=089bcc8ba364 docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:DHTNode initialized for FedChair at 127.0.0.1:8462, ID: 089bcc8ba3641a95
+INFO:SovereignTreasury:Registered treasury validator 089bcc8ba364
+INFO:SovereignTreasury:Registered treasury validator a2b319717701
+INFO:SovereignTreasury:Registered treasury validator 1ec4d82628f8
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for FedChair with ID: b3e204bd69eb in hashchain
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for VerifierOne with ID: 01d059fe5104 in hashchain
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for VerifierTwo with ID: 1f1ff89d393c in hashchain
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:PAN_SDK.PAN_SDK:PANEconomicEngine initialized
+INFO:PAN_SDK.PAN_SDK:PANNameRegistry initialized
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for FedChair
+INFO:SovereignTreasury:SovereignTreasury online state=GENESIS chair= validators=0
+INFO:MasterDatabase:MasterDatabase online replica=b3e204bd69eb docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:DHTNode initialized for FedChair at 127.0.0.1:8462, ID: b3e204bd69ebff37
+INFO:SovereignTreasury:Registered treasury validator b3e204bd69eb
+INFO:SovereignTreasury:Registered treasury validator 01d059fe5104
+INFO:SovereignTreasury:Registered treasury validator 1f1ff89d393c
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for PoILinearModel with ID: 13c9c5de69be in hashchain
+INFO:PAN_SDK.PAN_SDK:Created manifest for model poi-linear-v1
+INFO:PAN_SDK.PAN_SDK:SovereignInferenceEngine initialized for poi-linear-v1
+INFO:PAN_SDK.PAN_SDK:Loaded sovereign linear model /tmp/treas_mint_29bu_b3n/poi.panlin hash=c7495033ebea
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for FedChair, depth: 1
+INFO:PAN_SDK.PAN_SDK:Executed transaction b9c56173-350 on PAN network
+INFO:PAN_SDK.PAN_SDK:Minted 40 tokens to 01d059fe5104 for proof_of_inference. Total supply: 40
+INFO:PAN_SDK.PAN_SDK:Created TREASURY_LEDGER packet: 4e5457598d4a
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for FedChair with ID: bd7e0e9e2ee0 in hashchain
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for VerifierOne with ID: 6b2b0c89a243 in hashchain
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for VerifierTwo with ID: 2e6d352069d3 in hashchain
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:PAN_SDK.PAN_SDK:PANEconomicEngine initialized
+INFO:PAN_SDK.PAN_SDK:PANNameRegistry initialized
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for FedChair
+INFO:SovereignTreasury:SovereignTreasury online state=GENESIS chair= validators=0
+INFO:MasterDatabase:MasterDatabase online replica=bd7e0e9e2ee0 docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:DHTNode initialized for FedChair at 127.0.0.1:8462, ID: bd7e0e9e2ee03b2d
+INFO:SovereignTreasury:Registered treasury validator bd7e0e9e2ee0
+INFO:SovereignTreasury:Registered treasury validator 6b2b0c89a243
+INFO:SovereignTreasury:Registered treasury validator 2e6d352069d3
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for PoILinearModel with ID: 84c3c90502e8 in hashchain
+INFO:PAN_SDK.PAN_SDK:Created manifest for model poi-linear-v1
+INFO:PAN_SDK.PAN_SDK:SovereignInferenceEngine initialized for poi-linear-v1
+INFO:PAN_SDK.PAN_SDK:Loaded sovereign linear model /tmp/treas_flow_9lsa6bs2/poi.panlin hash=c7495033ebea
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for FedChair, depth: 1
+INFO:PAN_SDK.PAN_SDK:Executed transaction f9e87603-ebd on PAN network
+INFO:PAN_SDK.PAN_SDK:Minted 100 tokens to treasury:pan for proof_of_inference. Total supply: 100
+INFO:PAN_SDK.PAN_SDK:Created TREASURY_LEDGER packet: 37af0fc7ee57
+INFO:PAN_SDK.PAN_SDK:Created TREASURY_LEDGER packet: 22f7e963364d
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for FedChair, depth: 2
+INFO:PAN_SDK.PAN_SDK:Executed transaction 4d3c9eeb-6a4 on PAN network
+INFO:PAN_SDK.PAN_SDK:Executed transaction 4d3c9eeb-6a4: 25 tokens from treasury:pan to 6b2b0c89a243
+INFO:PAN_SDK.PAN_SDK:Created TREASURY_LEDGER packet: c30d2a51772a
+INFO:PAN_SDK.PAN_SDK:Created TREASURY_LEDGER packet: be986a7ac744
+INFO:PAN_SDK.PAN_SDK:Created TREASURY_LEDGER packet: 06a43e22abc2
+INFO:PAN_SDK.PAN_SDK:Created hashchain entry for FedChair, depth: 3
+INFO:PAN_SDK.PAN_SDK:Executed transaction 85b1f5db-3f0 on PAN network
+INFO:PAN_SDK.PAN_SDK:Burned 10 tokens from 6b2b0c89a243 for treasury_burn. Total supply: 90
+INFO:PAN_SDK.PAN_SDK:Created TREASURY_LEDGER packet: bf26b20c1459
+INFO:PAN_SDK.PAN_SDK:Created TREASURY_LEDGER packet: 88c827793c16
+INFO:PAN_SDK.PAN_SDK:Created TREASURY_LEDGER packet: 972d8466b928
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for FedChair with ID: 02ca32c48f14 in hashchain
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for VerifierOne with ID: 013287624994 in hashchain
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for VerifierTwo with ID: 0b6a6f749111 in hashchain
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:PAN_SDK.PAN_SDK:PANEconomicEngine initialized
+INFO:PAN_SDK.PAN_SDK:PANNameRegistry initialized
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for FedChair
+INFO:SovereignTreasury:SovereignTreasury online state=GENESIS chair= validators=0
+INFO:MasterDatabase:MasterDatabase online replica=02ca32c48f14 docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:DHTNode initialized for FedChair at 127.0.0.1:8462, ID: 02ca32c48f141e10
+INFO:SovereignTreasury:Registered treasury validator 02ca32c48f14
+INFO:SovereignTreasury:Registered treasury validator 013287624994
+INFO:SovereignTreasury:Registered treasury validator 0b6a6f749111
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for FedChair with ID: 02ca32c48f14 in hashchain
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:PAN_SDK.PAN_SDK:PANEconomicEngine initialized
+INFO:PAN_SDK.PAN_SDK:PANNameRegistry initialized
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for FedChair
+INFO:SovereignTreasury:SovereignTreasury online state=MINT_PHASE chair=02ca32c48f14 validators=3
+INFO:MasterDatabase:MasterDatabase online replica=02ca32c48f14 docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:DHTNode initialized for FedChair at 127.0.0.1:8462, ID: 02ca32c48f141e10
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for FedChair with ID: f5c9fd121177 in hashchain
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for VerifierOne with ID: 1821390e2820 in hashchain
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for VerifierTwo with ID: 02e7099f6fe1 in hashchain
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:PAN_SDK.PAN_SDK:PANEconomicEngine initialized
+INFO:PAN_SDK.PAN_SDK:PANNameRegistry initialized
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for FedChair
+INFO:SovereignTreasury:SovereignTreasury online state=GENESIS chair= validators=0
+INFO:MasterDatabase:MasterDatabase online replica=f5c9fd121177 docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:DHTNode initialized for FedChair at 127.0.0.1:8462, ID: f5c9fd1211775316
+INFO:SovereignTreasury:Registered treasury validator f5c9fd121177
+INFO:SovereignTreasury:Registered treasury validator 1821390e2820
+INFO:SovereignTreasury:Registered treasury validator 02e7099f6fe1
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for PoILinearModel with ID: 1c250835db7a in hashchain
+INFO:PAN_SDK.PAN_SDK:Created manifest for model poi-linear-v1
+INFO:PAN_SDK.PAN_SDK:SovereignInferenceEngine initialized for poi-linear-v1
+INFO:PAN_SDK.PAN_SDK:Loaded sovereign linear model /tmp/treas_forge_n7swjhro/poi.panlin hash=c7495033ebea
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for FedChair with ID: ea77580999ac in hashchain
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for VerifierOne with ID: 6d89ef01b473 in hashchain
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for VerifierTwo with ID: 1f9e65ca27fd in hashchain
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:PAN_SDK.PAN_SDK:PANEconomicEngine initialized
+INFO:PAN_SDK.PAN_SDK:PANNameRegistry initialized
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for FedChair
+INFO:SovereignTreasury:SovereignTreasury online state=GENESIS chair= validators=0
+INFO:MasterDatabase:MasterDatabase online replica=ea77580999ac docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:DHTNode initialized for FedChair at 127.0.0.1:8462, ID: ea77580999ac960a
+INFO:SovereignTreasury:Registered treasury validator ea77580999ac
+INFO:SovereignTreasury:Registered treasury validator 6d89ef01b473
+INFO:SovereignTreasury:Registered treasury validator 1f9e65ca27fd
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for PoILinearModel with ID: c6036b60d707 in hashchain
+INFO:PAN_SDK.PAN_SDK:Created manifest for model poi-linear-v1
+INFO:PAN_SDK.PAN_SDK:SovereignInferenceEngine initialized for poi-linear-v1
+INFO:PAN_SDK.PAN_SDK:Loaded sovereign linear model /tmp/treas_unbound_5xouuk0c/poi.panlin hash=c7495033ebea
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for MailAlice with ID: ccb55c765ae3 in hashchain
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for MailBob with ID: ccd9eb371fd6 in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/mail_seal_rc40fd5x/fw_a.sqlite
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/mail_seal_rc40fd5x/fw_b.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for MailAlice
+INFO:EmailSocial:StatelessRelay online id=ccb55c765ae3 events=0
+INFO:EmailSocial:EmailSocialNode online address=pan:id:ccb55c765ae3e57a3f78008888dda3eebf3ec9cf51fcf686f72267565270b6ae relay=ccb55c765ae3
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for MailBob
+INFO:EmailSocial:StatelessRelay online id=ccd9eb371fd6 events=0
+INFO:EmailSocial:EmailSocialNode online address=pan:id:ccd9eb371fd6875b064f2c212d73b8c9b45ad623cc9f3e06a9b5fab56939946d relay=ccd9eb371fd6
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for Stranger with ID: f181cbe7756b in hashchain
+INFO:PAN_SDK.PAN_SDK:Created MAIL_SEALED packet: 6b2b0b0e25d0
+INFO:EmailSocial:Relay ccb55c765ae3 stored MAIL_SEALED 6b2b0b0e25d0
+INFO:EmailSocial:Relay ccd9eb371fd6 stored MAIL_SEALED 6b2b0b0e25d0
+INFO:PAN_SDK.PAN_SDK:Created MAIL_RECEIPT packet: d6b7f88ccb3d
+INFO:EmailSocial:Relay ccd9eb371fd6 stored MAIL_RECEIPT d6b7f88ccb3d
+INFO:EmailSocial:Relay ccb55c765ae3 stored MAIL_RECEIPT d6b7f88ccb3d
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for RelayOp with ID: 88baf19a26e3 in hashchain
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for Peer with ID: 9965b53756e2 in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/mail_relay_y75ez_2s/fw.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for RelayOp
+INFO:EmailSocial:StatelessRelay online id=88baf19a26e3 events=0
+INFO:EmailSocial:EmailSocialNode online address=pan:id:88baf19a26e37d680f052f25f0ad18fa1138644db5ed6f2f721f1cb4871f3262 relay=88baf19a26e3
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for RelayOp
+INFO:PAN_SDK.PAN_SDK:Created MAIL_SEALED packet: 78f94b659528
+INFO:PAN_SDK.PAN_SDK:Created SOCIAL_BROADCAST packet: 07b09c198cf6
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for SocialAnn with ID: 5fa92b9f3576 in hashchain
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for SocialBea with ID: 2a0aba776ba4 in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/mail_social_csut4ele/fw_a.sqlite
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/mail_social_csut4ele/fw_b.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for SocialAnn
+INFO:EmailSocial:StatelessRelay online id=5fa92b9f3576 events=0
+INFO:EmailSocial:EmailSocialNode online address=pan:id:5fa92b9f357632622b75d9cabb0622b12b15cb0f064d33347110c967ba405563 relay=5fa92b9f3576
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for SocialBea
+INFO:EmailSocial:StatelessRelay online id=2a0aba776ba4 events=0
+INFO:EmailSocial:EmailSocialNode online address=pan:id:2a0aba776ba486af0507f456afdc529434c15ab01b752003eff1a6f339d454ea relay=2a0aba776ba4
+INFO:PAN_SDK.PAN_SDK:Created SOCIAL_BROADCAST packet: a34b10c248e7
+INFO:EmailSocial:Relay 5fa92b9f3576 stored SOCIAL_BROADCAST a34b10c248e7
+INFO:EmailSocial:Relay 2a0aba776ba4 stored SOCIAL_BROADCAST a34b10c248e7
+INFO:PAN_SDK.PAN_SDK:Created DISCOVERY_KNOCK packet: 3e4d585bb53f
+INFO:EmailSocial:Relay 5fa92b9f3576 stored DISCOVERY_KNOCK 3e4d585bb53f
+INFO:EmailSocial:Relay 2a0aba776ba4 stored DISCOVERY_KNOCK 3e4d585bb53f
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for RestartAnn with ID: 29627e126e30 in hashchain
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for RestartBea with ID: 7a7a4b670625 in hashchain
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/mail_restart_hfhh2lx8/fw_a.sqlite
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/mail_restart_hfhh2lx8/fw_b.sqlite
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for RestartAnn
+INFO:EmailSocial:StatelessRelay online id=29627e126e30 events=0
+INFO:EmailSocial:EmailSocialNode online address=pan:id:29627e126e30798a6d37c3f53bb1347cc4a635acaa2f622ea574863cd396bf9a relay=29627e126e30
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for RestartBea
+INFO:EmailSocial:StatelessRelay online id=7a7a4b670625 events=0
+INFO:EmailSocial:EmailSocialNode online address=pan:id:7a7a4b6706258bb6d74b9c6fd1065cad5bf680c09f8d2dda9270c8f4d4f23479 relay=7a7a4b670625
+INFO:PAN_SDK.PAN_SDK:Created MAIL_SEALED packet: 8973487d401b
+INFO:EmailSocial:Relay 29627e126e30 stored MAIL_SEALED 8973487d401b
+INFO:EmailSocial:Relay 7a7a4b670625 stored MAIL_SEALED 8973487d401b
+INFO:SovereignFirewall:SovereignFirewall ledger opened at /tmp/mail_restart_hfhh2lx8/fw_b.sqlite
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for RestartBea with ID: 7a7a4b670625 in hashchain
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for RestartBea
+INFO:EmailSocial:StatelessRelay online id=7a7a4b670625 events=1
+INFO:EmailSocial:EmailSocialNode online address=pan:id:7a7a4b6706258bb6d74b9c6fd1065cad5bf680c09f8d2dda9270c8f4d4f23479 relay=7a7a4b670625
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for ReplicaA with ID: f22697a7eea8 in hashchain
+INFO:MasterDatabase:MasterDatabase online replica=f22697a7eea8 docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for ReplicaB with ID: 90a4ac44e877 in hashchain
+INFO:MasterDatabase:MasterDatabase online replica=90a4ac44e877 docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for AlgA with ID: 3ce986c644d4 in hashchain
+INFO:MasterDatabase:MasterDatabase online replica=3ce986c644d4 docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for AlgB with ID: e6befc217321 in hashchain
+INFO:MasterDatabase:MasterDatabase online replica=e6befc217321 docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for AlgC with ID: 7a4b04dc0867 in hashchain
+INFO:MasterDatabase:MasterDatabase online replica=7a4b04dc0867 docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for AlgA2 with ID: 03dcf86823ed in hashchain
+INFO:MasterDatabase:MasterDatabase online replica=03dcf86823ed docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for AlgB2 with ID: 72275f750bf8 in hashchain
+INFO:MasterDatabase:MasterDatabase online replica=72275f750bf8 docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for AlgC2 with ID: 091195e58cdf in hashchain
+INFO:MasterDatabase:MasterDatabase online replica=091195e58cdf docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for TombA with ID: 0a6c0c2144de in hashchain
+INFO:MasterDatabase:MasterDatabase online replica=0a6c0c2144de docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for TombB with ID: d7411667ad7a in hashchain
+INFO:MasterDatabase:MasterDatabase online replica=d7411667ad7a docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for MasterChair with ID: 4108c124d32a in hashchain
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:PAN_SDK.PAN_SDK:PANEconomicEngine initialized
+INFO:PAN_SDK.PAN_SDK:PANNameRegistry initialized
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for MasterChair
+INFO:SovereignTreasury:SovereignTreasury online state=GENESIS chair= validators=0
+INFO:MasterDatabase:MasterDatabase online replica=4108c124d32a docs=0 counters=0 sets=0
+INFO:PAN_SDK.PAN_SDK:DHTNode initialized for MasterChair at 127.0.0.1:8462, ID: 4108c124d32a18f2
+INFO:PAN_SDK.PAN_SDK:Created SovereignIdentity for MasterChair with ID: 4108c124d32a in hashchain
+INFO:PAN_SDK.PAN_SDK:PANCitizenRegistry initialized
+INFO:PAN_SDK.PAN_SDK:PANEconomicEngine initialized
+INFO:PAN_SDK.PAN_SDK:PANNameRegistry initialized
+INFO:PAN_SDK.PAN_SDK:SovereignCommunicator initialized for MasterChair
+INFO:SovereignTreasury:SovereignTreasury online state=GENESIS chair= validators=0
+INFO:MasterDatabase:MasterDatabase online replica=4108c124d32a docs=1 counters=1 sets=0
+INFO:PAN_SDK.PAN_SDK:DHTNode initialized for MasterChair at 127.0.0.1:8462, ID: 4108c124d32a18f2
+INFO:memory.memory_core:Memory manager initialized
+INFO:memory.memory_core:Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+WARNING:memory.memory_core:sentence_transformers is not installed; using LocalHashEmbeddingModel. Semantic similarity is hash-stable, not transformer-grade.
+ERROR:memory.memory_core:Failed to import chromadb: No module named 'chromadb'
+WARNING:memory.memory_core:ChromaDB not available; using in-process SimpleLocalVectorDB fallback.
+INFO:memory.memory_core:Metadata database initialized
+INFO:memory.memory_core:Memory system initialized successfully
+INFO:memory.memory_core:Stored memory 050d6f9e-550d-4fb4-b657-1281d4255d67 for user citizen:ann
+INFO:memory.memory_core:Retrieved 1 memories for user citizen:ann
+INFO:memory.memory_core:Shutting down memory system...
+INFO:memory.memory_core:Memory cleanup loop cancelled.
+INFO:memory.memory_core:Memory system shutdown complete
+INFO:memory.system_cache:Loaded 0 cache entries from persistence
+INFO:memory.system_cache:SOMNUS Cache initialized: 0 entries, 0.0MB
+INFO:memory.system_cache:Cache background cleanup stopped
+INFO:memory.memory_core:Memory manager initialized
+INFO:memory.system_cache:Loaded 0 cache entries from persistence
+INFO:memory.system_cache:Started dedicated asyncio event loop for SomnusCache.
+INFO:memory.system_cache:Hydrating cache from MemoryManager...
+INFO:memory.system_cache:SOMNUS Cache initialized: 0 entries, 0.0MB
+INFO:memory.memory_core:Memory manager initialized
+INFO:memory.system_cache:Loaded 0 cache entries from persistence
+INFO:memory.system_cache:Hydrating cache from MemoryManager...
+INFO:memory.system_cache:SOMNUS Cache initialized: 0 entries, 0.0MB
+WARNING:telecom.phone_orchestrator:Config file not found: /home/daeron/LAB/Experiments/projects/pan-sdk/schemas/phone_config.yaml, using defaults
+INFO:PAN_SDK.personal_data:PANPhoneAddressRegistry initialized
+INFO:memory.memory_core:Memory manager initialized
+INFO:memory.system_cache:Loaded 0 cache entries from persistence
+INFO:memory.system_cache:Hydrating cache from MemoryManager...
+INFO:memory.system_cache:SOMNUS Cache initialized: 0 entries, 0.0MB
+INFO:telecom.phone_orchestrator:ThyrisPhoneOrchestrator initialized (retries: 3, delay: 5.0s)
+INFO:memory.system_cache:Shutting down SOMNUS Cache...
+INFO:memory.system_cache:Cache background cleanup stopped
+INFO:memory.system_cache:Shut down dedicated asyncio event loop.
+INFO:memory.system_cache:Saved 0 cache entries to disk
+INFO:memory.system_cache:SOMNUS Cache shutdown complete
+
+genesis blocked mint: proposals are illegal before genesis is sealed
+PASS genesis_rejects_mint
+
+========================================================================
+CHECK: seal_genesis_and_contract_reject
+========================================================================
+seal_genesis status=ok state=MINT_PHASE
+contract rejected: contract key forbidden: bytecode
+PASS seal_genesis_and_contract_reject
+
+========================================================================
+CHECK: poi_mint_requires_quorum
+========================================================================
+bound PoI engine hash=c7495033ebea path=/tmp/treas_mint_29bu_b3n/poi.panlin
+poi output_len=32 model=c7495033ebea
+unilateral execute=rejected reason=quorum_not_met
+quorum mint status=ok supply=40
+PASS poi_mint_requires_quorum
+
+========================================================================
+CHECK: distribute_and_burn_and_halts
+========================================================================
+bound PoI engine hash=c7495033ebea path=/tmp/treas_flow_9lsa6bs2/poi.panlin
+distribute blocked without telemetry: DISTRIBUTE requires sealed network telemetry
+to DISTRIBUTE status=ok state=DISTRIBUTE
+citizen after distribute=25
+citizen after burn=15 supply=90
+audit halt blocked mint: AUDIT_HALT accepts only TRANSITION or ELECT_CHAIR
+PASS distribute_and_burn_and_halts
+
+========================================================================
+CHECK: restart_hydrates_fsm
+========================================================================
+reopened state=MINT_PHASE validators=3 chair=02ca32c48f14
+PASS restart_hydrates_fsm
+
+========================================================================
+CHECK: poi_rejects_forged_output
+========================================================================
+bound PoI engine hash=c7495033ebea path=/tmp/treas_forge_n7swjhro/poi.panlin
+forged output rejected: claimed output diverged from local re-execution
+PASS poi_rejects_forged_output
+
+========================================================================
+CHECK: poi_unbound_engine_fails
+========================================================================
+bound PoI engine hash=c7495033ebea path=/tmp/treas_unbound_5xouuk0c/poi.panlin
+unbound engine blocked mint: PoI requires a bound SovereignInferenceEngine
+PASS poi_unbound_engine_fails
+slice sovereign_treasury -> PASS
+
+========================================================================
+RUNNING run
+========================================================================
+
+========================================================================
+CHECK: sealed_mail_across_relays
+========================================================================
+published mail packet=6b2b0b0e25d09fcc2ddab33cc0ea35b4ef054bac22f8bd14e76e17787dafaf8b relays=2
+bob opened subject='treasury-cycle' body='mint proof attached off-wire'
+stranger correctly failed: sealed envelope is not addressed to this identity
+receipt packet=d6b7f88ccb3d950a9ad282dfec01a9dfa24c5bbbda6fee1525f4bd6f4e1ea508
+PASS sealed_mail_across_relays
+
+========================================================================
+CHECK: legacy_ip_rejected
+========================================================================
+routing rejected: legacy routing key forbidden: destination_ip
+address rejected: legacy IP value in address
+PASS legacy_ip_rejected
+
+========================================================================
+CHECK: relay_blocks_unsigned_and_routing
+========================================================================
+forged signature rejected: packet signature is invalid
+next_hop rejected: legacy routing key forbidden: next_hop
+PASS relay_blocks_unsigned_and_routing
+
+========================================================================
+CHECK: social_and_knock
+========================================================================
+social packet=a34b10c248e7b21e2b6f25ec889b6930ab785192e9557c9df140b8ea4b8a6b16
+bea saw text='citizen assembly at dusk'
+live knocks=1 expires=2026-09-16T23:11:22.468069+00:00
+after ttl knocks=0 dropped=2
+PASS social_and_knock
+
+========================================================================
+CHECK: restart_hydrates_relay
+========================================================================
+reopened inbox=1 body=persist-me
+PASS restart_hydrates_relay
+slice email_social -> PASS
+
+========================================================================
+RUNNING run
+========================================================================
+
+========================================================================
+CHECK: offline_nodes_converge
+========================================================================
+before A docs=['citizen:ann'] ctr={'inference_cycles': 4}
+before B docs=['citizen:bea'] ctr={'inference_cycles': 7}
+sync pages left<-right=3 right<-left=3
+after A={'documents': {'citizen:ann': {'role': 'chair', 'tokens': 1}, 'citizen:bea': {'role': 'verifier', 'tokens': 2}}, 'counters': {'inference_cycles': 11}, 'sets': {'validators': ['ann', 'bea']}}
+after B={'documents': {'citizen:ann': {'role': 'chair', 'tokens': 1}, 'citizen:bea': {'role': 'verifier', 'tokens': 2}}, 'counters': {'inference_cycles': 11}, 'sets': {'validators': ['ann', 'bea']}}
+PASS offline_nodes_converge
+
+========================================================================
+CHECK: join_algebra
+========================================================================
+commutative snapshot docs={'from_a': 1, 'from_b': 2}
+associative left={'from_a': 1, 'from_b': 2, 'from_c': 3} right={'from_a': 1, 'from_b': 2, 'from_c': 3}
+PASS join_algebra
+
+========================================================================
+CHECK: tombstone_and_orset_remove
+========================================================================
+sync pages left<-right=0 right<-left=2
+sync pages left<-right=2 right<-left=2
+after tombstone A.get=None members=set()
+PASS tombstone_and_orset_remove
+
+========================================================================
+CHECK: dht_bind_and_restart
+========================================================================
+reopened policy={'emission': 1} cycles=3
+PASS dht_bind_and_restart
+slice master_db -> PASS
+
+========================================================================
+RUNNING run
+========================================================================
+
+========================================================================
+THYRIS MEMORY CONSUMER
+========================================================================
+thyris owner=memory.memory_core
+usms owner=memory.unified_memory_system
+PASS owners_are_not_usms
+metadata_db=/tmp/thyris_mem_f3w7kw08/metadata.db
+embedding_model=LocalHashEmbeddingModel
+stored memory_id=050d6f9e-550d-4fb4-b657-1281d4255d67
+retrieved count=1
+PASS memory_store_retrieve
+cache set ok=True
+cache get={'vm': 'android-13', 'ready': True}
+PASS cache_set_get
+slice thyris_memory -> PASS
+
+========================================================================
+RUNNING run
+========================================================================
+
+========================================================================
+THYRIS VM CONSUMER
+========================================================================
+phone_orchestrator=/home/daeron/LAB/Experiments/projects/pan-sdk/telecom/phone_orchestrator.py
+PASS phone_orchestrator_imports
+image storage=/tmp/thyris_img_9uyu4nrp/images
+PASS image_manager_constructs
+custom vm storage=/tmp/thyris_sup_cyl4v4qq/vms
+assigned ip=192.168.122.105
+supervisor vms=0
+memory_db=/tmp/thyris_sup_cyl4v4qq/vms/memory/metadata.db
+idle profile={'profile_name': 'idle', 'vcpus': 1, 'memory_gb': 4, 'gpu_enabled': False, 'description': 'Low power state.'}
+instance state=creating
+PASS supervisor_constructs
+supervisor_file=/home/daeron/LAB/Experiments/projects/pan-sdk/telecom/vm_supervisor.py
+active_vms=0
+PASS aipc_prompt_unbound
+usms_module=memory.unified_memory_system
+immune_module=security.planetary_immune_system
+packet_type=UnifiedDataPacket
+PASS usms_erebus_has_no_prompt
+required_host_tools=['qemu-system-x86_64', 'qemu-img', 'adb']
+host_tools_ok=True missing=[]
+PASS telecom_host_tools_contract
+qemu-img=/usr/bin/qemu-img
+qemu-system-x86_64=/usr/bin/qemu-system-x86_64
+qcow2 path=/tmp/thyris_disk_ircmeudm/probe.qcow2 bytes=196624 format=qcow2 virtual_size=1073741824
+PASS qemu_img_disk_create
+slice thyris_vm -> PASS
+
+========================================================================
+GATE SUMMARY
+========================================================================
+compile: PASS
+import: PASS
+persistence: PASS
+name_registry: PASS
+manifest: PASS
+personal_data: PASS
+system_scenario: PASS
+planetary_immune_system: PASS
+planetary_highway: PASS
+sovereign_treasury: PASS
+email_social: PASS
+master_db: PASS
+thyris_memory: PASS
+thyris_vm: PASS
+artifacts: /home/daeron/LAB/Experiments/projects/pan-sdk/results/pan_gate_20260916_181112.json
+artifacts: /home/daeron/LAB/Experiments/projects/pan-sdk/results/pan_gate_20260916_181112.md
+GATE PASSED in 10.466s

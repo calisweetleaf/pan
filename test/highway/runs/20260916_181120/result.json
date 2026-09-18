@@ -1,0 +1,92 @@
+{
+  "name": "planetary_highway",
+  "passed": true,
+  "status": "pass",
+  "pass_count": 10,
+  "fail_count": 0,
+  "skip_count": 0,
+  "elapsed_seconds": 1.418053388595581,
+  "checks": [
+    {
+      "name": "source_has_no_legacy_mesh",
+      "status": "pass",
+      "detail": {
+        "banned_absent": true,
+        "source_chars": 34421
+      }
+    },
+    {
+      "name": "requires_explicit_firewall",
+      "status": "pass",
+      "detail": {
+        "refused": true
+      }
+    },
+    {
+      "name": "direct_travel_sealed_cargo",
+      "status": "pass",
+      "detail": {
+        "travel_id": "3e253d0e091aa76972630a972f1719cb78c1e5159a4d80b9029e6fb893784954",
+        "arrived": true
+      }
+    },
+    {
+      "name": "multi_hop_three_nodes",
+      "status": "pass",
+      "detail": {
+        "forwarded": true,
+        "hop_plaintext": false
+      }
+    },
+    {
+      "name": "firewall_blocks_telemetry_on_hop",
+      "status": "pass",
+      "detail": {
+        "blocked": true
+      }
+    },
+    {
+      "name": "legacy_routing_key_rejected",
+      "status": "pass",
+      "detail": {
+        "rejected": true,
+        "envelope_rejected": true
+      }
+    },
+    {
+      "name": "identity_blocklist_stops_travel",
+      "status": "pass",
+      "detail": {
+        "blocked": true
+      }
+    },
+    {
+      "name": "bad_usms_signature_fails_loud",
+      "status": "pass",
+      "detail": {
+        "refused": true
+      }
+    },
+    {
+      "name": "cargo_survives_restart",
+      "status": "pass",
+      "detail": {
+        "restart_recovered": true
+      }
+    },
+    {
+      "name": "dht_index_optional_and_unbound_to_firewall",
+      "status": "pass",
+      "detail": {
+        "dht_indexed": true,
+        "dht_unbound_to_firewall": true
+      }
+    }
+  ],
+  "artifacts": {
+    "json": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/highway/runs/20260916_181120/result.json",
+    "md": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/highway/runs/20260916_181120/result.md",
+    "log": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/highway/runs/20260916_181120/result.log",
+    "run_dir": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/highway/runs/20260916_181120"
+  }
+}

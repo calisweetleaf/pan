@@ -1,0 +1,164 @@
+{
+  "name": "planetary_immune_system",
+  "passed": true,
+  "status": "pass",
+  "pass_count": 18,
+  "fail_count": 0,
+  "skip_count": 0,
+  "elapsed_seconds": 5.064990043640137,
+  "checks": [
+    {
+      "name": "firewall_blocks_telemetry",
+      "status": "pass",
+      "detail": {
+        "telemetry_reason": "telemetry_dictionary",
+        "telemetry_ledger_rows": 1
+      }
+    },
+    {
+      "name": "firewall_allows_civic_chat",
+      "status": "pass",
+      "detail": {
+        "civic_chat_allowed": true
+      }
+    },
+    {
+      "name": "inspect_content_compresses_secrets",
+      "status": "pass",
+      "detail": {
+        "compressed_bytes": 65,
+        "original_bytes": 59
+      }
+    },
+    {
+      "name": "signed_secret_packet_is_blocked",
+      "status": "pass",
+      "detail": {
+        "signed_secret_blocked": true
+      }
+    },
+    {
+      "name": "identity_blocklist",
+      "status": "pass",
+      "detail": {
+        "blocked_identity": "4872a20e9bdb"
+      }
+    },
+    {
+      "name": "legacy_ip_routing_blocked",
+      "status": "pass",
+      "detail": {
+        "routing_blocked": true
+      }
+    },
+    {
+      "name": "memory_survives_restart",
+      "status": "pass",
+      "detail": {
+        "intel_id": "1bc950516579d598",
+        "event_node_id": "80aa8464-e77b-4d85-b328-ab18b428d10b",
+        "belief_node_id": "e2016485-f28a-4fc8-80c6-e8c8f3e7e5bc",
+        "bulletin_dht_key": "threat-memory:43e7bbfec8469ff0511c97d7c7dba99d5d490afb243059544a13b071e2463a90",
+        "restart_hits": 4
+      }
+    },
+    {
+      "name": "peer_ingests_bulletin",
+      "status": "pass",
+      "detail": {
+        "peer_ingested_intel_id": "9777ccc17641673f",
+        "peer_hits": 4,
+        "packet_kind": "THREAT_MEMORY_BULLETIN"
+      }
+    },
+    {
+      "name": "contradiction_and_campaign_entangle",
+      "status": "pass",
+      "detail": {
+        "entanglement_id": "2dd6fb87-7040-44e0-bfa9-e9fe5bac5170",
+        "contradiction_node_id": "ed98c279-a886-40a8-9aee-ffd0171a7ce3",
+        "contradictions": 1
+      }
+    },
+    {
+      "name": "roe_ladder_persists_through_bridge",
+      "status": "pass",
+      "detail": {
+        "roe_level": "deceive",
+        "neural_activation": 0.385,
+        "belief_node_id": "5ea33e86-15c5-49e8-81a6-354e098f2e61",
+        "restart_recovered": true
+      }
+    },
+    {
+      "name": "neutralize_requires_human_authorization",
+      "status": "pass",
+      "detail": {
+        "share_denied": "ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized",
+        "record_denied": "ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized",
+        "external_host_action": false
+      }
+    },
+    {
+      "name": "second_chain_retired_share_uses_immune",
+      "status": "pass",
+      "detail": {
+        "unbound_denied": "ThreatDetectionModule.share_threat_intelligence requires a bound PlanetaryImmuneSystem; BlockchainThreatIntelligence is retired",
+        "retired_construct": true,
+        "detector_intel_id": "e2be0d2086cc8c7f",
+        "detector_roe_level": "observe",
+        "monitor_hits": 6,
+        "identities_distinct": true
+      }
+    },
+    {
+      "name": "smtp_alert_fails_loud",
+      "status": "pass",
+      "detail": {
+        "refused": true
+      }
+    },
+    {
+      "name": "webhook_alert_fails_loud",
+      "status": "pass",
+      "detail": {
+        "refused": true
+      }
+    },
+    {
+      "name": "threat_feed_fetch_fails_loud",
+      "status": "pass",
+      "detail": {
+        "sync_refused": true
+      }
+    },
+    {
+      "name": "whois_fails_loud",
+      "status": "pass",
+      "detail": {
+        "map_refused": true
+      }
+    },
+    {
+      "name": "wifi_deauth_fails_loud",
+      "status": "pass",
+      "detail": {
+        "deauth_refused": true
+      }
+    },
+    {
+      "name": "bridge_refuses_simulated_authorization",
+      "status": "pass",
+      "detail": {
+        "l4_denied": "ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized",
+        "no_simulated_operator": true
+      }
+    }
+  ],
+  "artifacts": {
+    "json": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/immune/runs/20260916_181322/result.json",
+    "md": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/immune/runs/20260916_181322/result.md",
+    "log": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/immune/runs/20260916_181322/result.log",
+    "run_dir": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/immune/runs/20260916_181322"
+  }
+}

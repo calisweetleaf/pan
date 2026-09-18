@@ -2,3 +2,9 @@ __pycache__
 android_images/
 *.iso
 pan-sdk-day2.zip
+
+# local envs + kwisatz probe dirt
+.venv/
+venv/
+env/
+results/kwisatz_cross_device_control_1_*.json
