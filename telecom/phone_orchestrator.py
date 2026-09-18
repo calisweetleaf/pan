@@ -72,6 +72,16 @@ Justification: Fletcher's READY audit showed serial setprop into a kernel log
     thyris_adb_health. snapshots/v0.15 is not promoted until that proof lands.
 Provenance: SCOPE.md engagement thyris-adb-userspace-ready
 Files: telecom/phone_orchestrator.py
+
+Modified: 2026-09-18
+Modified by: cursor-grok (daeron)
+Justification: TCG DEBUG=2 reached Android init/healthd but adbd stayed offline
+    (20260918_025416, 900s). The ISO init uses chroot when DEBUG is set, not
+    switch_root. I switched the live ADB cmdline to isolinux livem+nosetup
+    (SETUPWIZARD=0 SRC= DATA=) plus vesa nomodeset without vga=ask, refused
+    WHPX, and kept PhoneVMState.READY only after adb shell thyris_adb_health.
+Provenance: SCOPE.md engagement thyris-adb-userspace-ready
+Files: telecom/phone_orchestrator.py
 """
 
 from __future__ import annotations
@@ -156,10 +166,15 @@ ISO_BOOTLOADER_MARKERS: tuple[str, ...] = (
 ANDROID_LIVE_KERNEL = "kernel"
 ANDROID_LIVE_INITRD = "initrd.img"
 # isolinux.cfg label debug. SRC= keeps system.sfs on the same CDROM.
+# DEBUG=2 makes this ISO's init exec chroot instead of switch_root.
 ANDROID_ISOLINUX_DEBUG_APPEND = "root=/dev/ram0 DEBUG=2 SRC= DATA="
+# isolinux.cfg label livem (SRC= DATA=) plus label nosetup (SETUPWIZARD=0).
+# quiet is omitted so -nographic serial stays evidence. nomodeset is label
+# vesa without vga=ask (vga=ask would block on an interactive prompt).
+ANDROID_ISOLINUX_LIVE_APPEND = "root=/dev/ram0 SETUPWIZARD=0 nomodeset SRC= DATA="
 # console= is the -nographic capture channel; it is not an ADB enable switch.
 ANDROID_LIVE_CMDLINE = (
-    ANDROID_ISOLINUX_DEBUG_APPEND
+    ANDROID_ISOLINUX_LIVE_APPEND
     + " console=ttyS0,115200 androidboot.console=ttyS0"
 )
 ISOLINUX_DEBUG_SHELL_PROMPTS: tuple[str, ...] = (
@@ -564,6 +579,26 @@ def select_qemu_accelerator() -> Tuple[str, ...]:
     return ("-accel", "tcg")
 
 
+def refuse_whpx_accelerator(accel: Tuple[str, ...]) -> Tuple[str, ...]:
+    """Option A stays TCG. WHPX is a different host-tool contract.
+
+    Args:
+        accel: Result of select_qemu_accelerator.
+
+    Returns:
+        The same tuple when it is TCG or KVM.
+
+    Raises:
+        ThyrisBootError: WHPX (or another non-TCG Windows accel) was selected.
+    """
+    joined = " ".join(str(part).lower() for part in accel)
+    if "whpx" in joined or "hax" in joined:
+        raise ThyrisBootError(
+            f"refusing accelerator {accel!r}; Thyris ADB userspace stays TCG"
+        )
+    return accel
+
+
 def build_android_qemu_argv(
     *,
     qemu_system: Path,
@@ -589,7 +624,7 @@ def build_android_qemu_argv(
         raise ThyrisBootError("live boot requires both kernel_path and initrd_path")
     cmd: List[str] = [
         str(qemu_system),
-        *select_qemu_accelerator(),
+        *refuse_whpx_accelerator(select_qemu_accelerator()),
         "-cpu",
         "qemu64",
         "-name",
@@ -779,7 +814,7 @@ async def run_android_adb_userspace_boot(
     *,
     memory_mb: int = 2048,
     vcpus: int = 2,
-    timeout_seconds: float = 720.0,
+    timeout_seconds: float = 1800.0,
     adb_port: Optional[int] = None,
     qemu_stderr_path: Optional[Path] = None,
     live_boot_dir: Optional[Path] = None,
@@ -789,8 +824,19 @@ async def run_android_adb_userspace_boot(
     This is the PhoneVMState.READY owner. ISOLINUX installer text and
     Detecting Android-x86 markers are not sufficient. Disk create stays
     ISOConverter._create_disk. Kernel and initrd come from the same ISO.
-    Live append is isolinux.cfg label debug (DEBUG=2 SRC= DATA=).
+    Live append is isolinux.cfg livem+nosetup (SETUPWIZARD=0 SRC= DATA=)
+    plus vesa nomodeset without vga=ask. DEBUG=2 is not this path because
+    that ISO init uses chroot instead of switch_root.
     """
+    refuse_whpx_accelerator(select_qemu_accelerator())
+    if "DEBUG=2" in ANDROID_LIVE_CMDLINE:
+        raise ThyrisBootError(
+            "live ADB cmdline still carries DEBUG=2; that ISO init chroots"
+        )
+    if "SETUPWIZARD=0" not in ANDROID_LIVE_CMDLINE or "SRC=" not in ANDROID_LIVE_CMDLINE:
+        raise ThyrisBootError("live ADB cmdline is missing isolinux livem/nosetup append")
+    if "setprop" in ANDROID_LIVE_CMDLINE or "AUTO_INSTALL" in ANDROID_LIVE_CMDLINE:
+        raise ThyrisBootError("live ADB cmdline used setprop or AUTO_INSTALL")
     qemu_system = resolve_qemu_system()
     adb = resolve_adb()
     disk = Path(disk_path)
@@ -830,7 +876,7 @@ async def run_android_adb_userspace_boot(
     if "-nographic" not in argv:
         raise ThyrisBootError("live ADB argv is missing -nographic; refusing a VNC-only guest")
     if ANDROID_LIVE_CMDLINE not in argv:
-        raise ThyrisBootError("live ADB argv is missing isolinux.cfg DEBUG=2 SRC= append")
+        raise ThyrisBootError("live ADB argv is missing isolinux livem/nosetup append")
     logger.info("Android ADB userspace argv: %s", " ".join(str(item) for item in argv))
     stdout_handle = console.open("wb")
     stderr_handle = stderr_file.open("wb")
@@ -1740,7 +1786,7 @@ class ThyrisPhoneOrchestrator:
                 if "-nographic" not in qemu_cmd:
                     raise ThyrisBootError("create_phone_vm argv is missing -nographic")
                 if ANDROID_LIVE_CMDLINE not in qemu_cmd:
-                    raise ThyrisBootError("create_phone_vm argv is missing isolinux DEBUG=2 SRC= append")
+                    raise ThyrisBootError("create_phone_vm argv is missing isolinux livem/nosetup append")
                 logger.debug(f"[{correlation_id}] QEMU command: {' '.join(qemu_cmd)}")
                 phone_vm.process = await asyncio.create_subprocess_exec(
                     *qemu_cmd,
@@ -1918,7 +1964,7 @@ class ThyrisPhoneOrchestrator:
         *,
         memory_mb: int = 2048,
         vcpus: int = 2,
-        timeout_seconds: float = 720.0,
+        timeout_seconds: float = 1800.0,
         adb_port: Optional[int] = None,
         qemu_stderr_path: Optional[Path] = None,
         live_boot_dir: Optional[Path] = None,
@@ -1940,7 +1986,7 @@ class ThyrisPhoneOrchestrator:
         self,
         phone_vm: AndroidPhoneVM,
         correlation_id: str,
-        timeout_seconds: float = 900.0,
+        timeout_seconds: float = 1800.0,
     ) -> Optional[str]:
         """Wait for real adb shell on the qemu user-net forward. Fake IPs are not READY."""
         adb_port = phone_vm.adb_port

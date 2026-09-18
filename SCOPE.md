@@ -12,40 +12,35 @@ guest. Inference untouched. Erebus untouched.
 - target_module_provenance: snapshots/v0.11/manifest.json domains.thyris
 - subsequent_targets:
   - test/thyris_vm/test_thyris_android_boot.py
-- justification: I am editing the live Thyris phone owner because
-  PhoneVMState.READY is already gated on ADB proof. Fletcher's audit showed
-  serial setprop into a kernel log cannot enable TCP adbd, leftover adb.exe
-  produced stale connect+offline, and create_phone_vm launched VNC without
-  serial. WRAP is rejected. This continuation uses isolinux.cfg label debug
-  (DEBUG=2 SRC= DATA=), kills leftover qemu/adb, unifies _start_android_vm
-  onto the nographic helper argv, and sets AndroidPhoneVM.vm_state READY
-  only after adb shell thyris_adb_health.
+- justification: I am editing the live Thyris phone owner because TCG
+  DEBUG=2 reached Android init/healthd but adbd stayed offline
+  (20260918_025416). The ISO init execs chroot when DEBUG is set. WRAP is
+  rejected. This continuation uses isolinux livem+nosetup
+  (SETUPWIZARD=0 SRC= DATA=) plus vesa nomodeset without vga=ask, refuses
+  WHPX, kills leftover qemu/adb, and sets READY only after adb shell
+  thyris_adb_health.
 - author: daeron
 - date: 2026-09-18
 
 ## Runtime / host-tool OPTIONS (evidence, then selection)
 
-Surveyed this Windows host and the official ISO (mounted, isolinux.cfg read,
-ISO9660 root parsed with stdlib):
+Surveyed this Windows host and the official ISO (stdlib ISO9660 plus the
+isolinux.cfg text at the end of android-x86_64-9.0-r2.iso):
 
 | Option | What it is | Evidence | Verdict |
 |---|---|---|---|
-| 1. Same-ISO kernel/initrd live boot + qemu user-net hostfwd + `adb connect`/`shell` | Extract `/kernel` + `/initrd.img` from android-x86_64-9.0-r2.iso. QEMU `-kernel/-initrd/-append` with isolinux `DEBUG=2 SRC= DATA=`. | isolinux.cfg `label debug` / `livem` / `nosetup`. Prior consumer FAIL 20260918_021830: connect already-connected + device offline; leftover adb PID 26304. | **SELECTED.** Same legal ISO. No new image. No second disk-create owner. Offline. |
-| 2. Wait for vesamenu timeout, then Live CD | Keep `-boot order=d`. | `default vesamenu.c32` is a VGA menu. | Rejected as the READY owner. |
-| 3. QEMU monitor `sendkey` into ISOLINUX | Keep CDROM boot, inject Return. | Fragile vs vesamenu/nographic. | Not selected. |
-| 4. AUTO_INSTALL to the qcow2, reboot from disk | isolinux `AUTO_INSTALL=0`. | Fletcher: no AUTO_INSTALL silent substitute. | Rejected. |
-| 5. BlissOS / emulator system.img / downloaded qcow2 | New image. | Public internet. | Rejected. |
-| 6. Serial setprop into kernel log | `setprop service.adb.tcp.port` on qemu stdin. | Fletcher: cannot enable TCP adbd. | Rejected. |
-| 7. llama / ONNX / prompt_bridge / dummy READY | Claim READY from ISOLINUX or canned adb. | ANTITHESIS + AGENTS.md. | Rejected. |
+| 1. isolinux `label debug` (`DEBUG=2 SRC= DATA=`) | Same-ISO kernel/initrd. ISO init sets SWITCH=chroot. | Consumer FAIL 20260918_025416: 900s TCG, init+healthd, `127.0.0.1:PORT offline`. | Tried. Not READY. |
+| 2. isolinux `label livem` + `label nosetup` | `SETUPWIZARD=0 SRC= DATA=`. switch_root. Omit `quiet` for serial evidence. | isolinux.cfg. ISO init writes SETUPWIZARD default.prop then switch_root. | **SELECTED.** |
+| 3. isolinux `label vesa` `nomodeset vga=ask` | No GPU accel. | `vga=ask` is interactive. | Take `nomodeset` only. |
+| 4. WHPX | Windows hypervisor accel. | qemu-system lists it. | Rejected. Stay TCG. |
+| 5. AUTO_INSTALL / serial setprop / prompt_bridge / dummy READY | Shortcuts. | ANTITHESIS. | Rejected. |
 
-Selected option 1 with isolinux debug append. Disk-create remains
-`ISOConverter._create_disk`. `boot_android_installer` stays ISOLINUX-only
-and still returns `phone_ready=False` / `adb_proven=False`.
+Disk-create remains `ISOConverter._create_disk`. `boot_android_installer`
+stays ISOLINUX-only and still returns `phone_ready=False` / `adb_proven=False`.
 
 ## Fletcher continuation (this pass)
 
 1. Kill leftover qemu/adb before retry; `adb kill-server` after guest dead
-2. isolinux.cfg live/debug append, not setprop spam; keep SRC=
-3. Prove with `python test/thyris_vm/test_thyris_android_boot.py`
-4. Unify `_start_android_vm` to the nographic helper argv; READY only via
-   `apply_adb_ready` after the same adb proof
+2. isolinux livem+nosetup append, not DEBUG=2 chroot, not setprop spam
+3. Prove with `python test/thyris_vm/test_thyris_android_boot.py` (1800s ADB wait)
+4. READY only via `apply_adb_ready` after the same adb proof. Fail loud if offline.

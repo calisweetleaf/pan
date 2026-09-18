@@ -1,0 +1,55 @@
+treasury consumer start 20260918_015508
+
+========================================================================
+CHECK: genesis_rejects_mint
+========================================================================
+genesis blocked mint: proposals are illegal before genesis is sealed
+PASS genesis_rejects_mint
+
+========================================================================
+CHECK: seal_genesis_and_contract_reject
+========================================================================
+seal_genesis status=ok state=MINT_PHASE
+contract rejected: contract key forbidden: bytecode
+PASS seal_genesis_and_contract_reject
+
+========================================================================
+CHECK: poi_mint_requires_quorum
+========================================================================
+bound PoI engine hash=c7495033ebea path=C:\Users\trent\AppData\Local\Temp\treas_mint_uucc93yd\poi.panlin
+poi output_len=32 model=c7495033ebea
+unilateral execute=rejected reason=quorum_not_met
+quorum mint status=ok supply=40
+PASS poi_mint_requires_quorum
+
+========================================================================
+CHECK: distribute_and_burn_and_halts
+========================================================================
+bound PoI engine hash=c7495033ebea path=C:\Users\trent\AppData\Local\Temp\treas_flow_ufbcdklf\poi.panlin
+distribute blocked without telemetry: DISTRIBUTE requires sealed network telemetry
+to DISTRIBUTE status=ok state=DISTRIBUTE
+citizen after distribute=25
+citizen after burn=15 supply=90
+audit halt blocked mint: AUDIT_HALT accepts only TRANSITION or ELECT_CHAIR
+PASS distribute_and_burn_and_halts
+
+========================================================================
+CHECK: restart_hydrates_fsm
+========================================================================
+reopened state=MINT_PHASE validators=3 chair=b5c0c94cb0dc
+PASS restart_hydrates_fsm
+
+========================================================================
+CHECK: poi_rejects_forged_output
+========================================================================
+bound PoI engine hash=c7495033ebea path=C:\Users\trent\AppData\Local\Temp\treas_forge_nj0ma91a\poi.panlin
+forged output rejected: claimed output diverged from local re-execution
+PASS poi_rejects_forged_output
+
+========================================================================
+CHECK: poi_unbound_engine_fails
+========================================================================
+bound PoI engine hash=c7495033ebea path=C:\Users\trent\AppData\Local\Temp\treas_unbound_dd4qajtf\poi.panlin
+unbound engine blocked mint: PoI requires a bound SovereignInferenceEngine
+PASS poi_unbound_engine_fails
+treasury consumer status=pass

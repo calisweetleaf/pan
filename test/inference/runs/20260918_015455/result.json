@@ -1,0 +1,72 @@
+{
+  "name": "sovereign_inference",
+  "passed": true,
+  "status": "pass",
+  "pass_count": 7,
+  "fail_count": 0,
+  "skip_count": 0,
+  "elapsed_seconds": 0.7928261756896973,
+  "checks": [
+    {
+      "name": "missing_model_fails_loud",
+      "status": "pass",
+      "detail": {
+        "error": "model file is missing: C:\\Users\\trent\\AppData\\Local\\Temp\\infer_missing_er1b7eco\\absent.panlin"
+      }
+    },
+    {
+      "name": "hash_mismatch_fails_loud",
+      "status": "pass",
+      "detail": {
+        "error": "model file hash diverged from ModelManifest.model_hash"
+      }
+    },
+    {
+      "name": "corrupt_header_fails_loud",
+      "status": "pass",
+      "detail": {
+        "error": "model file is not pan-sovereign-linear-v1"
+      }
+    },
+    {
+      "name": "reexecution_matches",
+      "status": "pass",
+      "detail": {
+        "output_len": 24,
+        "model_hash": "523773e1220b493b206ded57f0157632aa5417753861d303c0a84f6c4088fd4f",
+        "matched": true
+      }
+    },
+    {
+      "name": "prompt_and_temperature_diverge",
+      "status": "pass",
+      "detail": {
+        "civic_len": 24,
+        "diverged_prompt": true,
+        "diverged_temperature": true
+      }
+    },
+    {
+      "name": "process_request_uses_owner",
+      "status": "pass",
+      "detail": {
+        "response_len": 20,
+        "processing_time_ms": 0,
+        "matched_infer": true
+      }
+    },
+    {
+      "name": "illegal_args_fail_loud",
+      "status": "pass",
+      "detail": {
+        "temperature_error": "temperature must be >= 0"
+      }
+    }
+  ],
+  "artifacts": {
+    "json": "C:\\Users\\trent\\pan\\test\\inference\\runs\\20260918_015455\\result.json",
+    "md": "C:\\Users\\trent\\pan\\test\\inference\\runs\\20260918_015455\\result.md",
+    "log": "C:\\Users\\trent\\pan\\test\\inference\\runs\\20260918_015455\\result.log",
+    "run_dir": "C:\\Users\\trent\\pan\\test\\inference\\runs\\20260918_015455"
+  }
+}

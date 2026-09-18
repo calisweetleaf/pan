@@ -1,0 +1,26 @@
+{
+  "version": "0.15",
+  "date": "2026-09-18",
+  "author": "daeron",
+  "summary": "Live-boot official android-x86 9.0-r2 kernel/initrd from the same ISO and prove PhoneVMState.READY only after real adb shell. Disk-create stays ISOConverter._create_disk. ISOLINUX installer boot remains a non-READY proof.",
+  "domains": {
+    "thyris": {
+      "module": "telecom/phone_orchestrator.py",
+      "wrapper": null,
+      "tool_count": 1,
+      "provenance": "snapshots/v0.11/manifest.json domains.thyris plus official android-x86_64-9.0-r2.iso live kernel/initrd. No prompt_bridge. No second qemu-img owner.",
+      "edits": [
+        {
+          "date": "2026-09-18",
+          "author": "daeron",
+          "summary": "Extract kernel/initrd from the proven ISO, live qemu argv with ADB hostfwd, adb connect+shell as the READY gate, refuse fabricated 192.168.122 IPs.",
+          "files": [
+            "telecom/phone_orchestrator.py",
+            "test/thyris_vm/test_thyris_android_boot.py"
+          ],
+          "justification_ref": "SCOPE.md"
+        }
+      ]
+    }
+  }
+}

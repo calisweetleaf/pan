@@ -32,6 +32,7 @@ if (_WINDOWS_QEMU / "qemu-img.exe").is_file():
 from telecom.phone_orchestrator import (
     ADB_HEALTH_TOKEN,
     ANDROID_ISOLINUX_DEBUG_APPEND,
+    ANDROID_ISOLINUX_LIVE_APPEND,
     ANDROID_LIVE_CMDLINE,
     ANDROID_LIVE_INITRD,
     ANDROID_LIVE_KERNEL,
@@ -48,6 +49,7 @@ from telecom.phone_orchestrator import (
     build_android_qemu_argv,
     ensure_windows_qemu_on_path,
     extract_android_live_boot_files,
+    refuse_whpx_accelerator,
     resolve_adb,
     resolve_qemu_system,
     run_android_adb_userspace_boot,
@@ -90,10 +92,12 @@ def check_qemu_system_resolves(details: dict[str, object]) -> None:
     print(f"qemu-system-x86_64={qemu_system}")
     if not qemu_system.is_file():
         raise CheckFailure(f"qemu-system-x86_64 is not a file: {qemu_system}")
-    accel = list(select_qemu_accelerator())
+    accel = list(refuse_whpx_accelerator(select_qemu_accelerator()))
     print(f"accelerator={accel}")
     details["qemu_system"] = str(qemu_system)
     details["accelerator"] = accel
+    if "whpx" in " ".join(str(part).lower() for part in accel):
+        raise CheckFailure(f"WHPX is rejected for Thyris ADB; accelerator={accel}")
     if sys.platform == "win32" and accel != ["-accel", "tcg"] and os.environ.get("THYRIS_QEMU_ACCEL", "").strip() == "":
         raise CheckFailure(f"Windows default accelerator is not tcg: {accel}")
 
@@ -198,13 +202,25 @@ def check_live_argv_forwards_adb(details: dict[str, object]) -> None:
         if "-initrd" not in argv:
             raise CheckFailure("live argv is missing -initrd")
         if ANDROID_LIVE_CMDLINE not in argv:
-            raise CheckFailure("live argv is missing isolinux.cfg DEBUG=2 SRC= DATA= append")
-        if ANDROID_ISOLINUX_DEBUG_APPEND not in ANDROID_LIVE_CMDLINE:
-            raise CheckFailure("ANDROID_LIVE_CMDLINE drifted off isolinux.cfg label debug")
+            raise CheckFailure("live argv is missing isolinux livem/nosetup append")
+        if ANDROID_ISOLINUX_LIVE_APPEND not in ANDROID_LIVE_CMDLINE:
+            raise CheckFailure("ANDROID_LIVE_CMDLINE drifted off isolinux livem/nosetup")
+        if "DEBUG=2" in ANDROID_LIVE_CMDLINE:
+            raise CheckFailure("live ADB cmdline still uses DEBUG=2 chroot instead of switch_root")
+        if "SETUPWIZARD=0" not in ANDROID_LIVE_CMDLINE or "SRC=" not in ANDROID_LIVE_CMDLINE:
+            raise CheckFailure("live cmdline is missing isolinux nosetup SETUPWIZARD=0 SRC=")
+        if "nomodeset" not in ANDROID_LIVE_CMDLINE:
+            raise CheckFailure("live cmdline is missing isolinux vesa nomodeset")
+        if "vga=ask" in ANDROID_LIVE_CMDLINE:
+            raise CheckFailure("live cmdline used vga=ask which blocks nographic boot")
+        if ANDROID_ISOLINUX_DEBUG_APPEND in ANDROID_LIVE_CMDLINE:
+            raise CheckFailure("live cmdline still uses isolinux label debug")
         if "AUTO_INSTALL" in ANDROID_LIVE_CMDLINE:
             raise CheckFailure("live cmdline used AUTO_INSTALL; that is not this unit")
         if "setprop" in ANDROID_LIVE_CMDLINE:
             raise CheckFailure("live cmdline still carries setprop spam")
+        if "whpx" in " ".join(str(item).lower() for item in argv):
+            raise CheckFailure("live argv selected WHPX; this pass stays TCG")
         if "-boot" in argv:
             raise CheckFailure("live argv still uses CDROM -boot order=d")
         if "-nographic" not in argv:
@@ -314,7 +330,7 @@ def check_android_adb_userspace(details: dict[str, object]) -> None:
                     console,
                     memory_mb=2048,
                     vcpus=2,
-                    timeout_seconds=900.0,
+                    timeout_seconds=1800.0,
                     qemu_stderr_path=stderr_path,
                     live_boot_dir=work / "liveboot",
                 )
@@ -355,8 +371,12 @@ def check_android_adb_userspace(details: dict[str, object]) -> None:
             if not evidence.get("android_release"):
                 raise CheckFailure("ADB proof omitted android_release after shell health")
         append = " ".join(str(item) for item in evidence.get("argv") or [])
-        if "DEBUG=2" not in append or "SRC=" not in append:
-            raise CheckFailure("ADB guest was not launched with isolinux DEBUG=2 SRC=")
+        if "SETUPWIZARD=0" not in append or "SRC=" not in append:
+            raise CheckFailure("ADB guest was not launched with isolinux livem/nosetup")
+        if "DEBUG=2" in append:
+            raise CheckFailure("ADB guest still used DEBUG=2 chroot")
+        if "whpx" in append.lower():
+            raise CheckFailure("ADB guest selected WHPX; this pass stays TCG")
         if "setprop" in append:
             raise CheckFailure("ADB argv still contains setprop")
         details.update(

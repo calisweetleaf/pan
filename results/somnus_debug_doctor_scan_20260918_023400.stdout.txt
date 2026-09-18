@@ -1,0 +1,5 @@
+Scan complete: files=57, issues=1589, critical=1, serious=652
+Markdown report: C:\Users\trent\pan\results\somnus_debug_doctor_scan_20260918_023400.md
+JSON report: C:\Users\trent\pan\results\somnus_debug_doctor_scan_20260918_023400.json
+State latest markdown: C:\Users\trent\pan\.python_doctor\reports\latest.md
+Run ID: 20260918T073343Z

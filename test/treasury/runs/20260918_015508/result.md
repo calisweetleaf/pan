@@ -1,0 +1,28 @@
+# Sovereign treasury run 20260918_015508
+
+I ran `python test/treasury/test_sovereign_treasury.py` at 20260918_015508.
+I found status `pass` with 7 passed, 0 failed, 0 skipped.
+
+## What I required
+
+I required a rigid FSM, Proof-of-Inference minting against the bound
+SovereignInferenceEngine owner, ceil(n/2)+1 quorum, smart-contract
+rejection, sqlite hydrate after reopen, forged-output rejection, and
+fail-loud mint when no engine is bound.
+
+## Checks
+
+- `genesis_rejects_mint`: pass
+- `seal_genesis_and_contract_reject`: pass
+- `poi_mint_requires_quorum`: pass
+- `distribute_and_burn_and_halts`: pass
+- `restart_hydrates_fsm`: pass
+- `poi_rejects_forged_output`: pass
+- `poi_unbound_engine_fails`: pass
+
+## Artifacts
+
+- `C:\Users\trent\pan\test\treasury\runs\20260918_015508\result.json`
+- `C:\Users\trent\pan\test\treasury\runs\20260918_015508\result.md`
+- `C:\Users\trent\pan\test\treasury\runs\20260918_015508\result.log`
+
