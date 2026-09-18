@@ -1,0 +1,68 @@
+{
+  "host": "daeron-hpenvyx3602in1laptop15ey0xxx",
+  "role": "laptop",
+  "iso": "/home/daeron/LAB/Experiments/projects/pan-sdk/android_images/android-x86_64-9.0-r2.iso",
+  "sha1": "1cc85b5ed7c830ff71aecf8405c7281a9c995aa0",
+  "expected_sha1": "1cc85b5ed7c830ff71aecf8405c7281a9c995aa0",
+  "disk": "/home/daeron/LAB/Experiments/projects/pan-sdk/thyris-disks/kwisatz-boot-hp/phone-boot-9.0-r2.qcow2",
+  "phone_ready": false,
+  "adb_proven": false,
+  "exchange": "NOT_ATTEMPTED_UNTIL_READY",
+  "status": "PASS_INSTALLER_BOOT",
+  "evidence": {
+    "status": "boot_evidence",
+    "pid": 100588,
+    "qemu_system": "/usr/bin/qemu-system-x86_64",
+    "accelerator": [
+      "-enable-kvm"
+    ],
+    "disk_path": "/home/daeron/LAB/Experiments/projects/pan-sdk/thyris-disks/kwisatz-boot-hp/phone-boot-9.0-r2.qcow2",
+    "iso_path": "/home/daeron/LAB/Experiments/projects/pan-sdk/android_images/android-x86_64-9.0-r2.iso",
+    "iso_bytes": 965738496,
+    "console_path": "/home/daeron/LAB/Experiments/projects/pan-sdk/thyris-disks/kwisatz-boot-hp/console.log",
+    "markers": [
+      "SeaBIOS",
+      "Booting from DVD",
+      "ISOLINUX",
+      "isolinux"
+    ],
+    "iso_bootloader_markers": [
+      "ISOLINUX",
+      "isolinux"
+    ],
+    "console_excerpt": "\u001bc\u001b[?7l\u001b[2J\u001b[0mSeaBIOS (version 1.17.0-debian-1.17.0-1ubuntu1)\n\n\niPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+7EFC8DD0+7EF08DD0 CA00\nPress Ctrl-B to configure iPXE (PCI 00:03.0)...\n                                                                               \n\n\nBooting from DVD/CD...\n\nISOLINUX 6.03 2014-10-06 ETCD Copyright (C) 1994-2014 H. Peter Anvin et al\u001b[01;01H",
+    "phone_ready": false,
+    "adb_proven": false
+  },
+  "argv": [
+    "/usr/bin/qemu-system-x86_64",
+    "-enable-kvm",
+    "-cpu",
+    "qemu64",
+    "-name",
+    "thyris-android-boot-376f04b6",
+    "-m",
+    "2048",
+    "-smp",
+    "2",
+    "-drive",
+    "file=/run/media/daeron/USB128GB/thyris-disks/kwisatz-boot-hp/phone-boot-9.0-r2.qcow2,format=qcow2,if=ide,index=0,media=disk",
+    "-drive",
+    "file=/run/media/daeron/USB128GB/android_images/android-x86_64-9.0-r2.iso,format=raw,if=ide,index=1,media=cdrom,readonly=on",
+    "-boot",
+    "order=d",
+    "-no-reboot",
+    "-nographic",
+    "-netdev",
+    "user,id=net0",
+    "-device",
+    "e1000,netdev=net0"
+  ],
+  "iso_bootloader_markers": [
+    "ISOLINUX",
+    "isolinux"
+  ],
+  "g3_ready": false,
+  "exchange_result": "FAIL",
+  "exchange_reason": "landed boot_android_installer sets phone_ready=False/adb_proven=False; A\u2192B sealed packet requires READY on both hosts"
+}

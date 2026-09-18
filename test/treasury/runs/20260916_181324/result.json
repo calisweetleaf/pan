@@ -1,0 +1,73 @@
+{
+  "name": "sovereign_treasury",
+  "passed": true,
+  "status": "pass",
+  "pass_count": 7,
+  "fail_count": 0,
+  "skip_count": 0,
+  "elapsed_seconds": 0.972529411315918,
+  "checks": [
+    {
+      "name": "genesis_rejects_mint",
+      "status": "pass",
+      "detail": {
+        "state": "GENESIS"
+      }
+    },
+    {
+      "name": "seal_genesis_and_contract_reject",
+      "status": "pass",
+      "detail": {
+        "state": "MINT_PHASE",
+        "quorum": 3
+      }
+    },
+    {
+      "name": "poi_mint_requires_quorum",
+      "status": "pass",
+      "detail": {
+        "minted_balance": 40,
+        "packet_id": "486d550820180f874009a3b0f72d7d9a9e1ff9ccbccec14d972f8eacc18354c5"
+      }
+    },
+    {
+      "name": "distribute_and_burn_and_halts",
+      "status": "pass",
+      "detail": {
+        "final_state": "CRITICAL_SUSPEND",
+        "supply": 90,
+        "citizen_balance": 15
+      }
+    },
+    {
+      "name": "restart_hydrates_fsm",
+      "status": "pass",
+      "detail": {
+        "state_before": "MINT_PHASE",
+        "chair_before": "94f37fc3f7d7a3a9d987f881f2a6a369698403edfc4fdedc4363075ad479e220",
+        "state_after": "MINT_PHASE",
+        "validators_after": 3
+      }
+    },
+    {
+      "name": "poi_rejects_forged_output",
+      "status": "pass",
+      "detail": {
+        "error": "claimed output diverged from local re-execution"
+      }
+    },
+    {
+      "name": "poi_unbound_engine_fails",
+      "status": "pass",
+      "detail": {
+        "error": "PoI requires a bound SovereignInferenceEngine"
+      }
+    }
+  ],
+  "artifacts": {
+    "json": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/treasury/runs/20260916_181324/result.json",
+    "md": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/treasury/runs/20260916_181324/result.md",
+    "log": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/treasury/runs/20260916_181324/result.log",
+    "run_dir": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/treasury/runs/20260916_181324"
+  }
+}

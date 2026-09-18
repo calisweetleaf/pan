@@ -1,0 +1,57 @@
+{
+  "name": "email_social",
+  "passed": true,
+  "status": "pass",
+  "pass_count": 5,
+  "fail_count": 0,
+  "skip_count": 0,
+  "elapsed_seconds": 1.556549072265625,
+  "checks": [
+    {
+      "name": "sealed_mail_across_relays",
+      "status": "pass",
+      "detail": {
+        "packet_id": "6b2b0b0e25d09fcc2ddab33cc0ea35b4ef054bac22f8bd14e76e17787dafaf8b",
+        "relays": 2,
+        "alice_address": "pan:id:ccb55c765ae3e57a3f78008888dda3eebf3ec9cf51fcf686f72267565270b6ae"
+      }
+    },
+    {
+      "name": "legacy_ip_rejected",
+      "status": "pass",
+      "detail": {
+        "rejected": true
+      }
+    },
+    {
+      "name": "relay_blocks_unsigned_and_routing",
+      "status": "pass",
+      "detail": {
+        "forged_rejected": true,
+        "routing_rejected": true
+      }
+    },
+    {
+      "name": "social_and_knock",
+      "status": "pass",
+      "detail": {
+        "social_id": "a34b10c248e7b21e2b6f25ec889b6930ab785192e9557c9df140b8ea4b8a6b16",
+        "knocks_dropped": 2
+      }
+    },
+    {
+      "name": "restart_hydrates_relay",
+      "status": "pass",
+      "detail": {
+        "before": 1,
+        "after": 1
+      }
+    }
+  ],
+  "artifacts": {
+    "json": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/email_social/runs/20260916_181122/result.json",
+    "md": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/email_social/runs/20260916_181122/result.md",
+    "log": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/email_social/runs/20260916_181122/result.log",
+    "run_dir": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/email_social/runs/20260916_181122"
+  }
+}

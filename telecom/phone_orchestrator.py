@@ -280,6 +280,7 @@ class PhoneVMState(str, Enum):
 
 class AndroidVersion(str, Enum):
     """Supported Android versions"""
+    ANDROID_9 = "android-9"
     ANDROID_11 = "android-11"
     ANDROID_12 = "android-12"
     ANDROID_13 = "android-13"
@@ -315,7 +316,7 @@ class AndroidPhoneVM:
     
     # VM State
     vm_state: PhoneVMState = PhoneVMState.PROVISIONING
-    android_version: AndroidVersion = AndroidVersion.ANDROID_13
+    android_version: AndroidVersion = AndroidVersion.ANDROID_9
     
     # Hardware specs
     profile: PhoneVMProfile = field(default_factory=lambda: PhoneVMProfile(profile_name="standard"))
@@ -633,6 +634,7 @@ class ThyrisPhoneOrchestrator:
         """
         env_iso = os.environ.get("THYRIS_ANDROID_ISO", "").strip()
         names = {
+            AndroidVersion.ANDROID_9: (ANDROID_X86_9_R2_ISO,),
             AndroidVersion.ANDROID_11: ("android-x86_64-11.0.iso", ANDROID_X86_9_R2_ISO),
             AndroidVersion.ANDROID_12: ("android-x86_64-12.0.iso", ANDROID_X86_9_R2_ISO),
             AndroidVersion.ANDROID_13: ("android-x86_64-13.0.iso", ANDROID_X86_9_R2_ISO),
@@ -702,7 +704,7 @@ class ThyrisPhoneOrchestrator:
         self,
         sovereign_id: str,
         instance_name: Optional[str] = None,
-        android_version: AndroidVersion = AndroidVersion.ANDROID_13,
+        android_version: AndroidVersion = AndroidVersion.ANDROID_9,
         profile_name: str = "standard",
         include_play_services: bool = False,
         metadata: Optional[Dict[str, Any]] = None,
@@ -842,11 +844,38 @@ class ThyrisPhoneOrchestrator:
             # Poll for IP and ADB readiness (retries)
             phone_vm.internal_ip = await self._wait_for_ip_and_adb(vm_id, adb_port, correlation_id)
             if not phone_vm.internal_ip:
-                add_step("boot_wait", "warning", {"note": "Could not confirm IP/ADB"})
-            else:
-                add_step("boot_wait", "completed", {"internal_ip": phone_vm.internal_ip})
+                error_msg = "ADB/IP health check failed; refusing PhoneVMState.READY without adb proof"
+                add_step("boot_wait", "failed", error=error_msg)
+                phone_vm.vm_state = PhoneVMState.ERROR
+                self._save_phone_config(phone_vm)
+                if phone_vm.process:
+                    await self._kill_process(phone_vm)
+                report["final_status"] = "error"
+                report["end_time"] = datetime.now(timezone.utc).isoformat()
+                reports = {}
+                try:
+                    report_file_json = self.vm_storage_path / f"provision_report_{vm_id}.json"
+                    with open(report_file_json, 'w') as f:
+                        json.dump(report, f, indent=2)
+                    reports["json"] = str(report_file_json)
+                    report_file_md = self.vm_storage_path / f"provision_report_{vm_id}.md"
+                    with open(report_file_md, 'w') as f:
+                        f.write(self._generate_markdown_report(report))
+                    reports["markdown"] = str(report_file_md)
+                except (OSError, TypeError) as report_err:
+                    logger.warning(f"[{correlation_id}] Failed to write provision report: {report_err}")
+                self.metrics['provision_failure']['count'] += 1
+                return {
+                    "status": "error",
+                    "message": error_msg,
+                    "vm_id": str(vm_id),
+                    "phone_ready": False,
+                    "adb_proven": False,
+                    "reports": reports,
+                }
+            add_step("boot_wait", "completed", {"internal_ip": phone_vm.internal_ip})
 
-            # 10. Mark ready and sync data
+            # 10. Mark ready only after ADB proof
             add_step("finalization", "started")
             phone_vm.vm_state = PhoneVMState.READY
             phone_vm.last_active = datetime.now(timezone.utc)
@@ -1392,11 +1421,23 @@ class ThyrisPhoneOrchestrator:
                 os.kill(phone_vm.process_pid, signal.SIGCONT)
                 logger.info(f"Resumed phone VM {vm_id} (PID: {phone_vm.process_pid})")
 
+            # Re-prove ADB before READY — SIGCONT alone is not userspace proof
+            phone_vm.vm_state = PhoneVMState.BOOTING
+            self._save_phone_config(phone_vm)
+            internal_ip = await self._wait_for_ip_and_adb(vm_id, phone_vm.adb_port, correlation_id=str(vm_id)[:8])
+            if not internal_ip:
+                phone_vm.vm_state = PhoneVMState.ERROR
+                self._save_phone_config(phone_vm)
+                logger.error(f"Resume refused READY for {vm_id}: ADB health check failed")
+                if phone_vm.process:
+                    await self._kill_process(phone_vm)
+                return False
+            phone_vm.internal_ip = internal_ip
             phone_vm.vm_state = PhoneVMState.READY
             phone_vm.last_active = datetime.now(timezone.utc)
             self._save_phone_config(phone_vm)
 
-            # Re-sync PAN data after resume
+            # Re-sync PAN data after resume only once ADB is proven
             personal_data_store = self.personal_data_stores.get(phone_vm.sovereign_id)
             if personal_data_store:
                 await self._sync_pan_to_vm(phone_vm, personal_data_store)
@@ -1499,11 +1540,17 @@ class ThyrisPhoneOrchestrator:
             await proc.communicate()
             
             # 8. Boot destination VM with migrated state
-            await self.resume_phone(to_vm_id)
-            
+            resumed = await self.resume_phone(to_vm_id)
+            if not resumed:
+                return {
+                    "status": "error",
+                    "message": f"Destination VM {to_vm_id} failed to resume after migration; "
+                               f"see {migration_snapshot} for recovery"
+                }
+
             # 9. Cleanup migration snapshot
             migration_snapshot.unlink()
-            
+
             logger.info(f"Successfully migrated VM state: {from_vm_id} → {to_vm_id}")
             
             return {

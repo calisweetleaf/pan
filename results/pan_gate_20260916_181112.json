@@ -1,0 +1,797 @@
+{
+  "gate": "run_pan_gate",
+  "timestamp": "20260916_181112",
+  "passed": true,
+  "elapsed_seconds": 10.46564245223999,
+  "python": "3.12.13 (main, Mar  3 2026, 14:59:34) [Clang 21.1.4 ]",
+  "slices": [
+    {
+      "name": "compile",
+      "passed": true,
+      "details": {
+        "compiled": [
+          "PAN_SDK/PAN_SDK.py",
+          "PAN_SDK/personal_data.py",
+          "PAN_SDK/citizen_simulator.py",
+          "PAN_SDK/__init__.py",
+          "PAN_SDK/treasury.py",
+          "PAN_SDK/email_social.py",
+          "PAN_SDK/master_db.py",
+          "security/sovereign_firewall.py",
+          "security/planetary_immune_system.py",
+          "security/planetary_highway.py",
+          "security/defensive_offensive_bridge.py",
+          "security/defensive_sovereignty.py",
+          "security/reactive_offense.py",
+          "memory/unified_memory_system.py",
+          "memory/memory_core.py",
+          "memory/system_cache.py",
+          "telecom/vm_supervisor.py",
+          "telecom/vm_image_manager.py",
+          "telecom/phone_orchestrator.py"
+        ],
+        "skipped": []
+      }
+    },
+    {
+      "name": "import",
+      "passed": true,
+      "details": {
+        "package": "/home/daeron/LAB/Experiments/projects/pan-sdk/PAN_SDK/__init__.py",
+        "has_persist_name": true,
+        "has_store_name": true,
+        "has_get_name": true,
+        "dht_node": "DHTNode",
+        "identity": "SovereignIdentity",
+        "citizen_simulator": "/home/daeron/LAB/Experiments/projects/pan-sdk/PAN_SDK/citizen_simulator.py"
+      }
+    },
+    {
+      "name": "persistence",
+      "passed": true,
+      "details": {
+        "components": [
+          "dht_data",
+          "dht_ledger",
+          "economy_accounts",
+          "governance_proposals",
+          "governance_policies"
+        ],
+        "matches": {
+          "dht_data": true,
+          "dht_ledger": true,
+          "economy_accounts": true,
+          "governance_proposals": true,
+          "governance_policies": true
+        },
+        "account_count": 3,
+        "proposal_count": 1
+      }
+    },
+    {
+      "name": "name_registry",
+      "passed": true,
+      "details": {
+        "registered": true,
+        "invalid_rejected": true,
+        "unauthorized_rejected": true,
+        "persisted_active": true,
+        "hydrated_name": "testname",
+        "hydrated_target": "259281e24ff7e01b63df38383875d4912daea50cd7a607fdcf756f854f7a8f78",
+        "missing_is_none": true,
+        "store_name_fail_loud": true
+      }
+    },
+    {
+      "name": "manifest",
+      "passed": true,
+      "details": {
+        "valid": true,
+        "tampered": false,
+        "wrong_key": false
+      }
+    },
+    {
+      "name": "personal_data",
+      "passed": true,
+      "details": {
+        "matches": {
+          "contacts": true,
+          "messages": true,
+          "call_logs": true,
+          "preferences": true,
+          "phone_addresses": true
+        },
+        "phone_address": "pan:netlab:motiflab:voice"
+      }
+    },
+    {
+      "name": "system_scenario",
+      "passed": true,
+      "details": {
+        "comparisons": {
+          "dht_data": "MATCH",
+          "dht_ledger": "MATCH",
+          "economy_accounts": "MATCH",
+          "governance_proposals": "MATCH",
+          "governance_policies": "MATCH",
+          "citizens": "MATCH",
+          "applications": "MATCH",
+          "name_registry": "MATCH",
+          "phone_addresses": "MATCH",
+          "treasury_fsm": "MATCH",
+          "treasury_validators": "MATCH",
+          "treasury_proposals": "MATCH",
+          "master_db_docs": "MATCH",
+          "master_db_counters": "MATCH",
+          "master_db_sets": "MATCH",
+          "master_db_meta": "MATCH",
+          "email_relay_8e351937b2d1bea06dbe328bf2afebe49e8f4d5ea65be38007ae893d2268b98e": "MATCH",
+          "pending_transactions": "MATCH",
+          "usage_metrics": "MATCH",
+          "personal_contacts": "MATCH",
+          "personal_messages": "MATCH",
+          "personal_call_logs": "MATCH",
+          "personal_preferences": "MATCH",
+          "treasury_fsm_live": "MATCH",
+          "master_db_live": "MATCH",
+          "email_relay_live": "MATCH",
+          "email_not_auto_bound": "MATCH"
+        },
+        "operations": {
+          "citizen_id": "f75385e9-5509-5b2b-93b1-e55456e6c05a",
+          "developer_id": "19a624bc-05d9-542f-b1f6-40a5c13dc93a",
+          "app_id": "6d660ba6-50f6-5ed4-99b5-60f5ec722de9",
+          "registered_name": "testname",
+          "proposal_id": "69373e40-86db-5cf6-9cf0-a08f67dc3266",
+          "treasury_state": "MINT_PHASE",
+          "treasury_validators": 3,
+          "poi_mint_amount": 40,
+          "poi_balance": 240,
+          "poi_proposal_id": "d9ba0f732377608a0ae8044ed6f64b1f",
+          "mail_packet_id": "1575006523e080a0cab133d8938cd8d3fd9ad44ea8d72c61dbd44b35c8cdfce2",
+          "social_packet_id": "a1c90482a3caee7e11f14d37bad3d40cc74e6d362a4aa280dac5a7ee3770bb7b",
+          "master_db_mint": {
+            "proposal_id": "d9ba0f732377608a0ae8044ed6f64b1f",
+            "amount": 40,
+            "recipient": "e17d80e1843cceac6dd39dc893b2172c8a1a5639c6a696d762de4907509906ee",
+            "treasury_state": "MINT_PHASE"
+          },
+          "master_db_cycles": 3,
+          "shared_sqlite": "/tmp/pan_sdk_system_i94m8w6j/pan_state.db",
+          "email_explicit": true,
+          "email_not_auto_bound": true,
+          "peer_identity_hash": "0675be6ea60ba14ca95c41b0ce9022643351318ae726a3c3ec2a4a83c1f57e21",
+          "email_relay_component": "email_relay_8e351937b2d1bea06dbe328bf2afebe49e8f4d5ea65be38007ae893d2268b98e",
+          "snapshot_sizes": {
+            "dht_data": 12,
+            "dht_ledger": 19,
+            "economy_accounts": 6,
+            "governance_proposals": 1,
+            "governance_policies": 2,
+            "citizens": 2,
+            "applications": 1,
+            "name_registry": 1,
+            "phone_addresses": 1,
+            "treasury_fsm": 1,
+            "treasury_validators": 3,
+            "treasury_proposals": 1,
+            "master_db_docs": 1,
+            "master_db_counters": 1,
+            "master_db_sets": 1,
+            "master_db_meta": 1,
+            "email_relay_8e351937b2d1bea06dbe328bf2afebe49e8f4d5ea65be38007ae893d2268b98e": 2,
+            "pending_transactions": 1,
+            "usage_metrics": 2,
+            "personal_contacts": 1,
+            "personal_messages": 1,
+            "personal_call_logs": 1,
+            "personal_preferences": 10
+          }
+        },
+        "artifacts": [
+          "/home/daeron/LAB/Experiments/projects/pan-sdk/results/pan_sdk_system_test_20260916_181113.txt",
+          "/home/daeron/LAB/Experiments/projects/pan-sdk/results/pan_sdk_system_test_20260916_181113.json",
+          "/home/daeron/LAB/Experiments/projects/pan-sdk/results/pan_sdk_system_test_20260916_181113.md"
+        ]
+      }
+    },
+    {
+      "name": "planetary_immune_system",
+      "passed": true,
+      "status": "pass",
+      "pass_count": 18,
+      "fail_count": 0,
+      "skip_count": 0,
+      "elapsed_seconds": 5.11892557144165,
+      "checks": [
+        {
+          "name": "firewall_blocks_telemetry",
+          "status": "pass",
+          "detail": {
+            "telemetry_reason": "telemetry_dictionary",
+            "telemetry_ledger_rows": 1
+          }
+        },
+        {
+          "name": "firewall_allows_civic_chat",
+          "status": "pass",
+          "detail": {
+            "civic_chat_allowed": true
+          }
+        },
+        {
+          "name": "inspect_content_compresses_secrets",
+          "status": "pass",
+          "detail": {
+            "compressed_bytes": 65,
+            "original_bytes": 59
+          }
+        },
+        {
+          "name": "signed_secret_packet_is_blocked",
+          "status": "pass",
+          "detail": {
+            "signed_secret_blocked": true
+          }
+        },
+        {
+          "name": "identity_blocklist",
+          "status": "pass",
+          "detail": {
+            "blocked_identity": "63f281204aea"
+          }
+        },
+        {
+          "name": "legacy_ip_routing_blocked",
+          "status": "pass",
+          "detail": {
+            "routing_blocked": true
+          }
+        },
+        {
+          "name": "memory_survives_restart",
+          "status": "pass",
+          "detail": {
+            "intel_id": "1bc950516579d598",
+            "event_node_id": "3c19e079-0653-4610-b633-bc8b96963bfa",
+            "belief_node_id": "416daf37-b02c-4c76-8a14-1ddd3ce2a6a4",
+            "bulletin_dht_key": "threat-memory:d3fc5d411322a4f1195a52d65e0cbd1bc6070f4bf7114300fe456697bd4feccb",
+            "restart_hits": 4
+          }
+        },
+        {
+          "name": "peer_ingests_bulletin",
+          "status": "pass",
+          "detail": {
+            "peer_ingested_intel_id": "9777ccc17641673f",
+            "peer_hits": 4,
+            "packet_kind": "THREAT_MEMORY_BULLETIN"
+          }
+        },
+        {
+          "name": "contradiction_and_campaign_entangle",
+          "status": "pass",
+          "detail": {
+            "entanglement_id": "31b206f7-21a1-441f-aa98-b048b285d80a",
+            "contradiction_node_id": "ed0fea7d-bbb4-4c13-bdd9-0efd7dc58e57",
+            "contradictions": 1
+          }
+        },
+        {
+          "name": "roe_ladder_persists_through_bridge",
+          "status": "pass",
+          "detail": {
+            "roe_level": "deceive",
+            "neural_activation": 0.385,
+            "belief_node_id": "67f31bb6-4cf6-421f-9e51-cccfd6de8627",
+            "restart_recovered": true
+          }
+        },
+        {
+          "name": "neutralize_requires_human_authorization",
+          "status": "pass",
+          "detail": {
+            "share_denied": "ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized",
+            "record_denied": "ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized",
+            "external_host_action": false
+          }
+        },
+        {
+          "name": "second_chain_retired_share_uses_immune",
+          "status": "pass",
+          "detail": {
+            "unbound_denied": "ThreatDetectionModule.share_threat_intelligence requires a bound PlanetaryImmuneSystem; BlockchainThreatIntelligence is retired",
+            "retired_construct": true,
+            "detector_intel_id": "e2be0d2086cc8c7f",
+            "detector_roe_level": "observe",
+            "monitor_hits": 6,
+            "identities_distinct": true
+          }
+        },
+        {
+          "name": "smtp_alert_fails_loud",
+          "status": "pass",
+          "detail": {
+            "refused": true
+          }
+        },
+        {
+          "name": "webhook_alert_fails_loud",
+          "status": "pass",
+          "detail": {
+            "refused": true
+          }
+        },
+        {
+          "name": "threat_feed_fetch_fails_loud",
+          "status": "pass",
+          "detail": {
+            "sync_refused": true
+          }
+        },
+        {
+          "name": "whois_fails_loud",
+          "status": "pass",
+          "detail": {
+            "map_refused": true
+          }
+        },
+        {
+          "name": "wifi_deauth_fails_loud",
+          "status": "pass",
+          "detail": {
+            "deauth_refused": true
+          }
+        },
+        {
+          "name": "bridge_refuses_simulated_authorization",
+          "status": "pass",
+          "detail": {
+            "l4_denied": "ROE Level 4 NEUTRALIZE requires human authorization; external-host action is not authorized",
+            "no_simulated_operator": true
+          }
+        }
+      ],
+      "artifacts": {
+        "json": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/immune/runs/20260916_181118/result.json",
+        "md": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/immune/runs/20260916_181118/result.md",
+        "log": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/immune/runs/20260916_181118/result.log",
+        "run_dir": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/immune/runs/20260916_181118"
+      }
+    },
+    {
+      "name": "planetary_highway",
+      "passed": true,
+      "status": "pass",
+      "pass_count": 10,
+      "fail_count": 0,
+      "skip_count": 0,
+      "elapsed_seconds": 1.418053388595581,
+      "checks": [
+        {
+          "name": "source_has_no_legacy_mesh",
+          "status": "pass",
+          "detail": {
+            "banned_absent": true,
+            "source_chars": 34421
+          }
+        },
+        {
+          "name": "requires_explicit_firewall",
+          "status": "pass",
+          "detail": {
+            "refused": true
+          }
+        },
+        {
+          "name": "direct_travel_sealed_cargo",
+          "status": "pass",
+          "detail": {
+            "travel_id": "3e253d0e091aa76972630a972f1719cb78c1e5159a4d80b9029e6fb893784954",
+            "arrived": true
+          }
+        },
+        {
+          "name": "multi_hop_three_nodes",
+          "status": "pass",
+          "detail": {
+            "forwarded": true,
+            "hop_plaintext": false
+          }
+        },
+        {
+          "name": "firewall_blocks_telemetry_on_hop",
+          "status": "pass",
+          "detail": {
+            "blocked": true
+          }
+        },
+        {
+          "name": "legacy_routing_key_rejected",
+          "status": "pass",
+          "detail": {
+            "rejected": true,
+            "envelope_rejected": true
+          }
+        },
+        {
+          "name": "identity_blocklist_stops_travel",
+          "status": "pass",
+          "detail": {
+            "blocked": true
+          }
+        },
+        {
+          "name": "bad_usms_signature_fails_loud",
+          "status": "pass",
+          "detail": {
+            "refused": true
+          }
+        },
+        {
+          "name": "cargo_survives_restart",
+          "status": "pass",
+          "detail": {
+            "restart_recovered": true
+          }
+        },
+        {
+          "name": "dht_index_optional_and_unbound_to_firewall",
+          "status": "pass",
+          "detail": {
+            "dht_indexed": true,
+            "dht_unbound_to_firewall": true
+          }
+        }
+      ],
+      "artifacts": {
+        "json": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/highway/runs/20260916_181120/result.json",
+        "md": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/highway/runs/20260916_181120/result.md",
+        "log": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/highway/runs/20260916_181120/result.log",
+        "run_dir": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/highway/runs/20260916_181120"
+      }
+    },
+    {
+      "name": "sovereign_treasury",
+      "passed": true,
+      "status": "pass",
+      "pass_count": 7,
+      "fail_count": 0,
+      "skip_count": 0,
+      "elapsed_seconds": 0.8798947334289551,
+      "checks": [
+        {
+          "name": "genesis_rejects_mint",
+          "status": "pass",
+          "detail": {
+            "state": "GENESIS"
+          }
+        },
+        {
+          "name": "seal_genesis_and_contract_reject",
+          "status": "pass",
+          "detail": {
+            "state": "MINT_PHASE",
+            "quorum": 3
+          }
+        },
+        {
+          "name": "poi_mint_requires_quorum",
+          "status": "pass",
+          "detail": {
+            "minted_balance": 40,
+            "packet_id": "4e5457598d4a13918684ca2e2e217ad9c85a7088914ef7b6ac2f1a7d8a230812"
+          }
+        },
+        {
+          "name": "distribute_and_burn_and_halts",
+          "status": "pass",
+          "detail": {
+            "final_state": "CRITICAL_SUSPEND",
+            "supply": 90,
+            "citizen_balance": 15
+          }
+        },
+        {
+          "name": "restart_hydrates_fsm",
+          "status": "pass",
+          "detail": {
+            "state_before": "MINT_PHASE",
+            "chair_before": "02ca32c48f141e10bb6fee45314ea7c5943cb32ea21a55fce84313391861de3e",
+            "state_after": "MINT_PHASE",
+            "validators_after": 3
+          }
+        },
+        {
+          "name": "poi_rejects_forged_output",
+          "status": "pass",
+          "detail": {
+            "error": "claimed output diverged from local re-execution"
+          }
+        },
+        {
+          "name": "poi_unbound_engine_fails",
+          "status": "pass",
+          "detail": {
+            "error": "PoI requires a bound SovereignInferenceEngine"
+          }
+        }
+      ],
+      "artifacts": {
+        "json": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/treasury/runs/20260916_181121/result.json",
+        "md": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/treasury/runs/20260916_181121/result.md",
+        "log": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/treasury/runs/20260916_181121/result.log",
+        "run_dir": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/treasury/runs/20260916_181121"
+      }
+    },
+    {
+      "name": "email_social",
+      "passed": true,
+      "status": "pass",
+      "pass_count": 5,
+      "fail_count": 0,
+      "skip_count": 0,
+      "elapsed_seconds": 1.556549072265625,
+      "checks": [
+        {
+          "name": "sealed_mail_across_relays",
+          "status": "pass",
+          "detail": {
+            "packet_id": "6b2b0b0e25d09fcc2ddab33cc0ea35b4ef054bac22f8bd14e76e17787dafaf8b",
+            "relays": 2,
+            "alice_address": "pan:id:ccb55c765ae3e57a3f78008888dda3eebf3ec9cf51fcf686f72267565270b6ae"
+          }
+        },
+        {
+          "name": "legacy_ip_rejected",
+          "status": "pass",
+          "detail": {
+            "rejected": true
+          }
+        },
+        {
+          "name": "relay_blocks_unsigned_and_routing",
+          "status": "pass",
+          "detail": {
+            "forged_rejected": true,
+            "routing_rejected": true
+          }
+        },
+        {
+          "name": "social_and_knock",
+          "status": "pass",
+          "detail": {
+            "social_id": "a34b10c248e7b21e2b6f25ec889b6930ab785192e9557c9df140b8ea4b8a6b16",
+            "knocks_dropped": 2
+          }
+        },
+        {
+          "name": "restart_hydrates_relay",
+          "status": "pass",
+          "detail": {
+            "before": 1,
+            "after": 1
+          }
+        }
+      ],
+      "artifacts": {
+        "json": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/email_social/runs/20260916_181122/result.json",
+        "md": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/email_social/runs/20260916_181122/result.md",
+        "log": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/email_social/runs/20260916_181122/result.log",
+        "run_dir": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/email_social/runs/20260916_181122"
+      }
+    },
+    {
+      "name": "master_db",
+      "passed": true,
+      "status": "pass",
+      "pass_count": 4,
+      "fail_count": 0,
+      "skip_count": 0,
+      "elapsed_seconds": 0.463853120803833,
+      "checks": [
+        {
+          "name": "offline_nodes_converge",
+          "status": "pass",
+          "detail": {
+            "counter": 11,
+            "docs": [
+              "citizen:ann",
+              "citizen:bea"
+            ]
+          }
+        },
+        {
+          "name": "join_algebra",
+          "status": "pass",
+          "detail": {
+            "commutative": true,
+            "associative": true,
+            "idempotent": true
+          }
+        },
+        {
+          "name": "tombstone_and_orset_remove",
+          "status": "pass",
+          "detail": {
+            "tombstone": true
+          }
+        },
+        {
+          "name": "dht_bind_and_restart",
+          "status": "pass",
+          "detail": {
+            "before": {
+              "emission": 1
+            },
+            "after": {
+              "emission": 1
+            },
+            "cycles": 3
+          }
+        }
+      ],
+      "artifacts": {
+        "json": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/master_db/runs/20260916_181123/result.json",
+        "md": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/master_db/runs/20260916_181123/result.md",
+        "log": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/master_db/runs/20260916_181123/result.log",
+        "run_dir": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/master_db/runs/20260916_181123"
+      }
+    },
+    {
+      "name": "thyris_memory",
+      "passed": true,
+      "status": "pass",
+      "pass_count": 3,
+      "fail_count": 0,
+      "skip_count": 0,
+      "elapsed_seconds": 0.03283548355102539,
+      "checks": [
+        {
+          "name": "owners_are_not_usms",
+          "status": "pass",
+          "detail": {
+            "memory_manager": "memory.memory_core",
+            "usms": "memory.unified_memory_system"
+          }
+        },
+        {
+          "name": "memory_store_retrieve",
+          "status": "pass",
+          "detail": {
+            "memory_id": "050d6f9e-550d-4fb4-b657-1281d4255d67",
+            "retrieved": 1,
+            "embedding": "LocalHashEmbeddingModel"
+          }
+        },
+        {
+          "name": "cache_set_get",
+          "status": "pass",
+          "detail": {
+            "cache_get": {
+              "vm": "android-13",
+              "ready": true
+            },
+            "metadata_db": "/tmp/thyris_cache_q9ckigf1/runtime_cache/cache_metadata.db"
+          }
+        }
+      ],
+      "artifacts": {
+        "json": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/memory_core/runs/20260916_181123/result.json",
+        "md": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/memory_core/runs/20260916_181123/result.md",
+        "log": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/memory_core/runs/20260916_181123/result.log",
+        "run_dir": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/memory_core/runs/20260916_181123"
+      }
+    },
+    {
+      "name": "thyris_vm",
+      "passed": true,
+      "status": "pass",
+      "pass_count": 7,
+      "fail_count": 0,
+      "skip_count": 0,
+      "elapsed_seconds": 0.04235506057739258,
+      "checks": [
+        {
+          "name": "phone_orchestrator_imports",
+          "status": "pass",
+          "detail": {
+            "module": "/home/daeron/LAB/Experiments/projects/pan-sdk/telecom/phone_orchestrator.py",
+            "thyris_class": "ThyrisPhoneOrchestrator",
+            "vm_state": "creating"
+          }
+        },
+        {
+          "name": "image_manager_constructs",
+          "status": "pass",
+          "detail": {
+            "metadata_file": "/tmp/thyris_img_9uyu4nrp/images/image_metadata.json",
+            "os_families": [
+              "ubuntu",
+              "debian",
+              "fedora",
+              "centos",
+              "alpine",
+              "arch",
+              "windows",
+              "custom"
+            ]
+          }
+        },
+        {
+          "name": "supervisor_constructs",
+          "status": "pass",
+          "detail": {
+            "ip": "192.168.122.105",
+            "memory_db": "/tmp/thyris_sup_cyl4v4qq/vms/memory/metadata.db",
+            "profiles": [
+              "coding",
+              "idle",
+              "media_creation",
+              "research"
+            ],
+            "orchestrator_aliases": {
+              "vm_manager": true,
+              "network": true
+            }
+          }
+        },
+        {
+          "name": "aipc_prompt_unbound",
+          "status": "pass",
+          "detail": {
+            "supervisor_file": "/home/daeron/LAB/Experiments/projects/pan-sdk/telecom/vm_supervisor.py",
+            "prompt_imports": [],
+            "leaked_methods": []
+          }
+        },
+        {
+          "name": "usms_erebus_has_no_prompt",
+          "status": "pass",
+          "detail": {
+            "usms_module": "memory.unified_memory_system",
+            "immune_module": "security.planetary_immune_system",
+            "packet": "UnifiedDataPacket",
+            "prompt_bridge_in_usms": false,
+            "prompt_bridge_in_immune": false
+          }
+        },
+        {
+          "name": "telecom_host_tools_contract",
+          "status": "pass",
+          "detail": {
+            "required": [
+              "qemu-system-x86_64",
+              "qemu-img",
+              "adb"
+            ],
+            "ok": true,
+            "missing": [],
+            "orchestrator": "ThyrisPhoneOrchestrator"
+          }
+        },
+        {
+          "name": "qemu_img_disk_create",
+          "status": "pass",
+          "detail": {
+            "qemu_img": "/usr/bin/qemu-img",
+            "qemu_system_x86_64": "/usr/bin/qemu-system-x86_64",
+            "booted": false,
+            "bytes": 196624,
+            "format": "qcow2",
+            "virtual_size": 1073741824,
+            "owner": "telecom.vm_image_manager.ISOConverter._create_disk"
+          }
+        }
+      ],
+      "artifacts": {
+        "json": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/thyris_vm/runs/20260916_181123/result.json",
+        "md": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/thyris_vm/runs/20260916_181123/result.md",
+        "log": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/thyris_vm/runs/20260916_181123/result.log",
+        "run_dir": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/thyris_vm/runs/20260916_181123"
+      }
+    }
+  ],
+  "skipped": []
+}
