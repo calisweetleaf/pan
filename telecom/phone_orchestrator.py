@@ -138,7 +138,7 @@ Justification: I am editing this owner because AUTO_INSTALL on Envy reached
     helper would duplicate android_serial_socket_path. The chardev now lives
     under tempfile.gettempdir(); the 8G qcow and serial log stay on USB.
     READY still only flips after adb shell thyris_adb_health.
-Provenance: SCOPE.md engagement thyris-adb-userspace-ready
+Provenance: snapshots/v0.17/manifest.json -> domains.thyris.edits[0]
 Files: telecom/phone_orchestrator.py, test/thyris_vm/test_thyris_android_boot.py
 """
 

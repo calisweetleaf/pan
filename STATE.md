@@ -40,11 +40,14 @@ invented alternative.
 - `telecom/vm_supervisor.py` and `telecom/vm_image_manager.py` are the VM owners
   `phone_orchestrator` already imported. `ISOConverter._create_disk` is fail-loud
   and has a real qemu-img consumer (`ba05cf4`). `phone_orchestrator` now also
-  boots official android-x86 9.0-r2 via `qemu-system-x86_64 -nographic` and
-  fails loud without ISOLINUX. That is installer-media boot evidence, not
-  `PhoneVMState.READY` or ADB. TCG live, WHPX livem (`20260918_050641`),
-  and AUTO_INSTALL-then-disk (`20260918_052020`) all reached Android-x86
-  detect then `console:/ #`; TCP adbd was never proven. AIPC `PromptSystemBridge` is unbound.
+  boots official android-x86 9.0-r2 via `qemu-system-x86_64`. Installer
+  media boot (`-nographic` SeaBIOS/ISOLINUX) is still a non-READY proof.
+  On this Envy KVM host (`daeron-hpenvyx3602in1laptop15ey0xxx`),
+  AUTO_INSTALL=force then disk-boot `SRC=/thyris` with hidden VGA,
+  bidirectional serial chardev under `/tmp`, and `VIRT_WIFI=0` proved
+  `adb shell echo thyris_adb_health` (`test/thyris_vm/runs/20260918_233451/`).
+  Windows nographic/WHPX still failed loud at `console:/ #`. Disk-create
+  stays `ISOConverter._create_disk`. AIPC `PromptSystemBridge` is unbound.
   Thyris does not import or require `core.prompt_bridge`.
 - Direct project gate: `python test/run_pan_gate.py` (immune, highway,
   treasury, email_social, master_db, thyris_memory, thyris_vm slices).
@@ -58,6 +61,18 @@ invented alternative.
   result under results/ (append-only; not rewritten).
 
 ## Verified baseline
+
+- **GREEN, 2026-09-18 (Thyris ADB userspace on Envy KVM):** Linux
+  `daeron-hpenvyx3602in1laptop15ey0xxx`, Python 3.12 `.venv`, qemu 10.2.1
+  `-enable-kvm`, official android-x86_64-9.0-r2.iso SHA-1
+  `1cc85b5ed7c830ff71aecf8405c7281a9c995aa0`. Consumer
+  `python test/thyris_vm/test_thyris_android_boot.py` 9/9 in 444.7s.
+  `HOST_CMD: adb -s 127.0.0.1:44451 shell echo thyris_adb_health` /
+  guest `thyris_adb_health`. Android 9. `boot_mode=installed_disk`.
+  `phone_ready` true, `adb_proven` true, `vm_state=ready`. Artifact:
+  `test/thyris_vm/runs/20260918_233451/`. Snapshot
+  `snapshots/v0.17/manifest.json`. Full `run_pan_gate.py` was not re-run
+  this unit. Windows nographic remains exhausted, not READY.
 
 - **GREEN, 2026-09-18 (Erebus towers on USMS):** Windows Python 3.14 `.venv`.
   `.\.venv\Scripts\python.exe test\immune\test_planetary_immune_system.py`
@@ -129,21 +144,14 @@ invented alternative.
 
 ## Active frontier
 
-1. Android installer media boots (SeaBIOS/ISOLINUX on `-nographic` stdout).
-   Combined Linux gate 20260912_094045 is green. `/dev/kvm` may exist without
-   being usable; TCG fallback is proven. TCG live CD on this Windows host
-   reached Android init; DEBUG=2 also reached healthd
-   (`test/thyris_vm/runs/20260918_025416/`, 7/8, 915.5s). livem+nosetup
-   (`test/thyris_vm/runs/20260918_032455/`, 7/8, 1829.9s) stopped at
-   `Detecting Android-x86... found at /dev/sr0` without healthd. adbd never
-   listened. Host adb stayed offline. `phone_ready` and `adb_proven` remain
-   false. `test/thyris_vm/runs/20260918_035525/` is not an independent trial
-   (JSON/MD duplicate `032455`). WHPX livem (`20260918_050641`) and
-   AUTO_INSTALL-then-disk (`20260918_052020`) both failed loud: detect then
-   `console:/ #`, no `thyris_adb_health`. The ISO is local
-   under gitignored `android_images/`; the project gate still does not
-   boot phones. Do not dummy READY from ISOLINUX, init, healthd, or install
-   Congratulations. Do not invent a third phone stack.
+1. Android installer media boots (SeaBIOS/ISOLINUX on `-nographic` stdout)
+   remain a non-READY proof. Envy KVM disk-boot ADB userspace is landed
+   (`test/thyris_vm/runs/20260918_233451/`, `snapshots/v0.17`). Windows
+   TCG/WHPX nographic still died at `console:/ #` without
+   `thyris_adb_health`. `create_phone_vm` still launches isolinux livem
+   `-nographic`, not the proven AUTO_INSTALL then disk-boot owner.
+   Do not dummy READY from ISOLINUX. Do not hop to Trents-Laptop. Do not
+   invent a third phone stack.
 2. `memory/memory_integration.py` still imports `schemas.session`, which is
    absent. That is leftover AIPC session-memory, not a Thyris telecom
    requirement. Do not scaffold a fake schemas package.
@@ -185,6 +193,8 @@ snapshots/v0.9. Second-chain retirement landed in snapshots/v0.10.
 Android-x86 installer boot landed in snapshots/v0.11. KVM-inaccessible TCG
 fallback landed in snapshots/v0.12. Highway packet fabric and WAN isolation
 landed in snapshots/v0.13. Erebus towers on USMS landed in snapshots/v0.14.
+Envy KVM host-guest ADB (`adb shell echo thyris_adb_health`) landed in
+snapshots/v0.17.
 
 ## Generated-map status
 
@@ -194,12 +204,11 @@ through FileTree Pro.
 
 ## Next justified action
 
-ADB userspace / `PhoneVMState.READY` is blocked on this Windows nographic
-host. TCG live, WHPX live (`20260918_050641`), and AUTO_INSTALL-then-disk
-(`20260918_052020`) all reached Android-x86 detect then `console:/ #`
-without `adb shell echo thyris_adb_health`. `phone_ready` stays false.
-`snapshots/v0.15` is not a READY landing. Do not dummy a READY phone.
-Do not name a next accelerator here. Do not pull prompt files. Do not
-construct `BlockchainThreatIntelligence`. Do not invent a third phone
-stack. Do not reconnect the public internet. Next host or display
-contract is a material decision; it is not selected here.
+Envy KVM proved `PhoneVMState.READY` via host `adb shell echo thyris_adb_health`
+(`test/thyris_vm/runs/20260918_233451/`). Stay on this Envy host. Do not
+use Trents-Laptop. Trent-Desktop is allowed for other units, not a reason
+to hop. `create_phone_vm` still uses isolinux livem `-nographic` rather
+than the proven AUTO_INSTALL then disk-boot owner; that bind is the next
+Thyris cut if this army continues. Do not dummy READY. Do not pull prompt
+files. Do not construct `BlockchainThreatIntelligence`. Do not invent a
+third phone stack. Do not reconnect the public internet.

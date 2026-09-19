@@ -1,0 +1,134 @@
+thyris android boot consumer start 20260918_233451
+
+========================================================================
+THYRIS ANDROID GUEST BOOT CONSUMER
+========================================================================
+qemu-system-x86_64=/usr/bin/qemu-system-x86_64
+accelerator=['-enable-kvm']
+PASS qemu_system_resolves
+iso=/home/daeron/LAB/Experiments/projects/pan-sdk/android_images/android-x86_64-9.0-r2.iso
+bytes=965738496
+sha1=1cc85b5ed7c830ff71aecf8405c7281a9c995aa0
+expected=1cc85b5ed7c830ff71aecf8405c7281a9c995aa0
+PASS android_iso_authentic
+argv=/usr/bin/qemu-system-x86_64 -enable-kvm -cpu qemu64 -name thyris-argv-probe -m 2048 -smp 2 -drive file=/home/daeron/LAB/Experiments/projects/pan-sdk/disk.qcow2,format=qcow2,if=ide,index=0,media=disk -drive file=/home/daeron/LAB/Experiments/projects/pan-sdk/android.iso,format=raw,if=ide,index=1,media=cdrom,readonly=on -boot order=d -no-reboot -nographic -netdev user,id=net0 -device e1000,netdev=net0
+PASS nographic_argv
+adb=/usr/lib/android-sdk/platform-tools/adb
+PASS adb_resolves
+kernel=/tmp/thyris_liveboot__wvtnlc0/kernel bytes=7511040
+initrd=/tmp/thyris_liveboot__wvtnlc0/initrd.img bytes=1357566
+PASS extract_live_boot_files
+live_argv=/usr/bin/qemu-system-x86_64 -enable-kvm -cpu qemu64 -name thyris-live-argv -m 2048 -smp 2 -drive file=/tmp/thyris_liveargv_shfums92/disk.qcow2,format=qcow2,if=ide,index=0,media=disk -drive file=/run/media/daeron/USB128GB/android_images/android-x86_64-9.0-r2.iso,format=raw,if=ide,index=1,media=cdrom,readonly=on -kernel /tmp/thyris_liveargv_shfums92/boot/kernel -initrd /tmp/thyris_liveargv_shfums92/boot/initrd.img -append root=/dev/ram0 SETUPWIZARD=0 nomodeset SRC= DATA= console=ttyS0,115200 androidboot.console=ttyS0 -no-reboot -nographic -netdev user,id=net0,hostfwd=tcp::15555-:5555 -device e1000,netdev=net0
+PASS live_argv_forwards_adb
+disk_argv=/usr/bin/qemu-system-x86_64 -enable-kvm -cpu qemu64 -name thyris-disk-argv -m 2048 -smp 2 -drive file=/tmp/thyris_diskargv_cc9ecvi5/disk.qcow2,format=qcow2,if=ide,index=0,media=disk -kernel /tmp/thyris_diskargv_cc9ecvi5/kernel -initrd /tmp/thyris_diskargv_cc9ecvi5/initrd.img -append root=/dev/ram0 SETUPWIZARD=0 SRC=/thyris DATA= VIRT_WIFI=0 console=ttyS0,115200 androidboot.console=ttyS0 -vga std -display none -chardev socket,id=thyris_serial,path=/tmp/thyris-serial-8964b56a62723000.sock,server=on,wait=off -serial chardev:thyris_serial -netdev user,id=net0,hostfwd=tcp::15555-:5555 -device e1000,netdev=net0
+PASS disk_boot_argv
+disk=/tmp/thyris_boot_m1t6pgoa/phone-boot.qcow2 iso=/home/daeron/LAB/Experiments/projects/pan-sdk/android_images/android-x86_64-9.0-r2.iso
+starting qemu-system-x86_64 -nographic Android-x86 installer...
+{
+  "status": "boot_evidence",
+  "pid": 173883,
+  "qemu_system": "/usr/bin/qemu-system-x86_64",
+  "accelerator": [
+    "-enable-kvm"
+  ],
+  "disk_path": "/tmp/thyris_boot_m1t6pgoa/phone-boot.qcow2",
+  "iso_path": "/home/daeron/LAB/Experiments/projects/pan-sdk/android_images/android-x86_64-9.0-r2.iso",
+  "iso_bytes": 965738496,
+  "console_path": "/tmp/thyris_boot_m1t6pgoa/console.log",
+  "markers": [
+    "SeaBIOS",
+    "Booting from DVD",
+    "ISOLINUX",
+    "isolinux"
+  ],
+  "iso_bootloader_markers": [
+    "ISOLINUX",
+    "isolinux"
+  ],
+  "console_excerpt": "\u001bc\u001b[?7l\u001b[2J\u001b[0mSeaBIOS (version 1.17.0-debian-1.17.0-1ubuntu1)\n\n\niPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+7EFC8DD0+7EF08DD0 CA00\nPress Ctrl-B to configure iPXE (PCI 00:03.0)...\n                                                                               \n\n\nBooting from DVD/CD...\n\nISOLINUX 6.03 2014-10-06 ETCD Copyright (C) 1994-2014 H. Peter Anvin et al\u001b[01;01H",
+  "phone_ready": false,
+  "adb_proven": false
+}
+argv=/usr/bin/qemu-system-x86_64 -enable-kvm -cpu qemu64 -name thyris-android-boot-b0366bfe -m 2048 -smp 2 -drive file=/tmp/thyris_boot_m1t6pgoa/phone-boot.qcow2,format=qcow2,if=ide,index=0,media=disk -drive file=/run/media/daeron/USB128GB/android_images/android-x86_64-9.0-r2.iso,format=raw,if=ide,index=1,media=cdrom,readonly=on -boot order=d -no-reboot -nographic -netdev user,id=net0 -device e1000,netdev=net0
+PASS android_installer_boot
+disk=/home/daeron/LAB/Experiments/projects/pan-sdk/thyris-disks/thyris_adb_zlg39sv0/phone-adb.qcow2 iso=/home/daeron/LAB/Experiments/projects/pan-sdk/android_images/android-x86_64-9.0-r2.iso adb=/usr/lib/android-sdk/platform-tools/adb
+stale_qemu_killed=[]
+stale_adb_killed=[]
+starting live kernel qemu-system-x86_64 for ADB userspace...
+{
+  "status": "adb_userspace",
+  "pid": 175532,
+  "qemu_system": "/usr/bin/qemu-system-x86_64",
+  "adb": "/usr/lib/android-sdk/platform-tools/adb",
+  "accelerator": [
+    "-enable-kvm"
+  ],
+  "disk_path": "/home/daeron/LAB/Experiments/projects/pan-sdk/thyris-disks/thyris_adb_zlg39sv0/phone-adb.qcow2",
+  "iso_path": "/home/daeron/LAB/Experiments/projects/pan-sdk/android_images/android-x86_64-9.0-r2.iso",
+  "iso_bytes": 965738496,
+  "kernel_path": "/home/daeron/LAB/Experiments/projects/pan-sdk/thyris-disks/thyris_adb_zlg39sv0/liveboot/kernel",
+  "kernel_bytes": 7511040,
+  "initrd_path": "/home/daeron/LAB/Experiments/projects/pan-sdk/thyris-disks/thyris_adb_zlg39sv0/liveboot/initrd.img",
+  "initrd_bytes": 1357566,
+  "console_path": "/home/daeron/LAB/Experiments/projects/pan-sdk/thyris-disks/thyris_adb_zlg39sv0/disk-adb-console.log",
+  "userspace_markers": [
+    "Detecting Android-x86",
+    "init: "
+  ],
+  "console_excerpt": "erface driver ums-isd200\n[    0.586921] usbcore: registered new interface driver ums-jumpshot\n[    0.588330] usbcore: registered new interface driver ums-onetouch\n[    0.589755] usbcore: registered new interface driver ums-realtek\n[    0.591147] usbcore: registered new interface driver ums-sddr09\n[    0.592517] usbcore: registered new interface driver ums-sddr55\n[    0.593904] usbcore: registered new interface driver ums-usbat\n[    0.595252] i8042: PNP: PS/2 Controller [PNP0303:KBD,PNP0f13:MOU] at 0x60,0x64 irq 1,12\n[    0.598041] serio: i8042 KBD port at 0x60,0x64 irq 1\n[    0.599221] serio: i8042 AUX port at 0x60,0x64 irq 12\n[    0.600414] hv_vmbus: registering driver hyperv_keyboard\n[    0.601695] mousedev: PS/2 mouse device common for all mice\n[    0.603086] rtc_cmos 00:05: RTC can wake from S4\n[    0.604611] rtc_cmos 00:05: registered as rtc0\n[    0.605737] rtc_cmos 00:05: setting system clock to 2026-09-19 04:39:55 UTC (1789792795)\n[    0.607641] rtc_cmos 00:05: alarms up to one day, y3k, 242 bytes nvram, hpet irqs\n[    0.609355] IR Sharp protocol handler initialized\n[    0.610478] IR XMP protocol handler initialized\n[    0.611568] device-mapper: uevent: version 1.0.3\n[    0.612669] device-mapper: ioctl: 4.39.0-ioctl (2018-04-03) initialised: dm-devel@redhat.com\n[    0.614716] sdhci: Secure Digital Host Controller Interface driver\n[    0.616171] sdhci: Copyright(c) Pierre Ossman\n[    0.617229] sdhci-pltfm: SDHCI platform and OF driver helper\n[    0.618614] hidraw: raw HID events driver (C) Jiri Kosina\n[    0.619915] usbcore: registered new interface driver usbhid\n[    0.621217] usbhid: USB HID core driver\n[    0.622200] ashmem: initialized\n[    0.623222] oprofile: using NMI interrupt.\n[    0.624506] xt_time: kernel timezone is -0000\n[    0.625598] Initializing XFRM netlink socket\n[    0.626657] NET: Registered protocol family 10\n[    0.627867] Segment Routing with IPv6\n[    0.628725] mip6: Mobile IPv6\n[    0.629428] sit: IPv6, IPv4 and MPLS over IPv4 tunneling driver\n[    0.630912] NET: Registered protocol family 17\n[    0.631923] NET: Registered protocol family 15\n[    0.632944] NET: Registered protocol family 35\n[    0.634109] mce: Using 10 MCE banks\n[    0.634937] sched_clock: Marking stable (502390399, 132521990)->(667028644, -32116255)\n[    0.636744] registered taskstats version 1\n[    0.637696] Loading compiled-in X.509 certificates\n[    0.638873] Key type ._fscrypt registered\n[    0.640010] Key type .fscrypt registered\n[    0.641079] Key type fscrypt-provisioning registered\n[    0.642356]   Magic number: 10:2:667\n[    0.643186]   hash matches /home/lh/cwhuang/pie-x86/kernel/drivers/base/power/main.c:1385\n[    0.722756] ata2.00: ATAPI: QEMU DVD-ROM, 2.5+, max UDMA/100\n[    0.724692] ata1.00: ATA-7: QEMU HARDDISK, 2.5+, max UDMA/100\n[    0.726004] ata1.00: 16777216 sectors, multi 16: LBA48 \n[    0.728285] scsi 0:0:0:0: Direct-Access     ATA      QEMU HARDDISK    2.5+ PQ: 0 ANSI: 5\n[    0.730241] sd 0:0:0:0: Attached scsi generic sg0 type 0\n[    0.731697] sd 0:0:0:0: [sda] 16777216 512-byte logical blocks: (8.59 GB/8.00 GiB)\n[    0.733403] sd 0:0:0:0: [sda] Write Protect is off\n[    0.734527] sd 0:0:0:0: [sda] Write cache: enabled, read cache: enabled, doesn't support DPO or FUA\n[    0.736926]  sda: sda1\n[    0.737553] sd 0:0:0:0: [sda] Attached SCSI disk\n[    0.738972] scsi 1:0:0:0: CD-ROM            QEMU     QEMU DVD-ROM     2.5+ PQ: 0 ANSI: 5\n[    0.757757] sr 1:0:0:0: [sr0] scsi3-mmc drive: 4x/4x cd/rw xa/form2 tray\n[    0.759563] cdrom: Uniform CD-ROM driver Revision: 3.20\n[    0.761422] sr 1:0:0:0: Attached scsi generic sg1 type 5\n[    0.763953] Freeing unused kernel image memory: 1492K\n[    0.765119] Write protecting the kernel read-only data: 18432k\n[    0.766812] Freeing unused kernel image memory: 2016K\n[    0.768079] Freeing unused kernel image memory: 412K\n[    0.769252] rodata_test: all tests were successful\n[    0.770344] Run /init as init process\nDetecting Android-x86... found at /dev/sda1\nconsole:/ # ",
+  "install_argv": [
+    "/usr/bin/qemu-system-x86_64",
+    "-enable-kvm",
+    "-cpu",
+    "qemu64",
+    "-name",
+    "thyris-android-install-ec4c81be",
+    "-m",
+    "2048",
+    "-smp",
+    "2",
+    "-drive",
+    "file=/run/media/daeron/USB128GB/thyris-disks/thyris_adb_zlg39sv0/phone-adb.qcow2,format=qcow2,if=ide,index=0,media=disk",
+    "-drive",
+    "file=/run/media/daeron/USB128GB/android_images/android-x86_64-9.0-r2.iso,format=raw,if=ide,index=1,media=cdrom,readonly=on",
+    "-kernel",
+    "/run/media/daeron/USB128GB/thyris-disks/thyris_adb_zlg39sv0/liveboot/kernel",
+    "-initrd",
+    "/run/media/daeron/USB128GB/thyris-disks/thyris_adb_zlg39sv0/liveboot/initrd.img",
+    "-append",
+    "root=/dev/ram0 AUTO_INSTALL=force INSTALL_PREFIX=thyris SRC= DATA= console=ttyS0,115200 androidboot.console=ttyS0",
+    "-no-reboot",
+    "-nographic",
+    "-netdev",
+    "user,id=net0,hostfwd=tcp::44451-:5555",
+    "-device",
+    "e1000,netdev=net0"
+  ],
+  "adb_port": 44451,
+  "adb_serial": "127.0.0.1:44451",
+  "adb_detail": "host_command=adb -s 127.0.0.1:44451 shell echo thyris_adb_health; guest_response='thyris_adb_health'; connect='connected to 127.0.0.1:44451'; devices='List of devices attached\\n127.0.0.1:44451\\tdevice'",
+  "host_command": "adb -s 127.0.0.1:44451 shell echo thyris_adb_health",
+  "guest_response": "thyris_adb_health",
+  "android_release": "9",
+  "internal_ip": "10.0.2.15",
+  "install_markers": [
+    "Congratulations",
+    "installed successfully",
+    "Installing Android-x86",
+    "Syncing to disk",
+    "Formatting"
+  ],
+  "install_reboot_keys": 1,
+  "stale_qemu_killed": [],
+  "stale_adb_killed": [],
+  "adb_kill_server": "cannot connect to daemon at tcp:5037: Connection refused",
+  "kernel_append": "root=/dev/ram0 SETUPWIZARD=0 SRC=/thyris DATA= VIRT_WIFI=0 console=ttyS0,115200 androidboot.console=ttyS0",
+  "serial_socket_path": "/tmp/thyris-serial-a7eee0f2ffc040ab.sock",
+  "boot_mode": "installed_disk",
+  "vm_state": "ready",
+  "phone_ready": true,
+  "adb_proven": true
+}
+argv=/usr/bin/qemu-system-x86_64 -enable-kvm -cpu qemu64 -name thyris-android-disk-ff2ae852 -m 2048 -smp 2 -drive file=/run/media/daeron/USB128GB/thyris-disks/thyris_adb_zlg39sv0/phone-adb.qcow2,format=qcow2,if=ide,index=0,media=disk -kernel /run/media/daeron/USB128GB/thyris-disks/thyris_adb_zlg39sv0/liveboot/kernel -initrd /run/media/daeron/USB128GB/thyris-disks/thyris_adb_zlg39sv0/liveboot/initrd.img -append root=/dev/ram0 SETUPWIZARD=0 SRC=/thyris DATA= VIRT_WIFI=0 console=ttyS0,115200 androidboot.console=ttyS0 -vga std -display none -chardev socket,id=thyris_serial,path=/tmp/thyris-serial-a7eee0f2ffc040ab.sock,server=on,wait=off -serial chardev:thyris_serial -netdev user,id=net0,hostfwd=tcp::44451-:5555 -device e1000,netdev=net0
+PASS android_adb_userspace
+thyris android boot consumer status=pass

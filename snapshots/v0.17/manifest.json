@@ -1,0 +1,27 @@
+{
+  "version": "0.17",
+  "date": "2026-09-18",
+  "author": "daeron",
+  "summary": "Prove PhoneVMState.READY on Envy KVM: AUTO_INSTALL=force then disk-boot SRC=/thyris with hidden VGA, bidirectional serial chardev under local /tmp, VIRT_WIFI=0, and real adb shell echo thyris_adb_health. Disk-create stays ISOConverter._create_disk. ISOLINUX installer boot remains a non-READY proof. Windows nographic is exhausted, not READY.",
+  "domains": {
+    "thyris": {
+      "module": "telecom/phone_orchestrator.py",
+      "wrapper": null,
+      "tool_count": 1,
+      "provenance": "snapshots/v0.16/manifest.json domains.thyris plus official android-x86_64-9.0-r2.iso. No prompt_bridge. No second qemu-img owner.",
+      "edits": [
+        {
+          "date": "2026-09-18",
+          "author": "daeron",
+          "summary": "Serial chardev holder instead of -serial file:; VIRT_WIFI=0 keeps eth0 on 10.0.2.15; AF_UNIX socket lives under tempfile.gettempdir() because USB VFAT returns EPERM. READY only after host adb shell returns thyris_adb_health.",
+          "files": [
+            "telecom/phone_orchestrator.py",
+            "test/thyris_vm/test_thyris_android_boot.py"
+          ],
+          "justification_ref": "docstring:Modified",
+          "evidence": "test/thyris_vm/runs/20260918_233451/"
+        }
+      ]
+    }
+  }
+}

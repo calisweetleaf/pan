@@ -3,6 +3,45 @@
 Append durable, evidence-backed findings here. Preserve corrections as new dated
 entries instead of erasing historical truth.
 
+## 2026-09-18 — Envy KVM host-guest ADB READY
+
+**Keys:** run_android_adb_userspace_boot · hold_android_serial_chardev ·
+VIRT_WIFI=0 · PhoneVMState.READY · thyris_adb_health
+
+**Status:** LANDED on `daeron-hpenvyx3602in1laptop15ey0xxx`. Snapshot v0.17.
+Full project gate was not re-run this unit. Windows nographic remains
+exhausted.
+
+### Durable findings
+
+- `-serial file:` presents EOF to Android console/PID1 and reboots the guest.
+  Disk-boot needs a bidirectional unix chardev plus a holder that stays
+  connected until qemu is stopped.
+- android-x86 `/system/etc/init.sh` renames eth0 to `wifi_eth` unless
+  `VIRT_WIFI=0`. Without that, qemu user-net `10.0.2.15` never gets IPv4
+  and hostfwd to guest 5555 stays offline.
+- USB/VFAT (`thyris-disks` on USB128GB) rejects AF_UNIX bind (EPERM,
+  `20260918_232743`). Put the chardev under `tempfile.gettempdir()`. Keep
+  the 8G qcow on USB. Disk-create stays `ISOConverter._create_disk`.
+- Official consumer 9/9: `HOST_CMD: adb -s 127.0.0.1:44451 shell echo
+  thyris_adb_health` / guest `thyris_adb_health`. Android 9.
+- Stay on this Envy. Do not use Trents-Laptop. Trent-Desktop is allowed
+  for other units, not a reason to hop.
+
+### Evidence
+
+- `test/thyris_vm/runs/20260918_233451/`
+- `test/thyris_vm/runs/20260918_234216/`
+- `snapshots/v0.17/manifest.json`
+
+### Retrieval anchors
+
+- SCOPE.md engagement thyris-adb-userspace-ready
+- SOTA_RUN.md
+- telecom/phone_orchestrator.py
+- test/thyris_vm/test_thyris_android_boot.py
+- STATE.md
+
 ## 2026-09-18 — Civic inference wire documented (PANLIN01 / PoI)
 
 **Keys:** SovereignInferenceEngine · `_run_inference` · ProofOfInference ·

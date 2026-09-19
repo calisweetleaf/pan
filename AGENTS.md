@@ -77,8 +77,8 @@ Do not import a foreign directory layout such as tools/native/ into PAN just to 
 | security/defensive_sovereignty.py, reactive_offense.py, defensive_offensive_bridge.py | compile + immune-imported lineage. WAN SMTP/webhook/feeds/whois/deauth fail loud. Live immune path is planetary_immune_system.py |
 | telecom/vm_supervisor.py | VMSupervisor, CustomVMManager, CustomNetworkManager, VMState, ResourceProfile. AIPC prompt hook unbound |
 | telecom/vm_image_manager.py | VMImageManager, OSFamily |
-| telecom/phone_orchestrator.py | Thyris V1 phone orchestration; android-x86 installer boot proven via `-nographic` SeaBIOS/ISOLINUX. PhoneVMState.READY / ADB unproven |
-| telecom/phone_integration.py | browser APK/VNC bridge; not a gate compile target; ADB userspace still unproven |
+| telecom/phone_orchestrator.py | Thyris V1 phone orchestration; android-x86 installer boot proven via `-nographic` SeaBIOS/ISOLINUX. Envy KVM disk-boot ADB userspace proven (`adb shell echo thyris_adb_health`, snapshots/v0.17). Windows nographic still unproven. |
+| telecom/phone_integration.py | browser APK/VNC bridge; not a gate compile target; create_phone_vm still uses livem nographic, not the proven disk-boot ADB owner |
 | security/ | defensive sovereignty and ROE-governed security work; see security/AGENTS.md |
 | test/ | direct gate, persistence/name/manifest/personal probes, immune/highway/treasury/email_social/master_db/thyris_memory/thyris_vm consumers, system scenario |
 | reference-code/ | historical lineage; not imported runtime code |
@@ -124,12 +124,15 @@ A green syntax check is structural evidence only. Do not claim a successful PAN 
 
 ## Next justified action
 
-ADB userspace / `PhoneVMState.READY` on a real Android guest, or a different
-production unit. Disk-create is already landed (`ba05cf4`). Android-x86 9.0-r2
+Envy KVM proved `PhoneVMState.READY` after host `adb shell echo thyris_adb_health`
+(`test/thyris_vm/runs/20260918_233451/`, snapshots/v0.17). Stay on this Envy
+host. Do not use Trents-Laptop. Trent-Desktop is allowed for other units, not
+a reason to hop. Disk-create is already landed (`ba05cf4`). Android-x86 9.0-r2
 installer boot is already landed (ISOLINUX on `-nographic` stdout).
 `BlockchainThreatIntelligence` construction is already retired (`32ea3a9`).
 Do not open a second `qemu-img create` owner. Do not reopen the second threat
-chain.
+chain. `create_phone_vm` still launches isolinux livem `-nographic` rather
+than the proven AUTO_INSTALL then disk-boot owner.
 
 Do not pull or invent `core.prompt_bridge`. Do not dummy `_run_inference` (that owner is landed; see `docs/CIVIC_INFERENCE_POI.md`). Do not claim READY phones from ISOLINUX installer evidence. Do not open a second civic wire or reconnect the public internet. `schemas.session` / `memory.memory_integration` is leftover AIPC session-memory and is not a Thyris blocker.
 

@@ -1,12 +1,12 @@
 # SCOPE — EDIT 2026-09-18: thyris-adb-userspace-ready
 
-**Status:** OPEN. B (WHPX livem) and D (AUTO_INSTALL=force then disk)
-failed loud on Windows `-nographic`/`-no-reboot`. This Linux Envy
-continuation keeps AUTO_INSTALL=force, then disk-boots SRC=/thyris with
-VGA+serial (not stdio) and allows guest reboot so first-boot cannot kill
-QEMU. `snapshots/v0.15` is NOT promoted until adb shell answers.
-STATE.md is not rewritten to READY. `phone_ready` and `adb_proven` stay
-false until that proof.
+**Status:** CLOSED on Envy KVM (`daeron-hpenvyx3602in1laptop15ey0xxx`).
+Consumer `test/thyris_vm/runs/20260918_233451/` 9/9:
+`adb -s 127.0.0.1:44451 shell echo thyris_adb_health` returned
+`thyris_adb_health`. `phone_ready` and `adb_proven` are true for that
+disk-boot owner. Windows nographic/WHPX remains exhausted. Installer
+ISOLINUX still returns `phone_ready=False`. Snapshot `v0.17`.
+Do not hop to Trents-Laptop.
 
 ## Engagement Mode
 
