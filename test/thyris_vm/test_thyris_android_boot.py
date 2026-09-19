@@ -254,6 +254,60 @@ def check_live_argv_forwards_adb(details: dict[str, object]) -> None:
             raise CheckFailure("Windows live argv still contains -enable-kvm")
 
 
+def check_disk_boot_argv(details: dict[str, object]) -> None:
+    """Disk ADB argv must use hidden VGA, chardev serial, and VIRT_WIFI=0."""
+    qemu_system = resolve_qemu_system()
+    with tempfile.TemporaryDirectory(prefix="thyris_diskargv_") as tmpdir:
+        work = Path(tmpdir)
+        kernel = work / ANDROID_LIVE_KERNEL
+        initrd = work / ANDROID_LIVE_INITRD
+        kernel.write_bytes(b"kernel-placeholder")
+        initrd.write_bytes(b"initrd-placeholder")
+        serial = work / "disk-serial.log"
+        argv = build_android_qemu_argv(
+            qemu_system=qemu_system,
+            disk_path=work / "disk.qcow2",
+            iso_path=work / "android.iso",
+            name="thyris-disk-argv",
+            memory_mb=2048,
+            vcpus=2,
+            nographic=False,
+            no_reboot=False,
+            serial_log_path=serial,
+            adb_port=15555,
+            kernel_path=kernel,
+            initrd_path=initrd,
+            kernel_append=ANDROID_DISK_BOOT_CMDLINE,
+            attach_iso=False,
+        )
+        print("disk_argv=" + " ".join(argv))
+        details["argv"] = argv
+        details["kernel_append"] = ANDROID_DISK_BOOT_CMDLINE
+        if "-nographic" in argv:
+            raise CheckFailure("disk-boot argv still uses -nographic")
+        if "-vga" not in argv:
+            raise CheckFailure("disk-boot argv is missing hidden VGA")
+        if "chardev:thyris_serial" not in argv:
+            raise CheckFailure("disk-boot argv is missing serial chardev socket")
+        if not any(isinstance(item, str) and item.startswith("socket,id=thyris_serial") for item in argv):
+            raise CheckFailure("disk-boot argv is missing thyris_serial unix chardev")
+        if any(isinstance(item, str) and item.startswith("file:") for item in argv):
+            raise CheckFailure("disk-boot argv still uses write-only -serial file")
+        if "-no-reboot" in argv:
+            raise CheckFailure("disk-boot argv still has -no-reboot")
+        if "media=cdrom" in " ".join(argv):
+            raise CheckFailure("disk-boot argv still attached live /dev/sr0 ISO")
+        if "VIRT_WIFI=0" not in ANDROID_DISK_BOOT_CMDLINE:
+            raise CheckFailure("disk-boot cmdline is missing VIRT_WIFI=0")
+        if "nomodeset" in ANDROID_DISK_BOOT_CMDLINE:
+            raise CheckFailure("disk-boot cmdline still uses nomodeset")
+        if ANDROID_DISK_BOOT_CMDLINE not in argv:
+            raise CheckFailure("disk-boot argv is missing SRC=/thyris")
+        forwarded = [item for item in argv if "hostfwd=tcp::15555-:5555" in item]
+        if not forwarded:
+            raise CheckFailure("disk-boot argv does not forward host 15555 to guest 5555")
+
+
 def check_android_installer_boot(details: dict[str, object]) -> None:
     """Create a disk via landed _create_disk, then boot the real ISO."""
     iso = _android_iso()
@@ -414,12 +468,24 @@ def check_android_adb_userspace(details: dict[str, object]) -> None:
                 raise CheckFailure("disk-boot still uses -nographic stdio")
             if "-vga" not in (evidence.get("argv") or []):
                 raise CheckFailure("disk-boot argv is missing hidden VGA")
-            if "-serial" not in (evidence.get("argv") or []):
-                raise CheckFailure("disk-boot argv is missing serial file capture")
+            if "chardev:thyris_serial" not in (evidence.get("argv") or []):
+                raise CheckFailure("disk-boot argv is missing serial chardev socket")
+            if not any(
+                isinstance(item, str) and item.startswith("socket,id=thyris_serial")
+                for item in (evidence.get("argv") or [])
+            ):
+                raise CheckFailure("disk-boot argv is missing thyris_serial unix chardev")
+            if any(
+                isinstance(item, str) and item.startswith("file:")
+                for item in (evidence.get("argv") or [])
+            ):
+                raise CheckFailure("disk-boot argv still uses write-only -serial file")
             if "-no-reboot" in (evidence.get("argv") or []):
                 raise CheckFailure("disk-boot argv still has -no-reboot")
             if "nomodeset" in ANDROID_DISK_BOOT_CMDLINE:
                 raise CheckFailure("disk-boot cmdline still uses nomodeset")
+            if "VIRT_WIFI=0" not in ANDROID_DISK_BOOT_CMDLINE:
+                raise CheckFailure("disk-boot cmdline is missing VIRT_WIFI=0")
         elif boot_mode == "auto_install_run":
             if ANDROID_AUTO_INSTALL_CMDLINE not in append:
                 raise CheckFailure("install-run argv lost AUTO_INSTALL=force")
@@ -475,6 +541,7 @@ def run() -> dict[str, object]:
         ("adb_resolves", check_adb_resolves),
         ("extract_live_boot_files", check_extract_live_boot_files),
         ("live_argv_forwards_adb", check_live_argv_forwards_adb),
+        ("disk_boot_argv", check_disk_boot_argv),
         ("android_installer_boot", check_android_installer_boot),
         ("android_adb_userspace", check_android_adb_userspace),
     )
@@ -574,7 +641,8 @@ def write_artifacts(payload: dict[str, object], timestamp: str, log_text: str) -
         "(SHA-1 1cc85b5ed7c830ff71aecf8405c7281a9c995aa0), a qcow2 from landed",
         "ISOConverter._create_disk, SeaBIOS/ISOLINUX on installer -nographic stdout,",
         "and a disk-install via this ISO's AUTO_INSTALL=force, then a disk boot",
-        "with hidden VGA + serial file that only sets phone_ready after adb",
+        "with hidden VGA + bidirectional serial chardev (VIRT_WIFI=0, eth0",
+        "on qemu user-net 10.0.2.15) that only sets phone_ready after adb",
         "connect + adb shell. Windows install still uses",
         "-accel whpx,kernel-irqchip=off. POSIX disk-boot uses KVM or TCG, not",
         "WHPX. I refused a dummy boot, prompt_bridge,",
@@ -596,16 +664,41 @@ def write_artifacts(payload: dict[str, object], timestamp: str, log_text: str) -
     return {"json": json_path, "md": md_path, "log": log_path, "run_dir": run_dir}
 
 
+class _LiveTee(io.TextIOBase):
+    """Copy consumer prints into the artifact buffer and the real stdout."""
+
+    def __init__(self, buffer: io.StringIO, live: object) -> None:
+        self._buffer = buffer
+        self._live = live
+
+    def write(self, data: str) -> int:
+        self._buffer.write(data)
+        write = getattr(self._live, "write", None)
+        if write is not None:
+            write(data)
+        flush = getattr(self._live, "flush", None)
+        if flush is not None:
+            flush()
+        return len(data)
+
+    def flush(self) -> None:
+        self._buffer.flush()
+        flush = getattr(self._live, "flush", None)
+        if flush is not None:
+            flush()
+
+
 def main() -> int:
     """Run checks, persist artifacts, print a gate-shaped summary."""
     timestamp = time.strftime("%Y%m%d_%H%M%S")
     buffer = io.StringIO()
-    with redirect_stdout(buffer), redirect_stderr(buffer):
+    with redirect_stdout(_LiveTee(buffer, sys.__stdout__)), redirect_stderr(
+        _LiveTee(buffer, sys.__stderr__)
+    ):
         print(f"thyris android boot consumer start {timestamp}")
         payload = run()
         print(f"thyris android boot consumer status={payload.get('status')}")
     log_text = buffer.getvalue()
-    sys.stdout.write(log_text)
     artifacts = write_artifacts(payload, timestamp, log_text)
     payload["artifacts"] = {key: str(path) for key, path in artifacts.items()}
     artifacts["json"].write_text(json.dumps(payload, indent=2, default=str) + "\n", encoding="utf-8")

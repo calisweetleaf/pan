@@ -117,6 +117,18 @@ Justification: I am editing this owner because Windows nographic disk-boot
     thyris_adb_health.
 Provenance: snapshots/v0.16/manifest.json -> domains.thyris.edits[0]
 Files: telecom/phone_orchestrator.py, test/thyris_vm/test_thyris_android_boot.py
+
+Modified: 2026-09-18
+Modified by: cursor-grok (daeron)
+Justification: I am editing this owner because a write-only -serial file:
+    presented EOF to Android console/PID1, and android-x86 init.sh renamed
+    eth0 to wifi_eth so qemu user-net 10.0.2.15 never got IPv4. Wrapping a
+    second serial helper would duplicate build_android_qemu_argv. Disk-boot
+    now uses a bidirectional unix chardev plus a holder that never closes
+    while the guest lives, and VIRT_WIFI=0 so eth0 stays on qemu DHCP.
+    READY still only flips after adb shell thyris_adb_health.
+Provenance: SCOPE.md engagement thyris-adb-userspace-ready
+Files: telecom/phone_orchestrator.py, test/thyris_vm/test_thyris_android_boot.py
 """
 
 from __future__ import annotations
@@ -228,7 +240,7 @@ ANDROID_AUTO_INSTALL_CMDLINE = (
 )
 ANDROID_DISK_BOOT_CMDLINE = (
     f"root=/dev/ram0 SETUPWIZARD=0 SRC=/{ANDROID_INSTALL_PREFIX} DATA= "
-    "console=ttyS0,115200 androidboot.console=ttyS0"
+    "VIRT_WIFI=0 console=ttyS0,115200 androidboot.console=ttyS0"
 )
 INSTALL_PROGRESS_MARKERS: tuple[str, ...] = (
     "Auto Installer",
@@ -733,6 +745,76 @@ def require_windows_whpx_accelerator(accel: Tuple[str, ...]) -> Tuple[str, ...]:
     return accel
 
 
+def android_serial_socket_path(serial_log_path: Path) -> Path:
+    """Unix socket beside the serial log for the disk-boot chardev."""
+    return Path(serial_log_path).with_suffix(".sock")
+
+
+async def hold_android_serial_chardev(
+    sock_path: Path,
+    log_path: Path,
+    stop_event: asyncio.Event,
+    *,
+    connect_timeout_seconds: float = 30.0,
+) -> None:
+    """Keep qemu's serial unix socket open and copy guest bytes to the log.
+
+    `-serial file:` is write-only from the guest: Android's console service
+    reads EOF, PID1 dies, and the VM reboots. This holder is the other end
+    of the bidirectional chardev. It never closes the socket until
+    `stop_event` is set after qemu has already been stopped.
+
+    Args:
+        sock_path: Path qemu creates with chardev socket,server=on,wait=off.
+        log_path: Console capture file written in append mode.
+        stop_event: Set by the boot owner after qemu is stopped.
+        connect_timeout_seconds: How long to wait for qemu to accept.
+
+    Raises:
+        ThyrisBootError: The socket never appeared or never accepted before
+            the connect timeout, and stop_event was not set.
+    """
+    reader: Optional[asyncio.StreamReader] = None
+    writer: Optional[asyncio.StreamWriter] = None
+    deadline = time.monotonic() + connect_timeout_seconds
+    last_error: Optional[BaseException] = None
+    while writer is None:
+        if stop_event.is_set():
+            return
+        if time.monotonic() >= deadline:
+            raise ThyrisBootError(
+                f"qemu serial chardev socket did not accept at {sock_path}: {last_error!r}"
+            )
+        if not sock_path.exists():
+            await asyncio.sleep(0.05)
+            continue
+        try:
+            reader, writer = await asyncio.open_unix_connection(str(sock_path))
+        except (ConnectionRefusedError, OSError) as exc:
+            last_error = exc
+            await asyncio.sleep(0.05)
+    if reader is None:
+        raise ThyrisBootError(f"qemu serial chardev connected without a reader at {sock_path}")
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        with log_path.open("ab") as handle:
+            while not stop_event.is_set():
+                try:
+                    data = await asyncio.wait_for(reader.read(4096), timeout=0.5)
+                except asyncio.TimeoutError:
+                    continue
+                if not data:
+                    break
+                handle.write(data)
+                handle.flush()
+    finally:
+        writer.close()
+        try:
+            await writer.wait_closed()
+        except (BrokenPipeError, ConnectionResetError, OSError):
+            pass
+
+
 def build_android_qemu_argv(
     *,
     qemu_system: Path,
@@ -757,9 +839,11 @@ def build_android_qemu_argv(
     Installer-boot (no kernel_path): SeaBIOS/ISOLINUX on -nographic stdout.
     Live/install (kernel_path+initrd_path): skip vesamenu.c32 using files
     extracted from the same ISO. Disk userspace omits the ISO so SRC cannot
-    land on live /dev/sr0. Disk ADB uses hidden VGA plus a serial file so
-    Android's console service does not own qemu stdio, and omits -no-reboot
-    so a first-boot reboot cannot kill the guest.
+    land on live /dev/sr0. Disk ADB uses hidden VGA plus a bidirectional
+    serial chardev socket so Android's console is not starved by a write-only
+    file, omits -no-reboot so a first-boot reboot cannot kill the guest, and
+    sets VIRT_WIFI=0 so init.sh leaves eth0 for qemu user-net DHCP (10.0.2.15)
+    instead of renaming it to wifi_eth without IPv4.
     """
     if (kernel_path is None) != (initrd_path is None):
         raise ThyrisBootError("live boot requires both kernel_path and initrd_path")
@@ -815,7 +899,17 @@ def build_android_qemu_argv(
     else:
         cmd.extend(["-vga", "std", "-display", "none"])
         if serial_log_path is not None:
-            cmd.extend(["-serial", f"file:{serial_log_path.resolve()}"])
+            serial_sock = android_serial_socket_path(serial_log_path)
+            if serial_sock.exists():
+                serial_sock.unlink()
+            cmd.extend(
+                [
+                    "-chardev",
+                    f"socket,id=thyris_serial,path={serial_sock.resolve()},server=on,wait=off",
+                    "-serial",
+                    "chardev:thyris_serial",
+                ]
+            )
         if vnc_display is not None:
             cmd.extend(["-vnc", f":{vnc_display}"])
     if adb_port is not None:
@@ -1002,7 +1096,9 @@ async def run_android_adb_userspace_boot(
     AUTO_INSTALL=force path, then boots SRC=/thyris from the qcow without
     live /dev/sr0. ISOLINUX text is not READY. Disk create stays
     ISOConverter._create_disk. Windows accel is WHPX with kernel-irqchip=off.
-    POSIX disk-boot uses hidden VGA plus a serial file and allows reboot.
+    POSIX disk-boot uses hidden VGA plus a bidirectional serial chardev
+    socket (not a write-only file) and allows reboot. VIRT_WIFI=0 keeps eth0
+    on qemu user-net DHCP 10.0.2.15.
     """
     require_windows_whpx_accelerator(select_qemu_accelerator())
     if "AUTO_INSTALL=force" not in ANDROID_AUTO_INSTALL_CMDLINE:
@@ -1011,6 +1107,8 @@ async def run_android_adb_userspace_boot(
         raise ThyrisBootError("auto-install cmdline is missing INSTALL_PREFIX")
     if f"SRC=/{ANDROID_INSTALL_PREFIX}" not in ANDROID_DISK_BOOT_CMDLINE:
         raise ThyrisBootError("disk-boot cmdline is not rooted on the installed prefix")
+    if "VIRT_WIFI=0" not in ANDROID_DISK_BOOT_CMDLINE:
+        raise ThyrisBootError("disk-boot cmdline is missing VIRT_WIFI=0")
     if "AUTO_INSTALL" in ANDROID_LIVE_CMDLINE:
         raise ThyrisBootError("livem cmdline drifted onto AUTO_INSTALL")
     if "setprop" in ANDROID_AUTO_INSTALL_CMDLINE or "setprop" in ANDROID_DISK_BOOT_CMDLINE:
@@ -1063,6 +1161,8 @@ async def run_android_adb_userspace_boot(
     stdout_handle = console.open("wb")
     stderr_handle = stderr_file.open("wb")
     process: Optional[asyncio.subprocess.Process] = None
+    serial_stop: Optional[asyncio.Event] = None
+    serial_task: Optional[asyncio.Task[None]] = None
     serial = f"127.0.0.1:{host_adb_port}"
 
     def _read_logs() -> tuple[str, str]:
@@ -1110,6 +1210,9 @@ async def run_android_adb_userspace_boot(
             "stale_adb_killed": killed_adb,
             "adb_kill_server": kill_server_before,
             "kernel_append": kernel_append,
+            "serial_socket_path": str(android_serial_socket_path(log_console))
+            if boot_mode == "installed_disk"
+            else "",
             "boot_mode": boot_mode,
             "vm_state": PhoneVMState.READY.value,
             "phone_ready": True,
@@ -1208,8 +1311,15 @@ async def run_android_adb_userspace_boot(
             raise ThyrisBootError("disk-boot argv still uses -nographic; Android console owns stdio")
         if "-vga" not in disk_argv:
             raise ThyrisBootError("disk-boot argv is missing hidden VGA")
-        if "-serial" not in disk_argv:
-            raise ThyrisBootError("disk-boot argv is missing serial file capture")
+        if "chardev:thyris_serial" not in disk_argv:
+            raise ThyrisBootError("disk-boot argv is missing serial chardev socket")
+        if not any(
+            isinstance(item, str) and item.startswith("socket,id=thyris_serial")
+            for item in disk_argv
+        ):
+            raise ThyrisBootError("disk-boot argv is missing thyris_serial unix chardev")
+        if any(isinstance(item, str) and item.startswith("file:") for item in disk_argv):
+            raise ThyrisBootError("disk-boot argv still uses write-only -serial file")
         if "-no-reboot" in disk_argv:
             raise ThyrisBootError("disk-boot argv still has -no-reboot; first-boot reboot would kill QEMU")
         if ANDROID_DISK_BOOT_CMDLINE not in disk_argv:
@@ -1219,6 +1329,15 @@ async def run_android_adb_userspace_boot(
         if "media=cdrom" in joined_disk:
             raise ThyrisBootError("disk-boot argv still attached live /dev/sr0 ISO")
         logger.info("Android disk-boot argv: %s", joined_disk)
+        serial_stop = asyncio.Event()
+        serial_task = asyncio.create_task(
+            hold_android_serial_chardev(
+                android_serial_socket_path(log_console),
+                log_console,
+                serial_stop,
+            ),
+            name="thyris-serial-holder",
+        )
         process = await asyncio.create_subprocess_exec(
             *disk_argv,
             stdin=asyncio.subprocess.DEVNULL,
@@ -1230,6 +1349,15 @@ async def run_android_adb_userspace_boot(
         deadline = time.monotonic() + timeout_seconds
         userspace_markers: List[str] = []
         while time.monotonic() < deadline:
+            if serial_task.done() and not serial_task.cancelled():
+                holder_error = serial_task.exception()
+                if holder_error is not None:
+                    raise ThyrisBootError(
+                        f"serial chardev holder died before ADB proof: {holder_error}"
+                    ) from holder_error
+                raise ThyrisBootError(
+                    "serial chardev holder closed while qemu is still running"
+                )
             if process.returncode is not None:
                 console_text, stderr_text = _read_logs()
                 raise ThyrisBootError(
@@ -1267,6 +1395,14 @@ async def run_android_adb_userspace_boot(
         )
     finally:
         await _stop_qemu_process(process)
+        if serial_stop is not None:
+            serial_stop.set()
+        if serial_task is not None:
+            serial_task.cancel()
+            try:
+                await serial_task
+            except (asyncio.CancelledError, OSError):
+                pass
         stdout_handle.close()
         stderr_handle.close()
         await adb_disconnect(adb, host_adb_port)
