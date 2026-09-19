@@ -1,0 +1,191 @@
+{
+  "name": "thyris_android_boot",
+  "passed": false,
+  "status": "fail",
+  "pass_count": 8,
+  "fail_count": 1,
+  "skip_count": 0,
+  "elapsed_seconds": 268.5342605113983,
+  "checks": [
+    {
+      "name": "qemu_system_resolves",
+      "status": "pass",
+      "detail": {
+        "qemu_system": "/usr/bin/qemu-system-x86_64",
+        "accelerator": [
+          "-enable-kvm"
+        ]
+      }
+    },
+    {
+      "name": "android_iso_authentic",
+      "status": "pass",
+      "detail": {
+        "iso_path": "/home/daeron/LAB/Experiments/projects/pan-sdk/android_images/android-x86_64-9.0-r2.iso",
+        "iso_bytes": 965738496,
+        "sha1": "1cc85b5ed7c830ff71aecf8405c7281a9c995aa0"
+      }
+    },
+    {
+      "name": "nographic_argv",
+      "status": "pass",
+      "detail": {
+        "argv": [
+          "/usr/bin/qemu-system-x86_64",
+          "-enable-kvm",
+          "-cpu",
+          "qemu64",
+          "-name",
+          "thyris-argv-probe",
+          "-m",
+          "2048",
+          "-smp",
+          "2",
+          "-drive",
+          "file=/home/daeron/LAB/Experiments/projects/pan-sdk/disk.qcow2,format=qcow2,if=ide,index=0,media=disk",
+          "-drive",
+          "file=/home/daeron/LAB/Experiments/projects/pan-sdk/android.iso,format=raw,if=ide,index=1,media=cdrom,readonly=on",
+          "-boot",
+          "order=d",
+          "-no-reboot",
+          "-nographic",
+          "-netdev",
+          "user,id=net0",
+          "-device",
+          "e1000,netdev=net0"
+        ]
+      }
+    },
+    {
+      "name": "adb_resolves",
+      "status": "pass",
+      "detail": {
+        "adb": "/usr/lib/android-sdk/platform-tools/adb"
+      }
+    },
+    {
+      "name": "extract_live_boot_files",
+      "status": "pass",
+      "detail": {
+        "kernel_bytes": 7511040,
+        "initrd_bytes": 1357566,
+        "iso_path": "/home/daeron/LAB/Experiments/projects/pan-sdk/android_images/android-x86_64-9.0-r2.iso"
+      }
+    },
+    {
+      "name": "live_argv_forwards_adb",
+      "status": "pass",
+      "detail": {
+        "argv": [
+          "/usr/bin/qemu-system-x86_64",
+          "-enable-kvm",
+          "-cpu",
+          "qemu64",
+          "-name",
+          "thyris-live-argv",
+          "-m",
+          "2048",
+          "-smp",
+          "2",
+          "-drive",
+          "file=/tmp/thyris_liveargv_z_omyjh7/disk.qcow2,format=qcow2,if=ide,index=0,media=disk",
+          "-drive",
+          "file=/run/media/daeron/USB128GB/android_images/android-x86_64-9.0-r2.iso,format=raw,if=ide,index=1,media=cdrom,readonly=on",
+          "-kernel",
+          "/tmp/thyris_liveargv_z_omyjh7/boot/kernel",
+          "-initrd",
+          "/tmp/thyris_liveargv_z_omyjh7/boot/initrd.img",
+          "-append",
+          "root=/dev/ram0 SETUPWIZARD=0 nomodeset SRC= DATA= console=ttyS0,115200 androidboot.console=ttyS0",
+          "-no-reboot",
+          "-nographic",
+          "-netdev",
+          "user,id=net0,hostfwd=tcp::15555-:5555",
+          "-device",
+          "e1000,netdev=net0"
+        ]
+      }
+    },
+    {
+      "name": "disk_boot_argv",
+      "status": "pass",
+      "detail": {
+        "argv": [
+          "/usr/bin/qemu-system-x86_64",
+          "-enable-kvm",
+          "-cpu",
+          "qemu64",
+          "-name",
+          "thyris-disk-argv",
+          "-m",
+          "2048",
+          "-smp",
+          "2",
+          "-drive",
+          "file=/tmp/thyris_diskargv_hptp68kv/disk.qcow2,format=qcow2,if=ide,index=0,media=disk",
+          "-kernel",
+          "/tmp/thyris_diskargv_hptp68kv/kernel",
+          "-initrd",
+          "/tmp/thyris_diskargv_hptp68kv/initrd.img",
+          "-append",
+          "root=/dev/ram0 SETUPWIZARD=0 SRC=/thyris DATA= VIRT_WIFI=0 console=ttyS0,115200 androidboot.console=ttyS0",
+          "-vga",
+          "std",
+          "-display",
+          "none",
+          "-chardev",
+          "socket,id=thyris_serial,path=/tmp/thyris_diskargv_hptp68kv/disk-serial.sock,server=on,wait=off",
+          "-serial",
+          "chardev:thyris_serial",
+          "-netdev",
+          "user,id=net0,hostfwd=tcp::15555-:5555",
+          "-device",
+          "e1000,netdev=net0"
+        ],
+        "kernel_append": "root=/dev/ram0 SETUPWIZARD=0 SRC=/thyris DATA= VIRT_WIFI=0 console=ttyS0,115200 androidboot.console=ttyS0"
+      }
+    },
+    {
+      "name": "android_installer_boot",
+      "status": "pass",
+      "detail": {
+        "pid": 169917,
+        "markers": [
+          "SeaBIOS",
+          "Booting from DVD",
+          "ISOLINUX",
+          "isolinux"
+        ],
+        "iso_bootloader_markers": [
+          "ISOLINUX",
+          "isolinux"
+        ],
+        "iso_bytes": 965738496,
+        "accelerator": [
+          "-enable-kvm"
+        ],
+        "console_excerpt": "\u001bc\u001b[?7l\u001b[2J\u001b[0mSeaBIOS (version 1.17.0-debian-1.17.0-1ubuntu1)\n\n\niPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+7EFC8DD0+7EF08DD0 CA00\nPress Ctrl-B to configure iPXE (PCI 00:03.0)...\n                                                                               \n\n\nBooting from DVD/CD...\n\nISOLINUX 6.03 2014-10-06 ETCD Copyright (C) 1994-2014 H. Peter Anvin et al\u001b[01;01H",
+        "phone_ready": false,
+        "adb_proven": false,
+        "qemu_system": "/usr/bin/qemu-system-x86_64",
+        "disk_owner": "telecom.vm_image_manager.ISOConverter._create_disk"
+      }
+    },
+    {
+      "name": "android_adb_userspace",
+      "status": "fail",
+      "error": "CheckFailure: Android live boot failed before ADB: disk-boot QEMU exited rc=1 before ADB userspace proof. install_markers=['Congratulations', 'installed successfully', 'Installing Android-x86', 'Syncing to disk', 'Formatting'] stderr='qemu-system-x86_64: -chardev socket,id=thyris_serial,path=/run/media/daeron/USB128GB/thyris-disks/thyris_adb_6lvwfsi0/disk-adb-console.sock,server=on,wait=off: Failed to bind socket to /run/media/daeron/USB128GB/thyris-disks/thyris_adb_6lvwfsi0/disk-adb-console.sock: Operation not permitted\\n' console=''",
+      "detail": {}
+    }
+  ],
+  "phone_ready": false,
+  "adb_proven": false,
+  "claim": "Installer ISOLINUX remains a non-READY proof. ADB userspace was not proven; phone_ready stays false.",
+  "error": "1 thyris android boot checks failed",
+  "artifacts": {
+    "json": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/thyris_vm/runs/20260918_232743/result.json",
+    "md": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/thyris_vm/runs/20260918_232743/result.md",
+    "log": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/thyris_vm/runs/20260918_232743/result.log",
+    "run_dir": "/home/daeron/LAB/Experiments/projects/pan-sdk/test/thyris_vm/runs/20260918_232743"
+  }
+}

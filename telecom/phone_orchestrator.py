@@ -129,6 +129,17 @@ Justification: I am editing this owner because a write-only -serial file:
     READY still only flips after adb shell thyris_adb_health.
 Provenance: SCOPE.md engagement thyris-adb-userspace-ready
 Files: telecom/phone_orchestrator.py, test/thyris_vm/test_thyris_android_boot.py
+
+Modified: 2026-09-18
+Modified by: cursor-grok (daeron)
+Justification: I am editing this owner because AUTO_INSTALL on Envy reached
+    Congratulations (20260918_232743) then qemu refused to bind the serial
+    unix socket on USB128GB (EPERM, VFAT/exFAT). Wrapping a second socket
+    helper would duplicate android_serial_socket_path. The chardev now lives
+    under tempfile.gettempdir(); the 8G qcow and serial log stay on USB.
+    READY still only flips after adb shell thyris_adb_health.
+Provenance: SCOPE.md engagement thyris-adb-userspace-ready
+Files: telecom/phone_orchestrator.py, test/thyris_vm/test_thyris_android_boot.py
 """
 
 from __future__ import annotations
@@ -151,6 +162,7 @@ import secrets  # For secure random passwords
 import psutil  # For PID/process management (from your VM supervisor)
 import os
 import signal
+import tempfile
 import time
 from collections import defaultdict
 
@@ -746,8 +758,14 @@ def require_windows_whpx_accelerator(accel: Tuple[str, ...]) -> Tuple[str, ...]:
 
 
 def android_serial_socket_path(serial_log_path: Path) -> Path:
-    """Unix socket beside the serial log for the disk-boot chardev."""
-    return Path(serial_log_path).with_suffix(".sock")
+    """Unix socket on a local POSIX fs for the disk-boot chardev.
+
+    The serial log may live next to the 8G qcow on USB. VFAT/exFAT rejects
+    AF_UNIX bind with EPERM, which is how disk-boot died after AUTO_INSTALL
+    on this Envy (20260918_232743).
+    """
+    digest = hashlib.sha1(str(Path(serial_log_path).resolve()).encode("utf-8")).hexdigest()[:16]
+    return Path(tempfile.gettempdir()) / f"thyris-serial-{digest}.sock"
 
 
 async def hold_android_serial_chardev(
@@ -1318,6 +1336,15 @@ async def run_android_adb_userspace_boot(
             for item in disk_argv
         ):
             raise ThyrisBootError("disk-boot argv is missing thyris_serial unix chardev")
+        serial_sock = android_serial_socket_path(log_console)
+        if str(disk.parent.resolve()) in str(serial_sock.resolve()):
+            raise ThyrisBootError(
+                f"serial chardev socket cannot live on the qcow workdir: {serial_sock}"
+            )
+        if "thyris-disks" in str(serial_sock) or "USB128GB" in str(serial_sock):
+            raise ThyrisBootError(
+                f"serial chardev socket cannot live on USB: {serial_sock}"
+            )
         if any(isinstance(item, str) and item.startswith("file:") for item in disk_argv):
             raise ThyrisBootError("disk-boot argv still uses write-only -serial file")
         if "-no-reboot" in disk_argv:
@@ -1332,7 +1359,7 @@ async def run_android_adb_userspace_boot(
         serial_stop = asyncio.Event()
         serial_task = asyncio.create_task(
             hold_android_serial_chardev(
-                android_serial_socket_path(log_console),
+                serial_sock,
                 log_console,
                 serial_stop,
             ),

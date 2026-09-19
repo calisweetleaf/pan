@@ -36,6 +36,7 @@ false until that proof.
 | 4. AUTO_INSTALL=force then disk boot SRC=/thyris | ISO install.img scripts/1-install unattended path. 8G qcow via landed _create_disk. | Windows nographic disk-boot: Congratulations then `console:/ #`, QEMU rc=4294967295, no adbd. | **SELECTED** and continued. |
 | 4b. Linux KVM disk-boot VGA+serial, allow reboot, adbd default.prop | Same install owner. Hidden std VGA, serial file (not stdio), no `-no-reboot` on disk-boot. Initrd writes `sys.usb.config=adb` and `ro.adb.secure=0` beside the existing TCP port lines. | This Envy: qemu 10.2.1, KVM open, adb, official ISO SHA-1 match. | **SELECTED on this host.** |
 | 4c. Serial chardev holder + VIRT_WIFI=0 | Bidirectional unix chardev instead of `-serial file:` (EOF killed PID1). `VIRT_WIFI=0` so init.sh leaves eth0 at 10.0.2.15 instead of wifi_eth IPv6-only. | Manual Envy probe: `adb -s 127.0.0.1:15555 shell echo thyris_adb_health` returned `thyris_adb_health`. | **SELECTED on this host.** |
+| 4d. Chardev socket on local POSIX temp, not USB | Same holder. AF_UNIX bind beside the USB qcow fails EPERM on VFAT/exFAT. | 20260918_232743: AUTO_INSTALL Congratulations then qemu rc=1 bind EPERM on `thyris-disks/.../disk-adb-console.sock`. | **SELECTED on this host.** |
 | 5. serial setprop / prompt_bridge / dummy READY / BlissOS download | Shortcuts | ANTITHESIS | Rejected |
 
 Disk-create remains `ISOConverter._create_disk`. `boot_android_installer`

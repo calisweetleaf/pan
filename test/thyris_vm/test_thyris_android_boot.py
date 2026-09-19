@@ -291,6 +291,14 @@ def check_disk_boot_argv(details: dict[str, object]) -> None:
             raise CheckFailure("disk-boot argv is missing serial chardev socket")
         if not any(isinstance(item, str) and item.startswith("socket,id=thyris_serial") for item in argv):
             raise CheckFailure("disk-boot argv is missing thyris_serial unix chardev")
+        sock_spec = next(
+            item for item in argv if isinstance(item, str) and item.startswith("socket,id=thyris_serial")
+        )
+        tmp_root = str(Path(tempfile.gettempdir()).resolve())
+        if "thyris-disks" in sock_spec or "USB128GB" in sock_spec:
+            raise CheckFailure("serial chardev socket is on USB; AF_UNIX bind fails there")
+        if f"path={tmp_root}/thyris-serial-" not in sock_spec and f"path={tempfile.gettempdir()}/thyris-serial-" not in sock_spec:
+            raise CheckFailure(f"serial chardev socket is not on local temp fs: {sock_spec}")
         if any(isinstance(item, str) and item.startswith("file:") for item in argv):
             raise CheckFailure("disk-boot argv still uses write-only -serial file")
         if "-no-reboot" in argv:
@@ -475,6 +483,13 @@ def check_android_adb_userspace(details: dict[str, object]) -> None:
                 for item in (evidence.get("argv") or [])
             ):
                 raise CheckFailure("disk-boot argv is missing thyris_serial unix chardev")
+            sock_spec = next(
+                item
+                for item in (evidence.get("argv") or [])
+                if isinstance(item, str) and item.startswith("socket,id=thyris_serial")
+            )
+            if "thyris-disks" in sock_spec or "USB128GB" in sock_spec:
+                raise CheckFailure("serial chardev socket is on USB; AF_UNIX bind fails there")
             if any(
                 isinstance(item, str) and item.startswith("file:")
                 for item in (evidence.get("argv") or [])
