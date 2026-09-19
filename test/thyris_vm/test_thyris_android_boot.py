@@ -178,8 +178,14 @@ def check_extract_live_boot_files(details: dict[str, object]) -> None:
         init_text = gzip.decompress(initrd.read_bytes()).decode("latin-1", "replace")
         if "service.adb.tcp.port=5555" not in init_text:
             raise CheckFailure("live initrd was not injected with ADB TCP default.prop writes")
+        if "persist.sys.usb.config=adb" not in init_text:
+            raise CheckFailure("live initrd was not injected with persist.sys.usb.config=adb")
+        if "ro.adb.secure=0" not in init_text:
+            raise CheckFailure("live initrd was not injected with ro.adb.secure=0")
         if "setprop service.adb.tcp.port" in init_text:
             raise CheckFailure("live initrd still uses serial setprop spam")
+        if "setprop persist.sys.usb.config" in init_text:
+            raise CheckFailure("live initrd used serial setprop for usb.config")
         details["kernel_bytes"] = kernel.stat().st_size
         details["initrd_bytes"] = initrd.stat().st_size
         details["iso_path"] = str(iso)
@@ -326,7 +332,9 @@ def check_android_installer_boot(details: dict[str, object]) -> None:
 def check_android_adb_userspace(details: dict[str, object]) -> None:
     """Install the same ISO to qcow, boot that disk, and demand adb shell."""
     iso = _android_iso()
-    with tempfile.TemporaryDirectory(prefix="thyris_adb_") as tmpdir:
+    work_parent = ROOT_DIR / "thyris-disks"
+    tmp_dir = str(work_parent) if work_parent.is_dir() else None
+    with tempfile.TemporaryDirectory(prefix="thyris_adb_", dir=tmp_dir) as tmpdir:
         work = Path(tmpdir)
         disk = work / "phone-adb.qcow2"
         created = asyncio.run(ISOConverter()._create_disk(disk, ANDROID_INSTALL_DISK_GB))
@@ -381,14 +389,15 @@ def check_android_adb_userspace(details: dict[str, object]) -> None:
             raise CheckFailure("ADB proof used a fabricated libvirt IP")
         if not str(evidence.get("adb_detail") or ""):
             raise CheckFailure("ADB proof omitted connect/shell detail")
-        if _adb_output_is_offline(str(evidence.get("adb_detail") or "")):
-            raise CheckFailure("ADB proof accepted a device-offline transport")
-        if ADB_HEALTH_TOKEN not in str(evidence.get("adb_detail") or "") and "thyris_adb_health" not in str(
+        if ADB_HEALTH_TOKEN not in str(evidence.get("guest_response") or "") and ADB_HEALTH_TOKEN not in str(
             evidence.get("adb_detail") or ""
         ):
-            # connect text may omit the token; require the helper to have proven shell
-            if not evidence.get("android_release"):
-                raise CheckFailure("ADB proof omitted android_release after shell health")
+            raise CheckFailure("ADB proof omitted guest_response thyris_adb_health")
+        host_command = str(evidence.get("host_command") or "")
+        if "adb" not in host_command or "shell" not in host_command or ADB_HEALTH_TOKEN not in host_command:
+            raise CheckFailure("ADB proof omitted host adb shell command")
+        if _adb_output_is_offline(str(evidence.get("adb_detail") or "")):
+            raise CheckFailure("ADB proof accepted a device-offline transport")
         append = " ".join(str(item) for item in evidence.get("argv") or [])
         install_append = " ".join(str(item) for item in evidence.get("install_argv") or [])
         if "AUTO_INSTALL=force" not in install_append:
@@ -401,6 +410,16 @@ def check_android_adb_userspace(details: dict[str, object]) -> None:
                 raise CheckFailure("disk-boot argv is missing SRC=/thyris")
             if "media=cdrom" in append:
                 raise CheckFailure("disk-boot still attached live /dev/sr0 ISO")
+            if "-nographic" in (evidence.get("argv") or []):
+                raise CheckFailure("disk-boot still uses -nographic stdio")
+            if "-vga" not in (evidence.get("argv") or []):
+                raise CheckFailure("disk-boot argv is missing hidden VGA")
+            if "-serial" not in (evidence.get("argv") or []):
+                raise CheckFailure("disk-boot argv is missing serial file capture")
+            if "-no-reboot" in (evidence.get("argv") or []):
+                raise CheckFailure("disk-boot argv still has -no-reboot")
+            if "nomodeset" in ANDROID_DISK_BOOT_CMDLINE:
+                raise CheckFailure("disk-boot cmdline still uses nomodeset")
         elif boot_mode == "auto_install_run":
             if ANDROID_AUTO_INSTALL_CMDLINE not in append:
                 raise CheckFailure("install-run argv lost AUTO_INSTALL=force")
@@ -428,6 +447,8 @@ def check_android_adb_userspace(details: dict[str, object]) -> None:
                 "internal_ip": evidence.get("internal_ip"),
                 "phone_ready": evidence.get("phone_ready"),
                 "adb_proven": evidence.get("adb_proven"),
+                "host_command": evidence.get("host_command"),
+                "guest_response": evidence.get("guest_response"),
                 "vm_state": evidence.get("vm_state"),
                 "stale_qemu_killed": evidence.get("stale_qemu_killed"),
                 "stale_adb_killed": evidence.get("stale_adb_killed"),
@@ -553,8 +574,10 @@ def write_artifacts(payload: dict[str, object], timestamp: str, log_text: str) -
         "(SHA-1 1cc85b5ed7c830ff71aecf8405c7281a9c995aa0), a qcow2 from landed",
         "ISOConverter._create_disk, SeaBIOS/ISOLINUX on installer -nographic stdout,",
         "and a disk-install via this ISO's AUTO_INSTALL=force, then a disk boot",
-        "that only sets phone_ready after adb connect + adb shell. Windows uses",
-        "-accel whpx,kernel-irqchip=off. I refused a dummy boot, prompt_bridge,",
+        "with hidden VGA + serial file that only sets phone_ready after adb",
+        "connect + adb shell. Windows install still uses",
+        "-accel whpx,kernel-irqchip=off. POSIX disk-boot uses KVM or TCG, not",
+        "WHPX. I refused a dummy boot, prompt_bridge,",
         "a second disk-create owner, and READY from ISOLINUX.",
         "",
         f"Claim: {payload.get('claim')}",

@@ -1,0 +1,26 @@
+{
+  "version": "0.16",
+  "date": "2026-09-18",
+  "author": "daeron",
+  "summary": "Continue Thyris ADB userspace on Linux KVM: AUTO_INSTALL=force then disk-boot SRC=/thyris with hidden VGA plus serial file, allow guest reboot, inject adbd USB/TCP default.prop. PhoneVMState.READY only after real adb shell. Disk-create stays ISOConverter._create_disk. ISOLINUX installer boot remains a non-READY proof.",
+  "domains": {
+    "thyris": {
+      "module": "telecom/phone_orchestrator.py",
+      "wrapper": null,
+      "tool_count": 1,
+      "provenance": "snapshots/v0.15/manifest.json domains.thyris plus official android-x86_64-9.0-r2.iso live kernel/initrd. No prompt_bridge. No second qemu-img owner.",
+      "edits": [
+        {
+          "date": "2026-09-18",
+          "author": "daeron",
+          "summary": "Hidden VGA+serial disk-boot without -no-reboot; initrd default.prop starts adbd on TCP 5555; host_command/guest_response on adb shell health. READY still only after the guest echoes thyris_adb_health.",
+          "files": [
+            "telecom/phone_orchestrator.py",
+            "test/thyris_vm/test_thyris_android_boot.py"
+          ],
+          "justification_ref": "docstring:Modified"
+        }
+      ]
+    }
+  }
+}

@@ -104,6 +104,19 @@ Justification: WHPX livem still could not start adbd (20260918_050641:
     READY still only flips after adb shell thyris_adb_health.
 Provenance: SCOPE.md engagement thyris-adb-userspace-ready
 Files: telecom/phone_orchestrator.py, test/thyris_vm/test_thyris_android_boot.py
+
+Modified: 2026-09-18
+Modified by: cursor-grok (daeron)
+Justification: I am editing this owner because Windows nographic disk-boot
+    reached Android console:/ # then QEMU exited before TCP adbd
+    (20260918_052020, 20260918_054408). Wrapping a second boot helper would
+    duplicate ISOConverter._create_disk and build_android_qemu_argv. This
+    Linux KVM host disk-boots with hidden VGA plus a serial file, keeps QEMU
+    across first-boot reboot, and writes adbd USB/TCP default.prop in the
+    same live initrd inject. READY still only flips after adb shell
+    thyris_adb_health.
+Provenance: snapshots/v0.16/manifest.json -> domains.thyris.edits[0]
+Files: telecom/phone_orchestrator.py, test/thyris_vm/test_thyris_android_boot.py
 """
 
 from __future__ import annotations
@@ -113,7 +126,7 @@ import asyncio
 import socket
 import subprocess
 import shutil
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, NamedTuple, Optional, Tuple
 from uuid import UUID, uuid4
 from pathlib import Path
 from dataclasses import dataclass, field, asdict
@@ -214,7 +227,7 @@ ANDROID_AUTO_INSTALL_CMDLINE = (
     + " console=ttyS0,115200 androidboot.console=ttyS0"
 )
 ANDROID_DISK_BOOT_CMDLINE = (
-    f"root=/dev/ram0 SETUPWIZARD=0 nomodeset SRC=/{ANDROID_INSTALL_PREFIX} DATA= "
+    f"root=/dev/ram0 SETUPWIZARD=0 SRC=/{ANDROID_INSTALL_PREFIX} DATA= "
     "console=ttyS0,115200 androidboot.console=ttyS0"
 )
 INSTALL_PROGRESS_MARKERS: tuple[str, ...] = (
@@ -248,6 +261,15 @@ class ThyrisBootError(RuntimeError):
 
 class ThyrisAdbError(RuntimeError):
     """Guest process ran but ADB userspace was not proven."""
+
+
+class AdbHealthProbe(NamedTuple):
+    """One host adb connect+shell attempt against the qemu user-net forward."""
+
+    ok: bool
+    detail: str
+    host_command: str
+    guest_response: str
 
 
 def sha1_file(path: Path) -> str:
@@ -558,6 +580,9 @@ def extract_android_live_boot_files(iso_path: Path, destination_dir: Path) -> Tu
 ADB_TCP_DEFAULT_PROP_LINES = (
     'echo "service.adb.tcp.port=5555" >> default.prop\n'
     'echo "persist.adb.tcp.port=5555" >> default.prop\n'
+    'echo "persist.sys.usb.config=adb" >> default.prop\n'
+    'echo "sys.usb.config=adb" >> default.prop\n'
+    'echo "ro.adb.secure=0" >> default.prop\n'
 )
 INITRD_SETUPWIZARD_PROP = (
     '[ "$SETUPWIZARD" = "0" ] && echo "ro.setupwizard.mode=DISABLED" >> default.prop\n'
@@ -603,11 +628,12 @@ def _replace_cpio_newc_file(blob: bytes, filename: str, new_payload: bytes) -> b
 
 
 def inject_adb_tcp_into_live_initrd(initrd_path: Path) -> None:
-    """Write ADB TCP properties beside the ISO init's SETUPWIZARD default.prop line.
+    """Write ADB TCP and USB-config properties beside SETUPWIZARD default.prop.
 
     Serial setprop into a kernel log cannot enable adbd. The live init already
     appends to default.prop before switch_root; this adds the TCP port the
-    hostfwd targets. The ISO file on disk is not modified.
+    hostfwd targets plus the USB config that starts adbd. The ISO file on
+    disk is not modified.
     """
     initrd = Path(initrd_path)
     raw = initrd.read_bytes()
@@ -723,18 +749,24 @@ def build_android_qemu_argv(
     kernel_append: Optional[str] = None,
     attach_iso: bool = True,
     boot_order: str = "d",
+    no_reboot: bool = True,
+    serial_log_path: Optional[Path] = None,
 ) -> List[str]:
     """Build qemu-system-x86_64 argv for Android-x86.
 
     Installer-boot (no kernel_path): SeaBIOS/ISOLINUX on -nographic stdout.
     Live/install (kernel_path+initrd_path): skip vesamenu.c32 using files
     extracted from the same ISO. Disk userspace omits the ISO so SRC cannot
-    land on live /dev/sr0.
+    land on live /dev/sr0. Disk ADB uses hidden VGA plus a serial file so
+    Android's console service does not own qemu stdio, and omits -no-reboot
+    so a first-boot reboot cannot kill the guest.
     """
     if (kernel_path is None) != (initrd_path is None):
         raise ThyrisBootError("live boot requires both kernel_path and initrd_path")
     if boot_order not in {"c", "d", "cd", "dc"}:
         raise ThyrisBootError(f"unsupported boot_order {boot_order!r}")
+    if nographic and serial_log_path is not None:
+        raise ThyrisBootError("nographic already owns stdio; refuse a second serial file")
     cmd: List[str] = [
         str(qemu_system),
         *require_windows_whpx_accelerator(select_qemu_accelerator()),
@@ -776,11 +808,14 @@ def build_android_qemu_argv(
         )
     else:
         cmd.extend(["-boot", f"order={boot_order}"])
-    cmd.append("-no-reboot")
+    if no_reboot:
+        cmd.append("-no-reboot")
     if nographic:
         cmd.append("-nographic")
     else:
         cmd.extend(["-vga", "std", "-display", "none"])
+        if serial_log_path is not None:
+            cmd.extend(["-serial", f"file:{serial_log_path.resolve()}"])
         if vnc_display is not None:
             cmd.extend(["-vnc", f":{vnc_display}"])
     if adb_port is not None:
@@ -799,13 +834,23 @@ def build_android_qemu_argv(
     return cmd
 
 
-async def adb_shell_health(adb: Path, adb_port: int) -> Tuple[bool, str]:
+async def adb_shell_health(adb: Path, adb_port: int) -> AdbHealthProbe:
     """adb connect then shell echo. Fabricated libvirt IPs are not proof.
 
     Device offline / unauthorized is a failed probe, even if connect printed
     'already connected'. Detecting Android-x86 console text is not READY.
     """
     serial = f"127.0.0.1:{adb_port}"
+    host_command = f"adb -s {serial} shell echo {ADB_HEALTH_TOKEN}"
+
+    def _fail(detail: str, guest_response: str = "") -> AdbHealthProbe:
+        return AdbHealthProbe(
+            ok=False,
+            detail=detail,
+            host_command=host_command,
+            guest_response=guest_response,
+        )
+
     await adb_disconnect(adb, adb_port)
     try:
         connect = await asyncio.create_subprocess_exec(
@@ -817,12 +862,12 @@ async def adb_shell_health(adb: Path, adb_port: int) -> Tuple[bool, str]:
         )
         connect_out, connect_err = await asyncio.wait_for(connect.communicate(), timeout=15)
     except asyncio.TimeoutError:
-        return False, "adb connect timed out"
+        return _fail("adb connect timed out")
     except OSError as exc:
-        return False, f"adb connect failed to exec: {exc}"
+        return _fail(f"adb connect failed to exec: {exc}")
     connect_text = (connect_out + connect_err).decode("utf-8", errors="replace").strip()
     if _adb_output_is_offline(connect_text):
-        return False, f"adb connect refused (offline): {connect_text!r}"
+        return _fail(f"adb connect refused (offline): {connect_text!r}")
     try:
         devices = await asyncio.create_subprocess_exec(
             str(adb),
@@ -832,12 +877,12 @@ async def adb_shell_health(adb: Path, adb_port: int) -> Tuple[bool, str]:
         )
         devices_out, devices_err = await asyncio.wait_for(devices.communicate(), timeout=15)
     except asyncio.TimeoutError:
-        return False, f"adb devices timed out after connect={connect_text!r}"
+        return _fail(f"adb devices timed out after connect={connect_text!r}")
     except OSError as exc:
-        return False, f"adb devices failed to exec: {exc}"
+        return _fail(f"adb devices failed to exec: {exc}")
     devices_text = (devices_out + devices_err).decode("utf-8", errors="replace").strip()
     if _adb_output_is_offline(devices_text) or _adb_output_is_offline(connect_text):
-        return False, (
+        return _fail(
             f"adb devices listed offline/unauthorized. "
             f"connect={connect_text!r} devices={devices_text!r}"
         )
@@ -854,20 +899,33 @@ async def adb_shell_health(adb: Path, adb_port: int) -> Tuple[bool, str]:
         )
         shell_out, shell_err = await asyncio.wait_for(shell.communicate(), timeout=15)
     except asyncio.TimeoutError:
-        return False, f"adb shell timed out after connect={connect_text!r}"
+        return _fail(f"adb shell timed out after connect={connect_text!r}")
     except OSError as exc:
-        return False, f"adb shell failed to exec: {exc}"
+        return _fail(f"adb shell failed to exec: {exc}")
+    guest_response = shell_out.decode("utf-8", errors="replace")
     err_text = (shell_out + shell_err).decode("utf-8", errors="replace").strip()
     if _adb_output_is_offline(err_text) or _adb_output_is_offline(devices_text):
-        return False, (
+        return _fail(
             f"adb shell refused device offline. connect={connect_text!r} "
-            f"devices={devices_text!r} shell={err_text!r} rc={shell.returncode}"
+            f"devices={devices_text!r} shell={err_text!r} rc={shell.returncode}",
+            guest_response=guest_response.strip(),
         )
     if shell.returncode == 0 and ADB_HEALTH_TOKEN.encode("ascii") in shell_out:
-        return True, connect_text or "adb shell echoed thyris_adb_health"
-    return False, (
+        detail = (
+            f"host_command={host_command}; "
+            f"guest_response={guest_response.strip()!r}; "
+            f"connect={connect_text!r}; devices={devices_text!r}"
+        )
+        return AdbHealthProbe(
+            ok=True,
+            detail=detail,
+            host_command=host_command,
+            guest_response=guest_response.strip(),
+        )
+    return _fail(
         f"connect={connect_text!r} devices={devices_text!r} "
-        f"shell={err_text!r} rc={shell.returncode}"
+        f"shell={err_text!r} rc={shell.returncode}",
+        guest_response=guest_response.strip(),
     )
 
 
@@ -944,6 +1002,7 @@ async def run_android_adb_userspace_boot(
     AUTO_INSTALL=force path, then boots SRC=/thyris from the qcow without
     live /dev/sr0. ISOLINUX text is not READY. Disk create stays
     ISOConverter._create_disk. Windows accel is WHPX with kernel-irqchip=off.
+    POSIX disk-boot uses hidden VGA plus a serial file and allows reboot.
     """
     require_windows_whpx_accelerator(select_qemu_accelerator())
     if "AUTO_INSTALL=force" not in ANDROID_AUTO_INSTALL_CMDLINE:
@@ -1041,6 +1100,8 @@ async def run_android_adb_userspace_boot(
             "adb_port": host_adb_port,
             "adb_serial": serial,
             "adb_detail": adb_detail,
+            "host_command": host_command,
+            "guest_response": guest_response,
             "android_release": release,
             "internal_ip": QEMU_USERNET_GUEST_IP,
             "install_markers": install_markers,
@@ -1060,6 +1121,8 @@ async def run_android_adb_userspace_boot(
     install_markers: List[str] = []
     reboot_keys = 0
     adb_detail = "adb not yet probed"
+    host_command = f"adb -s {serial} shell echo {ADB_HEALTH_TOKEN}"
+    guest_response = ""
     console_text = ""
     stderr_text = ""
     disk_argv: List[str] = []
@@ -1088,8 +1151,11 @@ async def run_android_adb_userspace_boot(
                     )
                 except (BrokenPipeError, ConnectionResetError, OSError) as exc:
                     logger.debug("AUTO_INSTALL reboot key write failed: %s", exc)
-                ok, adb_detail = await adb_shell_health(adb, host_adb_port)
-                if ok:
+                probe = await adb_shell_health(adb, host_adb_port)
+                adb_detail = probe.detail
+                host_command = probe.host_command
+                guest_response = probe.guest_response
+                if probe.ok:
                     return await _proven(
                         console_text,
                         install_argv,
@@ -1117,7 +1183,8 @@ async def run_android_adb_userspace_boot(
             )
         log_console = console.with_name("disk-" + console.name)
         log_stderr = stderr_file.with_name("disk-" + stderr_file.name)
-        stdout_handle = log_console.open("wb")
+        qemu_stdout_path = log_stderr.with_name("disk-qemu.stdout.log")
+        stdout_handle = qemu_stdout_path.open("wb")
         stderr_handle = log_stderr.open("wb")
         disk_argv = build_android_qemu_argv(
             qemu_system=qemu_system,
@@ -1126,7 +1193,9 @@ async def run_android_adb_userspace_boot(
             name=f"thyris-android-disk-{uuid4().hex[:8]}",
             memory_mb=memory_mb,
             vcpus=vcpus,
-            nographic=True,
+            nographic=False,
+            no_reboot=False,
+            serial_log_path=log_console,
             adb_port=host_adb_port,
             kernel_path=kernel_path,
             initrd_path=initrd_path,
@@ -1134,16 +1203,25 @@ async def run_android_adb_userspace_boot(
             attach_iso=False,
         )
         argv = disk_argv
-        if "-nographic" not in disk_argv:
-            raise ThyrisBootError("disk-boot argv is missing -nographic")
+        joined_disk = " ".join(str(item) for item in disk_argv)
+        if "-nographic" in disk_argv:
+            raise ThyrisBootError("disk-boot argv still uses -nographic; Android console owns stdio")
+        if "-vga" not in disk_argv:
+            raise ThyrisBootError("disk-boot argv is missing hidden VGA")
+        if "-serial" not in disk_argv:
+            raise ThyrisBootError("disk-boot argv is missing serial file capture")
+        if "-no-reboot" in disk_argv:
+            raise ThyrisBootError("disk-boot argv still has -no-reboot; first-boot reboot would kill QEMU")
         if ANDROID_DISK_BOOT_CMDLINE not in disk_argv:
             raise ThyrisBootError("disk-boot argv is missing SRC=/thyris")
-        if "media=cdrom" in " ".join(disk_argv):
+        if "nomodeset" in ANDROID_DISK_BOOT_CMDLINE:
+            raise ThyrisBootError("disk-boot cmdline still uses nomodeset; VGA cannot bind")
+        if "media=cdrom" in joined_disk:
             raise ThyrisBootError("disk-boot argv still attached live /dev/sr0 ISO")
-        logger.info("Android disk-boot argv: %s", " ".join(str(item) for item in disk_argv))
+        logger.info("Android disk-boot argv: %s", joined_disk)
         process = await asyncio.create_subprocess_exec(
             *disk_argv,
-            stdin=asyncio.subprocess.PIPE,
+            stdin=asyncio.subprocess.DEVNULL,
             stdout=stdout_handle,
             stderr=stderr_handle,
         )
@@ -1165,8 +1243,11 @@ async def run_android_adb_userspace_boot(
                 for marker in USERSPACE_EVIDENCE_MARKERS
                 if marker.lower() in console_text.lower()
             ]
-            ok, adb_detail = await adb_shell_health(adb, host_adb_port)
-            if ok:
+            probe = await adb_shell_health(adb, host_adb_port)
+            adb_detail = probe.detail
+            host_command = probe.host_command
+            guest_response = probe.guest_response
+            if probe.ok:
                 return await _proven(
                     console_text,
                     disk_argv,
@@ -2230,9 +2311,9 @@ class ThyrisPhoneOrchestrator:
                     )
                 except (BrokenPipeError, ConnectionResetError, OSError) as exc:
                     logger.debug("[%s] DEBUG=2 exit write failed: %s", correlation_id, exc)
-            ok, detail = await adb_shell_health(adb, adb_port)
-            logger.info("[%s] ADB attempt %s: %s", correlation_id, attempt, detail)
-            if ok:
+            probe = await adb_shell_health(adb, adb_port)
+            logger.info("[%s] ADB attempt %s: %s", correlation_id, attempt, probe.detail)
+            if probe.ok:
                 logger.info("[%s] ADB userspace proven at %s", correlation_id, QEMU_USERNET_GUEST_IP)
                 return QEMU_USERNET_GUEST_IP
             await asyncio.sleep(10)
