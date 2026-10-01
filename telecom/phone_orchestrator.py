@@ -1107,6 +1107,7 @@ async def run_android_adb_userspace_boot(
     adb_port: Optional[int] = None,
     qemu_stderr_path: Optional[Path] = None,
     live_boot_dir: Optional[Path] = None,
+    retain_runtime: bool = False,
 ) -> Dict[str, Any]:
     """Install this ISO onto the qcow, boot that disk, and demand adb shell.
 
@@ -1182,6 +1183,7 @@ async def run_android_adb_userspace_boot(
     serial_stop: Optional[asyncio.Event] = None
     serial_task: Optional[asyncio.Task[None]] = None
     serial = f"127.0.0.1:{host_adb_port}"
+    runtime_retained = False
 
     def _read_logs() -> tuple[str, str]:
         stdout_handle.flush()
@@ -1191,13 +1193,14 @@ async def run_android_adb_userspace_boot(
         return console_text, stderr_text
 
     async def _proven(console_text: str, boot_argv: List[str], kernel_append: str, boot_mode: str) -> Dict[str, Any]:
+        nonlocal runtime_retained
         release = await adb_getprop(adb, host_adb_port, "ro.build.version.release")
         userspace_markers = [
             marker
             for marker in USERSPACE_EVIDENCE_MARKERS
             if marker.lower() in console_text.lower()
         ]
-        return {
+        evidence: Dict[str, Any] = {
             "status": "adb_userspace",
             "pid": process.pid if process is not None else None,
             "qemu_system": str(qemu_system),
@@ -1235,7 +1238,22 @@ async def run_android_adb_userspace_boot(
             "vm_state": PhoneVMState.READY.value,
             "phone_ready": True,
             "adb_proven": True,
+            "qemu_stderr_path": str(log_stderr),
         }
+        if retain_runtime and boot_mode == "installed_disk":
+            if process is None or process.pid is None:
+                raise ThyrisBootError("cannot retain installed-disk runtime without a live qemu process")
+            if serial_stop is None or serial_task is None:
+                raise ThyrisBootError("cannot retain installed-disk runtime without serial holder")
+            runtime_retained = True
+            evidence["_runtime"] = {
+                "process": process,
+                "serial_stop": serial_stop,
+                "serial_task": serial_task,
+                "stdout_handle": stdout_handle,
+                "stderr_handle": stderr_handle,
+            }
+        return evidence
 
     log_console = console
     log_stderr = stderr_file
@@ -1421,20 +1439,20 @@ async def run_android_adb_userspace_boot(
             f"stderr={stderr_text[-2000:]!r} console={console_text[-4000:]!r}"
         )
     finally:
-        await _stop_qemu_process(process)
-        if serial_stop is not None:
-            serial_stop.set()
-        if serial_task is not None:
-            serial_task.cancel()
-            try:
-                await serial_task
-            except (asyncio.CancelledError, OSError):
-                pass
-        stdout_handle.close()
-        stderr_handle.close()
-        await adb_disconnect(adb, host_adb_port)
-        await adb_kill_server(adb)
-
+        if not runtime_retained:
+            await _stop_qemu_process(process)
+            if serial_stop is not None:
+                serial_stop.set()
+            if serial_task is not None:
+                serial_task.cancel()
+                try:
+                    await serial_task
+                except (asyncio.CancelledError, OSError):
+                    pass
+            stdout_handle.close()
+            stderr_handle.close()
+            await adb_disconnect(adb, host_adb_port)
+            await adb_kill_server(adb)
 
 # ==================== Phone VM Models ====================
 
@@ -1686,6 +1704,7 @@ class ThyrisPhoneOrchestrator:
         self.phone_config_path = self.vm_storage_path / "phone_configs"
         self.phone_config_path.mkdir(parents=True, exist_ok=True)
         self._qemu_stdio_handles: Dict[UUID, Tuple[object, object]] = {}
+        self._qemu_serial_holders: Dict[UUID, Tuple[asyncio.Event, asyncio.Task[None]]] = {}
         
         # Port allocation tracking (with auto-release on errors)
         self.allocated_vnc_ports: set = set()
@@ -2037,58 +2056,68 @@ class ThyrisPhoneOrchestrator:
             await self.memory_manager.sync_to_pan(sovereign_id, personal_data_store)
             add_step("memory_sync", "completed")
 
-            # 8. Start the Android VM (async, retries)
+            # 8. Install, boot, and retain the proven installed-disk runtime.
             add_step("vm_startup", "started")
-            success = await self._start_android_vm(phone_vm, include_play_services, correlation_id)
-            if not success:
-                error_msg = "Failed to start Android VM after retries"
-                add_step("vm_startup", "failed", error=error_msg)
-                phone_vm.vm_state = PhoneVMState.ERROR
-                self._save_phone_config(phone_vm)
-                self._release_ports(phone_vm)
-                return {"status": "error", "message": error_msg}
-            add_step("vm_startup", "completed", {"process_pid": phone_vm.process_pid})
+            _ = include_play_services
+            serial_log = vm_disk_path.with_suffix(".serial.log")
+            qemu_stderr = vm_disk_path.with_suffix(".qemu.stderr.log")
+            evidence = await self.boot_android_adb_userspace(
+                vm_disk_path,
+                android_iso_path,
+                serial_log,
+                memory_mb=profile.memory_gb * 1024,
+                vcpus=profile.vcpus,
+                timeout_seconds=1800.0,
+                adb_port=adb_port,
+                qemu_stderr_path=qemu_stderr,
+                live_boot_dir=vm_disk_path.parent / f"liveboot-{vm_id}",
+                retain_runtime=True,
+            )
+            runtime = evidence.pop("_runtime", None)
+            if evidence.get("boot_mode") != "installed_disk" or not isinstance(runtime, dict):
+                raise ThyrisBootError(
+                    "provisioning requires retained installed-disk ADB runtime; "
+                    f"got boot_mode={evidence.get('boot_mode')!r}"
+                )
+            process = runtime["process"]
+            serial_stop = runtime["serial_stop"]
+            serial_task = runtime["serial_task"]
+            stdout_handle = runtime["stdout_handle"]
+            stderr_handle = runtime["stderr_handle"]
+            phone_vm.process = process
+            phone_vm.process_pid = process.pid
+            phone_vm.serial_log_path = str(evidence.get("console_path") or serial_log)
+            phone_vm.qemu_stderr_path = str(evidence.get("qemu_stderr_path") or qemu_stderr)
+            self._qemu_stdio_handles[vm_id] = (stdout_handle, stderr_handle)
+            self._qemu_serial_holders[vm_id] = (serial_stop, serial_task)
+            add_step(
+                "vm_startup",
+                "completed",
+                {
+                    "process_pid": phone_vm.process_pid,
+                    "boot_mode": evidence.get("boot_mode"),
+                    "adb_port": evidence.get("adb_port"),
+                },
+            )
 
-            # 9. Wait for boot with retries/health check
+            # 9. READY remains gated on the real ADB proof returned by the owner.
             add_step("boot_wait", "started")
             phone_vm.vm_state = PhoneVMState.BOOTING
             self._save_phone_config(phone_vm)
+            phone_vm.internal_ip = str(evidence.get("internal_ip") or "")
+            if not evidence.get("adb_proven") or not evidence.get("phone_ready"):
+                raise ThyrisAdbError("installed-disk owner returned without ADB/READY proof")
+            add_step(
+                "boot_wait",
+                "completed",
+                {
+                    "internal_ip": phone_vm.internal_ip,
+                    "host_command": evidence.get("host_command"),
+                    "guest_response": evidence.get("guest_response"),
+                },
+            )
 
-            # Poll for IP and ADB readiness (retries)
-            phone_vm.internal_ip = await self._wait_for_ip_and_adb(phone_vm, correlation_id)
-            if not phone_vm.internal_ip:
-                error_msg = "ADB/IP health check failed; refusing PhoneVMState.READY without adb proof"
-                add_step("boot_wait", "failed", error=error_msg)
-                phone_vm.vm_state = PhoneVMState.ERROR
-                self._save_phone_config(phone_vm)
-                if phone_vm.process:
-                    await self._kill_process(phone_vm)
-                report["final_status"] = "error"
-                report["end_time"] = datetime.now(timezone.utc).isoformat()
-                reports = {}
-                try:
-                    report_file_json = self.vm_storage_path / f"provision_report_{vm_id}.json"
-                    with open(report_file_json, 'w') as f:
-                        json.dump(report, f, indent=2)
-                    reports["json"] = str(report_file_json)
-                    report_file_md = self.vm_storage_path / f"provision_report_{vm_id}.md"
-                    with open(report_file_md, 'w') as f:
-                        f.write(self._generate_markdown_report(report))
-                    reports["markdown"] = str(report_file_md)
-                except (OSError, TypeError) as report_err:
-                    logger.warning(f"[{correlation_id}] Failed to write provision report: {report_err}")
-                self.metrics['provision_failure']['count'] += 1
-                return {
-                    "status": "error",
-                    "message": error_msg,
-                    "vm_id": str(vm_id),
-                    "phone_ready": False,
-                    "adb_proven": False,
-                    "reports": reports,
-                }
-            add_step("boot_wait", "completed", {"internal_ip": phone_vm.internal_ip})
-
-            # 10. Mark ready only after ADB proof
+            # 10. Mark ready only after the owner's ADB proof.
             add_step("finalization", "started")
             apply_adb_ready(phone_vm, phone_vm.internal_ip)
 
@@ -2159,7 +2188,10 @@ class ThyrisPhoneOrchestrator:
             if 'phone_vm' in locals():
                 phone_vm.vm_state = PhoneVMState.ERROR
                 self._save_phone_config(phone_vm)
-                self._release_ports(phone_vm)
+                if phone_vm.process:
+                    await self._kill_process(phone_vm)
+                else:
+                    self._release_ports(phone_vm)
             raise
         except (OSError, RuntimeError, ValueError, TypeError) as e:
             self.metrics['provision_failure']['count'] += 1
@@ -2174,7 +2206,10 @@ class ThyrisPhoneOrchestrator:
             if 'phone_vm' in locals():
                 phone_vm.vm_state = PhoneVMState.ERROR
                 self._save_phone_config(phone_vm)
-                self._release_ports(phone_vm)
+                if phone_vm.process:
+                    await self._kill_process(phone_vm)
+                else:
+                    self._release_ports(phone_vm)
             return {"status": "error", "message": error_msg}
 
     async def _start_android_vm(
@@ -2427,6 +2462,7 @@ class ThyrisPhoneOrchestrator:
         adb_port: Optional[int] = None,
         qemu_stderr_path: Optional[Path] = None,
         live_boot_dir: Optional[Path] = None,
+        retain_runtime: bool = False,
     ) -> Dict[str, Any]:
         """Phone owner entry. Delegates to run_android_adb_userspace_boot."""
         return await run_android_adb_userspace_boot(
@@ -2439,6 +2475,7 @@ class ThyrisPhoneOrchestrator:
             adb_port=adb_port,
             qemu_stderr_path=qemu_stderr_path,
             live_boot_dir=live_boot_dir,
+            retain_runtime=retain_runtime,
         )
 
     async def _wait_for_ip_and_adb(
@@ -2518,6 +2555,7 @@ class ThyrisPhoneOrchestrator:
     async def _kill_process(self, phone_vm: AndroidPhoneVM):
         """Gracefully kill VM process (SIGTERM → SIGKILL)."""
         handles = self._qemu_stdio_handles.pop(phone_vm.vm_id, None)
+        serial_holder = self._qemu_serial_holders.pop(phone_vm.vm_id, None)
         if phone_vm.process:
             try:
                 phone_vm.process.terminate()  # SIGTERM
@@ -2529,6 +2567,14 @@ class ThyrisPhoneOrchestrator:
                 phone_vm.process = None
                 phone_vm.process_pid = None
                 self._release_ports(phone_vm)
+        if serial_holder is not None:
+            serial_stop, serial_task = serial_holder
+            serial_stop.set()
+            serial_task.cancel()
+            try:
+                await serial_task
+            except (asyncio.CancelledError, OSError):
+                pass
         if handles is not None:
             stdout_handle, stderr_handle = handles
             stdout_handle.close()
