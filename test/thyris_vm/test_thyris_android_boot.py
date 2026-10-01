@@ -407,9 +407,6 @@ def check_android_installer_boot(details: dict[str, object]) -> None:
                     "console_excerpt": excerpt[-1500:],
                     "phone_ready": evidence.get("phone_ready"),
                     "adb_proven": evidence.get("adb_proven"),
-                "retained_process_running": evidence.get("retained_process_running"),
-                "retained_serial_holder_running": evidence.get("retained_serial_holder_running"),
-                "retained_followup_adb": evidence.get("retained_followup_adb"),
                     "qemu_system": evidence.get("qemu_system"),
                     "disk_owner": "telecom.vm_image_manager.ISOConverter._create_disk",
                 }
@@ -439,7 +436,7 @@ def check_android_adb_userspace(details: dict[str, object]) -> None:
         killed_adb = terminate_stale_adb()
         print(f"stale_qemu_killed={killed}")
         print(f"stale_adb_killed={killed_adb}")
-        print("starting live kernel qemu-system-x86_64 for ADB userspace...")
+        print("starting retained installed-disk qemu-system-x86_64 ADB userspace proof...")
         async def _run_retained_probe() -> dict[str, object]:
             evidence = await run_android_adb_userspace_boot(
                 disk,
@@ -548,45 +545,43 @@ def check_android_adb_userspace(details: dict[str, object]) -> None:
         if f"INSTALL_PREFIX={ANDROID_INSTALL_PREFIX}" not in install_append:
             raise CheckFailure("AUTO_INSTALL did not pin INSTALL_PREFIX=thyris")
         boot_mode = str(evidence.get("boot_mode") or "")
-        if boot_mode == "installed_disk":
-            if ANDROID_DISK_BOOT_CMDLINE not in append:
-                raise CheckFailure("disk-boot argv is missing SRC=/thyris")
-            if "media=cdrom" in append:
-                raise CheckFailure("disk-boot still attached live /dev/sr0 ISO")
-            if "-nographic" in (evidence.get("argv") or []):
-                raise CheckFailure("disk-boot still uses -nographic stdio")
-            if "-vga" not in (evidence.get("argv") or []):
-                raise CheckFailure("disk-boot argv is missing hidden VGA")
-            if "chardev:thyris_serial" not in (evidence.get("argv") or []):
-                raise CheckFailure("disk-boot argv is missing serial chardev socket")
-            if not any(
-                isinstance(item, str) and item.startswith("socket,id=thyris_serial")
-                for item in (evidence.get("argv") or [])
-            ):
-                raise CheckFailure("disk-boot argv is missing thyris_serial unix chardev")
-            sock_spec = next(
-                item
-                for item in (evidence.get("argv") or [])
-                if isinstance(item, str) and item.startswith("socket,id=thyris_serial")
+        if boot_mode != "installed_disk":
+            raise CheckFailure(
+                f"retained ADB proof must hand off installed_disk runtime, got {boot_mode!r}"
             )
-            if "thyris-disks" in sock_spec or "USB128GB" in sock_spec:
-                raise CheckFailure("serial chardev socket is on USB; AF_UNIX bind fails there")
-            if any(
-                isinstance(item, str) and item.startswith("file:")
-                for item in (evidence.get("argv") or [])
-            ):
-                raise CheckFailure("disk-boot argv still uses write-only -serial file")
-            if "-no-reboot" in (evidence.get("argv") or []):
-                raise CheckFailure("disk-boot argv still has -no-reboot")
-            if "nomodeset" in ANDROID_DISK_BOOT_CMDLINE:
-                raise CheckFailure("disk-boot cmdline still uses nomodeset")
-            if "VIRT_WIFI=0" not in ANDROID_DISK_BOOT_CMDLINE:
-                raise CheckFailure("disk-boot cmdline is missing VIRT_WIFI=0")
-        elif boot_mode == "auto_install_run":
-            if ANDROID_AUTO_INSTALL_CMDLINE not in append:
-                raise CheckFailure("install-run argv lost AUTO_INSTALL=force")
-        else:
-            raise CheckFailure(f"ADB proof used unknown boot_mode {boot_mode!r}")
+        if ANDROID_DISK_BOOT_CMDLINE not in append:
+            raise CheckFailure("disk-boot argv is missing SRC=/thyris")
+        if "media=cdrom" in append:
+            raise CheckFailure("disk-boot still attached live /dev/sr0 ISO")
+        if "-nographic" in (evidence.get("argv") or []):
+            raise CheckFailure("disk-boot still uses -nographic stdio")
+        if "-vga" not in (evidence.get("argv") or []):
+            raise CheckFailure("disk-boot argv is missing hidden VGA")
+        if "chardev:thyris_serial" not in (evidence.get("argv") or []):
+            raise CheckFailure("disk-boot argv is missing serial chardev socket")
+        if not any(
+            isinstance(item, str) and item.startswith("socket,id=thyris_serial")
+            for item in (evidence.get("argv") or [])
+        ):
+            raise CheckFailure("disk-boot argv is missing thyris_serial unix chardev")
+        sock_spec = next(
+            item
+            for item in (evidence.get("argv") or [])
+            if isinstance(item, str) and item.startswith("socket,id=thyris_serial")
+        )
+        if "thyris-disks" in sock_spec or "USB128GB" in sock_spec:
+            raise CheckFailure("serial chardev socket is on USB; AF_UNIX bind fails there")
+        if any(
+            isinstance(item, str) and item.startswith("file:")
+            for item in (evidence.get("argv") or [])
+        ):
+            raise CheckFailure("disk-boot argv still uses write-only -serial file")
+        if "-no-reboot" in (evidence.get("argv") or []):
+            raise CheckFailure("disk-boot argv still has -no-reboot")
+        if "nomodeset" in ANDROID_DISK_BOOT_CMDLINE:
+            raise CheckFailure("disk-boot cmdline still uses nomodeset")
+        if "VIRT_WIFI=0" not in ANDROID_DISK_BOOT_CMDLINE:
+            raise CheckFailure("disk-boot cmdline is missing VIRT_WIFI=0")
         if "DEBUG=2" in append or "DEBUG=2" in install_append:
             raise CheckFailure("ADB guest still used DEBUG=2 chroot")
         if sys.platform == "win32":
@@ -609,6 +604,9 @@ def check_android_adb_userspace(details: dict[str, object]) -> None:
                 "internal_ip": evidence.get("internal_ip"),
                 "phone_ready": evidence.get("phone_ready"),
                 "adb_proven": evidence.get("adb_proven"),
+                "retained_process_running": evidence.get("retained_process_running"),
+                "retained_serial_holder_running": evidence.get("retained_serial_holder_running"),
+                "retained_followup_adb": evidence.get("retained_followup_adb"),
                 "host_command": evidence.get("host_command"),
                 "guest_response": evidence.get("guest_response"),
                 "vm_state": evidence.get("vm_state"),
