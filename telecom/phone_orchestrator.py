@@ -1294,12 +1294,17 @@ async def run_android_adb_userspace_boot(
                 adb_detail = probe.detail
                 host_command = probe.host_command
                 guest_response = probe.guest_response
-                if probe.ok:
+                if probe.ok and not retain_runtime:
                     return await _proven(
                         console_text,
                         install_argv,
                         ANDROID_AUTO_INSTALL_CMDLINE,
                         "auto_install_run",
+                    )
+                if probe.ok and retain_runtime:
+                    logger.info(
+                        "AUTO_INSTALL exposed ADB before installed-disk handoff; "
+                        "retained provisioning still requires the installed-disk runtime"
                     )
             else:
                 logger.info(
