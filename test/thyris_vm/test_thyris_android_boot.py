@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import gzip
 import io
+import inspect
 import json
 import os
 import sys
@@ -316,6 +317,30 @@ def check_disk_boot_argv(details: dict[str, object]) -> None:
             raise CheckFailure("disk-boot argv does not forward host 15555 to guest 5555")
 
 
+def check_provision_consumes_installed_disk_owner(details: dict[str, object]) -> None:
+    """Production provisioning must retain the proven installed-disk ADB owner."""
+    source = inspect.getsource(ThyrisPhoneOrchestrator.provision_sovereign_phone)
+    required = (
+        "boot_android_adb_userspace(",
+        "retain_runtime=True",
+        '"installed_disk"',
+        "apply_adb_ready(",
+    )
+    missing = [needle for needle in required if needle not in source]
+    if missing:
+        raise CheckFailure(f"provisioning lost installed-disk owner markers: {missing}")
+    forbidden = (
+        "_start_android_vm(",
+        "ANDROID_LIVE_CMDLINE",
+    )
+    present = [needle for needle in forbidden if needle in source]
+    if present:
+        raise CheckFailure(f"provisioning regressed to obsolete live boot path: {present}")
+    details["owner"] = "ThyrisPhoneOrchestrator.boot_android_adb_userspace"
+    details["retain_runtime"] = True
+    details["boot_mode_required"] = "installed_disk"
+
+
 def check_android_installer_boot(details: dict[str, object]) -> None:
     """Create a disk via landed _create_disk, then boot the real ISO."""
     iso = _android_iso()
@@ -557,6 +582,7 @@ def run() -> dict[str, object]:
         ("extract_live_boot_files", check_extract_live_boot_files),
         ("live_argv_forwards_adb", check_live_argv_forwards_adb),
         ("disk_boot_argv", check_disk_boot_argv),
+        ("provision_consumes_installed_disk_owner", check_provision_consumes_installed_disk_owner),
         ("android_installer_boot", check_android_installer_boot),
         ("android_adb_userspace", check_android_adb_userspace),
     )
