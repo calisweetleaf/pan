@@ -1143,15 +1143,24 @@ async def run_android_adb_userspace_boot(
         raise FileNotFoundError(f"Android ISO missing: {iso}")
     if timeout_seconds <= 0 or install_timeout_seconds <= 0:
         raise ThyrisAdbError("timeout_seconds and install_timeout_seconds must be > 0")
-    killed_qemu = terminate_stale_thyris_qemu()
-    kill_server_before = await adb_kill_server(adb)
-    killed_adb = terminate_stale_adb()
-    logger.info(
-        "cleared leftover Thyris qemu pids=%s adb_kill_server=%s stale_adb=%s",
-        killed_qemu,
-        kill_server_before,
-        killed_adb,
-    )
+    if retain_runtime:
+        killed_qemu: List[int] = []
+        killed_adb: List[int] = []
+        kill_server_before = "retained runtime: global adb kill-server skipped"
+        logger.info(
+            "retained provisioning preserves existing Thyris qemu/adb processes; "
+            "target ADB transport will be refreshed independently"
+        )
+    else:
+        killed_qemu = terminate_stale_thyris_qemu()
+        kill_server_before = await adb_kill_server(adb)
+        killed_adb = terminate_stale_adb()
+        logger.info(
+            "cleared leftover Thyris qemu pids=%s adb_kill_server=%s stale_adb=%s",
+            killed_qemu,
+            kill_server_before,
+            killed_adb,
+        )
     console.parent.mkdir(parents=True, exist_ok=True)
     stderr_file = Path(qemu_stderr_path) if qemu_stderr_path is not None else console.with_suffix(".qemu.stderr.log")
     boot_dir = Path(live_boot_dir) if live_boot_dir is not None else console.parent / "liveboot"
@@ -2590,7 +2599,6 @@ class ThyrisPhoneOrchestrator:
             return
         if phone_vm.adb_port > 0:
             await adb_disconnect(adb, phone_vm.adb_port)
-        await adb_kill_server(adb)
 
     async def install_apk(
         self,
