@@ -2104,6 +2104,15 @@ class ThyrisPhoneOrchestrator:
             phone_vm.qemu_stderr_path = str(evidence.get("qemu_stderr_path") or qemu_stderr)
             self._qemu_stdio_handles[vm_id] = (stdout_handle, stderr_handle)
             self._qemu_serial_holders[vm_id] = (serial_stop, serial_task)
+            if phone_vm.process.returncode is not None:
+                raise ThyrisBootError(
+                    f"installed-disk runtime exited during ownership handoff rc={phone_vm.process.returncode}"
+                )
+            if serial_task.done():
+                holder_error = None if serial_task.cancelled() else serial_task.exception()
+                raise ThyrisBootError(
+                    f"installed-disk serial holder died during ownership handoff: {holder_error!r}"
+                )
             add_step(
                 "vm_startup",
                 "completed",
@@ -2114,24 +2123,31 @@ class ThyrisPhoneOrchestrator:
                 },
             )
 
-            # 9. READY remains gated on the real ADB proof returned by the owner.
+            # 9. READY requires a second ADB proof after runtime ownership transfer.
             add_step("boot_wait", "started")
             phone_vm.vm_state = PhoneVMState.BOOTING
             self._save_phone_config(phone_vm)
-            phone_vm.internal_ip = str(evidence.get("internal_ip") or "")
             if not evidence.get("adb_proven") or not evidence.get("phone_ready"):
                 raise ThyrisAdbError("installed-disk owner returned without ADB/READY proof")
+            handoff_probe = await adb_shell_health(resolve_adb(), adb_port)
+            if not handoff_probe.ok:
+                raise ThyrisAdbError(
+                    "installed-disk runtime lost ADB during ownership handoff: "
+                    f"{handoff_probe.detail}"
+                )
+            phone_vm.internal_ip = QEMU_USERNET_GUEST_IP
             add_step(
                 "boot_wait",
                 "completed",
                 {
                     "internal_ip": phone_vm.internal_ip,
-                    "host_command": evidence.get("host_command"),
-                    "guest_response": evidence.get("guest_response"),
+                    "host_command": handoff_probe.host_command,
+                    "guest_response": handoff_probe.guest_response,
+                    "handoff_adb": handoff_probe.detail,
                 },
             )
 
-            # 10. Mark ready only after the owner's ADB proof.
+            # 10. Mark ready only after the post-handoff ADB proof.
             add_step("finalization", "started")
             apply_adb_ready(phone_vm, phone_vm.internal_ip)
 
