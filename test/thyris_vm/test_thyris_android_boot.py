@@ -51,6 +51,8 @@ from telecom.phone_orchestrator import (
     ThyrisBootError,
     ThyrisPhoneOrchestrator,
     WINDOWS_WHPX_ACCEL,
+    adb_disconnect,
+    adb_shell_health,
     apply_adb_ready,
     build_android_qemu_argv,
     ensure_windows_qemu_on_path,
@@ -405,6 +407,9 @@ def check_android_installer_boot(details: dict[str, object]) -> None:
                     "console_excerpt": excerpt[-1500:],
                     "phone_ready": evidence.get("phone_ready"),
                     "adb_proven": evidence.get("adb_proven"),
+                "retained_process_running": evidence.get("retained_process_running"),
+                "retained_serial_holder_running": evidence.get("retained_serial_holder_running"),
+                "retained_followup_adb": evidence.get("retained_followup_adb"),
                     "qemu_system": evidence.get("qemu_system"),
                     "disk_owner": "telecom.vm_image_manager.ISOConverter._create_disk",
                 }
@@ -435,20 +440,65 @@ def check_android_adb_userspace(details: dict[str, object]) -> None:
         print(f"stale_qemu_killed={killed}")
         print(f"stale_adb_killed={killed_adb}")
         print("starting live kernel qemu-system-x86_64 for ADB userspace...")
-        try:
-            evidence = asyncio.run(
-                run_android_adb_userspace_boot(
-                    disk,
-                    iso,
-                    console,
-                    memory_mb=2048,
-                    vcpus=2,
-                    timeout_seconds=1800.0,
-                    install_timeout_seconds=900.0,
-                    qemu_stderr_path=stderr_path,
-                    live_boot_dir=work / "liveboot",
-                )
+        async def _run_retained_probe() -> dict[str, object]:
+            evidence = await run_android_adb_userspace_boot(
+                disk,
+                iso,
+                console,
+                memory_mb=2048,
+                vcpus=2,
+                timeout_seconds=1800.0,
+                install_timeout_seconds=900.0,
+                qemu_stderr_path=stderr_path,
+                live_boot_dir=work / "liveboot",
+                retain_runtime=True,
             )
+            runtime = evidence.pop("_runtime", None)
+            if not isinstance(runtime, dict):
+                raise CheckFailure("retained ADB proof returned without runtime ownership")
+            process = runtime.get("process")
+            serial_stop = runtime.get("serial_stop")
+            serial_task = runtime.get("serial_task")
+            stdout_handle = runtime.get("stdout_handle")
+            stderr_handle = runtime.get("stderr_handle")
+            adb_port = int(evidence.get("adb_port") or 0)
+            if process is None or getattr(process, "returncode", None) is not None:
+                raise CheckFailure("retained installed-disk qemu is not running after READY")
+            if serial_stop is None or serial_task is None or serial_task.done():
+                raise CheckFailure("retained installed-disk serial holder is not running after READY")
+            try:
+                followup = await adb_shell_health(resolve_adb(), adb_port)
+                if not followup.ok:
+                    raise CheckFailure(
+                        f"retained installed-disk runtime lost ADB after handoff: {followup.detail}"
+                    )
+                evidence["retained_process_running"] = True
+                evidence["retained_serial_holder_running"] = True
+                evidence["retained_followup_adb"] = followup.detail
+                return evidence
+            finally:
+                if getattr(process, "returncode", None) is None:
+                    process.terminate()
+                    try:
+                        await asyncio.wait_for(process.wait(), timeout=10)
+                    except asyncio.TimeoutError:
+                        process.kill()
+                        await process.wait()
+                serial_stop.set()
+                serial_task.cancel()
+                try:
+                    await serial_task
+                except (asyncio.CancelledError, OSError):
+                    pass
+                if stdout_handle is not None:
+                    stdout_handle.close()
+                if stderr_handle is not None:
+                    stderr_handle.close()
+                if adb_port > 0:
+                    await adb_disconnect(resolve_adb(), adb_port)
+
+        try:
+            evidence = asyncio.run(_run_retained_probe())
         except ThyrisAdbError as exc:
             raise CheckFailure(f"Android ADB userspace failed loud: {exc}") from exc
         except ThyrisBootError as exc:
@@ -458,6 +508,12 @@ def check_android_adb_userspace(details: dict[str, object]) -> None:
         print("argv=" + " ".join(str(item) for item in evidence.get("argv", [])))
         if not evidence.get("adb_proven"):
             raise CheckFailure("ADB userspace returned without adb_proven")
+        if not evidence.get("retained_process_running"):
+            raise CheckFailure("ADB userspace did not prove retained qemu ownership")
+        if not evidence.get("retained_serial_holder_running"):
+            raise CheckFailure("ADB userspace did not prove retained serial-holder ownership")
+        if not str(evidence.get("retained_followup_adb") or ""):
+            raise CheckFailure("ADB userspace did not prove follow-up ADB after retained handoff")
         if not evidence.get("phone_ready"):
             raise CheckFailure("ADB userspace returned without phone_ready")
         if evidence.get("vm_state") != PhoneVMState.READY.value:
