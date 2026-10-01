@@ -326,6 +326,7 @@ def check_provision_consumes_installed_disk_owner(details: dict[str, object]) ->
         "boot_android_adb_userspace(",
         "retain_runtime=True",
         '"installed_disk"',
+        "handoff_probe = await adb_shell_health(",
         "apply_adb_ready(",
     )
     missing = [needle for needle in required if needle not in source]
